@@ -5,7 +5,7 @@ NetCoreMQTTExampleCluster is a project to run a multi MQTT broker system based o
 and [Orleans](https://dotnet.github.io/orleans/).
 The project was written and tested in .NetCore 3.1 and NetStandard 2.1.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/gul9bvjb9e7slm6c?svg=true)](https://ci.appveyor.com/project/SeppPenner/netcoremqttexampledapperconfig)
+[![Build status](https://ci.appveyor.com/api/projects/status/cns1rpiiaqefaycw?svg=true)](https://ci.appveyor.com/project/SeppPenner/netcoremqttexamplecluster)
 [![GitHub issues](https://img.shields.io/github/issues/SeppPenner/NetCoreMQTTExampleCluster.svg)](https://github.com/SeppPenner/NetCoreMQTTExampleCluster/issues)
 [![GitHub forks](https://img.shields.io/github/forks/SeppPenner/NetCoreMQTTExampleCluster.svg)](https://github.com/SeppPenner/NetCoreMQTTExampleCluster/network)
 [![GitHub stars](https://img.shields.io/github/stars/SeppPenner/NetCoreMQTTExampleCluster.svg)](https://github.com/SeppPenner/NetCoreMQTTExampleCluster/stargazers)
@@ -51,7 +51,7 @@ To do this, change the file `NetCoreMQTTExampleCluster.Cluster.json`.
 |Setting|Description|Optional|
 |-|-|-|
 |`Port`|The encrypted port of the MQTT cluster client.|No|
-|`UnencryptedPort`|The unencrypted port of the MQTT cluster client. (This should only be used locally).|Ja|
+|`UnencryptedPort`|The unencrypted port of the MQTT cluster client. (This should only be used locally).|Yes|
 |`BrokerConnectionSettings`|The connection that the SiloHost establishes to the broker if a message is published by another MQTT cluster client.|No|
 |`BrokerConnectionSettings.ClientId`|The ClientId of the connection.|No|
 |`BrokerConnectionSettings.HostName`|The host name of the connection.|No|
