@@ -54,7 +54,7 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateDatabase(string database)
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
             await connection.OpenAsync();
             var checkDatabaseExists = connection.ExecuteScalar(ExistsStatements.CheckDatabaseExists, new { this.connectionSettings.Database });
 
@@ -76,7 +76,7 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task DeleteDatabase(string database)
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
             await connection.OpenAsync();
             var sql = DropStatements.DropDatabase.Replace("@Database", database);
             await connection.ExecuteAsync(sql);
@@ -108,7 +108,7 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateEventLogTable(bool forceDelete)
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
             if (forceDelete)
@@ -140,7 +140,7 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreatePublishMessageTable(bool forceDelete)
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
             if (forceDelete)

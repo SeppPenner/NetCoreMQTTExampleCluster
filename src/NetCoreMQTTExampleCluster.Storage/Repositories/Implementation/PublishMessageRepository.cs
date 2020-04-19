@@ -53,7 +53,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         public async Task<IEnumerable<PublishMessage>> GetPublishMessages()
         {
             SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             return await connection.QueryAsync<PublishMessage>(SelectStatements.SelectAllPublishMessages);
         }
@@ -68,7 +68,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         public async Task<PublishMessage> GetPublishMessageById(Guid publishMessageId)
         {
             SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             return await connection.QueryFirstOrDefaultAsync<PublishMessage>(SelectStatements.SelectPublishMessageById, new { Id = publishMessageId });
         }
@@ -83,7 +83,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         public async Task<bool> InsertPublishMessage(PublishMessage publishMessage)
         {
             SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             var result = await connection.ExecuteAsync(InsertStatements.InsertPublishMessage, publishMessage);
             return result == 1;

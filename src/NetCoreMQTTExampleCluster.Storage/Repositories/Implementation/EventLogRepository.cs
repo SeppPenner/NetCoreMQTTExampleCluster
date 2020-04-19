@@ -50,7 +50,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <seealso cref="IEventLogRepository" />
         public async Task<IEnumerable<EventLog>> GetEventLogs()
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             return await connection.QueryAsync<EventLog>(SelectStatements.SelectAllEventLogs);
         }
@@ -64,7 +64,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <seealso cref="IEventLogRepository" />
         public async Task<EventLog> GetEventLogById(Guid eventLogId)
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             return await connection.QueryFirstOrDefaultAsync<EventLog>(SelectStatements.SelectEventLogById, new { Id = eventLogId });
         }
@@ -78,7 +78,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <seealso cref="IEventLogRepository" />
         public async Task<bool> InsertEventLog(EventLog eventLog)
         {
-            using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             var result = await connection.ExecuteAsync(InsertStatements.InsertEventLog, eventLog);
             return result == 1;

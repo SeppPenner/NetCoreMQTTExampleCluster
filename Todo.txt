@@ -3,4 +3,3 @@ Cache database access?!
 Add project to Snyk when on github
 Use user properties for the broker publishing (MQTTv5) once it's possible
 Add LogPath to config, update documentation
-Check code style

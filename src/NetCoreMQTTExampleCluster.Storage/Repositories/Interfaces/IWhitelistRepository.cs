@@ -24,6 +24,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         ///     Gets a <see cref="List{T}" /> of all <see cref="BlacklistWhitelist" /> items.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        // ReSharper disable once UnusedMember.Global
         Task<IEnumerable<BlacklistWhitelist>> GetAllWhitelistItems();
 
         /// <summary>
@@ -31,6 +32,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="whitelistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        // ReSharper disable once UnusedMember.Global
         Task<BlacklistWhitelist> GetWhitelistItemById(Guid whitelistItemId);
 
         /// <summary>
@@ -47,6 +49,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// <param name="whitelistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
         /// <param name="whitelistItemType">The <see cref="BlacklistWhitelistType" /> to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        // ReSharper disable once UnusedMember.Global
         Task<BlacklistWhitelist> GetWhitelistItemByIdAndType(Guid whitelistItemId, BlacklistWhitelistType whitelistItemType);
 
         /// <summary>
@@ -54,6 +57,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="whitelistItem">The <see cref="BlacklistWhitelist" /> item to insert.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        // ReSharper disable once UnusedMemberInSuper.Global
         Task<bool> InsertWhitelistItem(BlacklistWhitelist whitelistItem);
     }
 }

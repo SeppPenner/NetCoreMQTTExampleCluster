@@ -24,6 +24,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         ///     Gets a <see cref="List{T}" /> of all <see cref="User" />s.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        // ReSharper disable once UnusedMember.Global
         Task<IEnumerable<User>> GetUsers();
 
         /// <summary>
@@ -31,6 +32,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        // ReSharper disable once UnusedMember.Global
         Task<User> GetUserById(Guid userId);
 
         /// <summary>
