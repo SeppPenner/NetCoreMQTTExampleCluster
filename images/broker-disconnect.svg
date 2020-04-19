@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="371px" preserveAspectRatio="none" style="width:248px;height:371px;" version="1.1" viewBox="0 0 248 371" width="248px" zoomAndPan="magnify"><defs><filter height="300%" id="f1ldqwtfrxu2yf" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity SiloHost--><rect fill="#FFFFFF" filter="url(#f1ldqwtfrxu2yf)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="91" x="70.5" y="214"/><path d="M100.8333,215 L100.8333,219 L93.8333,226 L70.5,226 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="51" x="85.5" y="248.5332">SiloHost</text><!--entity MqttBroker--><rect fill="#FFFFFF" filter="url(#f1ldqwtfrxu2yf)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="109" x="61.5" y="8"/><path d="M97.8333,9 L97.8333,13 L90.8333,20 L61.5,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="69" x="76.5" y="42.5332">MqttBroker</text><!--entity DisconnectPackage--><polygon fill="#FEFECE" filter="url(#f1ldqwtfrxu2yf)" points="40,116,40,153.6094,192,153.6094,192,126,182,116,40,116" style="stroke: #000000; stroke-width: 1.5;"/><path d="M182,116 L182,126 L192,126 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="132" x="50" y="140.5332">Disconnect(brokerId)</text><!--entity Dictionary--><polygon fill="#FEFECE" filter="url(#f1ldqwtfrxu2yf)" points="6,322,6,359.6094,226,359.6094,226,332,216,322,6,322" style="stroke: #000000; stroke-width: 1.5;"/><path d="M216,322 L216,332 L226,332 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="200" x="16" y="346.5332">RemoveBrokerFromDictionary()</text><!--link MqttBroker to DisconnectPackage--><path d="M116,56.171 C116,72.497 116,94.275 116,110.641 " fill="none" id="MqttBroker-&gt;DisconnectPackage" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="116,115.969,120,106.969,116,110.969,112,106.969,116,115.969" style="stroke: #A80036; stroke-width: 1.0;"/><!--link DisconnectPackage to SiloHost--><path d="M116,154.057 C116,169.175 116,191.019 116,208.496 " fill="none" id="DisconnectPackage-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="116,213.767,120,204.767,116,208.767,112,204.767,116,213.767" style="stroke: #A80036; stroke-width: 1.0;"/><!--link SiloHost to Dictionary--><path d="M116,262.1714 C116,278.4967 116,300.2746 116,316.6414 " fill="none" id="SiloHost-&gt;Dictionary" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="116,321.9687,120,312.9687,116,316.9687,112,312.9687,116,321.9687" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+
+skinparam componentStyle uml2
+
+file "Disconnect(brokerId)" as DisconnectPackage
+file "RemoveBrokerFromDictionary()" as Dictionary
+
+frame SiloHost {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttBroker - -> DisconnectPackage
+DisconnectPackage - -> SiloHost
+SiloHost - -> Dictionary
+
+@enduml
+
+PlantUML version 1.2019.09(Mon Aug 26 18:19:51 CEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_222-b10
+Operating System: Windows 10
+OS Version: 10.0
+Default Encoding: Cp1252
+Language: de
+Country: DE
+--></g></svg>

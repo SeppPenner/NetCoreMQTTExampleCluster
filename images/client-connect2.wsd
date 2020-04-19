@@ -1,0 +1,26 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "ValidateCredentials()" as ValidateCredentials
+file "true" as CanConnect
+file "true" as CanConnect2
+file "true" as CanConnect3
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+ValidateCredentials --> CanConnect
+CanConnect --> SiloHost
+SiloHost --> CanConnect2
+CanConnect2 --> MqttBroker
+MqttBroker --> CanConnect3
+CanConnect3 --> MqttClient
+
+@enduml

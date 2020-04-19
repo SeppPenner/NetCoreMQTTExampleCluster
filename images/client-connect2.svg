@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="674px" preserveAspectRatio="none" style="width:181px;height:674px;" version="1.1" viewBox="0 0 181 674" width="181px" zoomAndPan="magnify"><defs><filter height="300%" id="f1ajw9x7jt9h6h" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity SiloHost--><rect fill="#FFFFFF" filter="url(#f1ajw9x7jt9h6h)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="91" x="37" y="204"/><path d="M67.3333,205 L67.3333,209 L60.3333,216 L37,216 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="51" x="52" y="238.5332">SiloHost</text><!--entity MqttClient--><rect fill="#FFFFFF" filter="url(#f1ajw9x7jt9h6h)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="103" x="31" y="616"/><path d="M65.3333,617 L65.3333,621 L58.3333,628 L31,628 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="63" x="46" y="650.5332">MqttClient</text><!--entity MqttBroker--><rect fill="#FFFFFF" filter="url(#f1ajw9x7jt9h6h)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="109" x="28" y="410"/><path d="M64.3333,411 L64.3333,415 L57.3333,422 L28,422 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="69" x="43" y="444.5332">MqttBroker</text><!--entity ValidateCredentials--><polygon fill="#FEFECE" filter="url(#f1ajw9x7jt9h6h)" points="6,8,6,45.6094,159,45.6094,159,18,149,8,6,8" style="stroke: #000000; stroke-width: 1.5;"/><path d="M149,8 L149,18 L159,18 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="133" x="16" y="32.5332">ValidateCredentials()</text><!--entity CanConnect--><polygon fill="#FEFECE" filter="url(#f1ajw9x7jt9h6h)" points="60,106,60,143.6094,105,143.6094,105,116,95,106,60,106" style="stroke: #000000; stroke-width: 1.5;"/><path d="M95,106 L95,116 L105,116 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="25" x="70" y="130.5332">true</text><!--entity CanConnect2--><polygon fill="#FEFECE" filter="url(#f1ajw9x7jt9h6h)" points="60,312,60,349.6094,105,349.6094,105,322,95,312,60,312" style="stroke: #000000; stroke-width: 1.5;"/><path d="M95,312 L95,322 L105,322 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="25" x="70" y="336.5332">true</text><!--entity CanConnect3--><polygon fill="#FEFECE" filter="url(#f1ajw9x7jt9h6h)" points="60,518,60,555.6094,105,555.6094,105,528,95,518,60,518" style="stroke: #000000; stroke-width: 1.5;"/><path d="M95,518 L95,528 L105,528 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="25" x="70" y="542.5332">true</text><!--link ValidateCredentials to CanConnect--><path d="M82.5,46.057 C82.5,61.513 82.5,83.865 82.5,100.673 " fill="none" id="ValidateCredentials-&gt;CanConnect" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="82.5,105.698,86.5,96.698,82.5,100.698,78.5,96.698,82.5,105.698" style="stroke: #A80036; stroke-width: 1.0;"/><!--link CanConnect to SiloHost--><path d="M82.5,144.057 C82.5,159.175 82.5,181.019 82.5,198.496 " fill="none" id="CanConnect-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="82.5,203.767,86.5,194.767,82.5,198.767,78.5,194.767,82.5,203.767" style="stroke: #A80036; stroke-width: 1.0;"/><!--link SiloHost to CanConnect2--><path d="M82.5,252.171 C82.5,268.497 82.5,290.275 82.5,306.641 " fill="none" id="SiloHost-&gt;CanConnect2" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="82.5,311.969,86.5,302.969,82.5,306.969,78.5,302.969,82.5,311.969" style="stroke: #A80036; stroke-width: 1.0;"/><!--link CanConnect2 to MqttBroker--><path d="M82.5,350.057 C82.5,365.175 82.5,387.019 82.5,404.496 " fill="none" id="CanConnect2-&gt;MqttBroker" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="82.5,409.767,86.5,400.767,82.5,404.767,78.5,400.767,82.5,409.767" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttBroker to CanConnect3--><path d="M82.5,458.171 C82.5,474.497 82.5,496.275 82.5,512.641 " fill="none" id="MqttBroker-&gt;CanConnect3" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="82.5,517.969,86.5,508.969,82.5,512.969,78.5,508.969,82.5,517.969" style="stroke: #A80036; stroke-width: 1.0;"/><!--link CanConnect3 to MqttClient--><path d="M82.5,556.057 C82.5,571.1746 82.5,593.0194 82.5,610.4959 " fill="none" id="CanConnect3-&gt;MqttClient" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="82.5,615.7672,86.5,606.7672,82.5,610.7672,78.5,606.7672,82.5,615.7672" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+
+skinparam componentStyle uml2
+
+file "ValidateCredentials()" as ValidateCredentials
+file "true" as CanConnect
+file "true" as CanConnect2
+file "true" as CanConnect3
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+ValidateCredentials - -> CanConnect
+CanConnect - -> SiloHost
+SiloHost - -> CanConnect2
+CanConnect2 - -> MqttBroker
+MqttBroker - -> CanConnect3
+CanConnect3 - -> MqttClient
+
+@enduml
+
+PlantUML version 1.2019.09(Mon Aug 26 18:19:51 CEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_222-b10
+Operating System: Windows 10
+OS Version: 10.0
+Default Encoding: Cp1252
+Language: de
+Country: DE
+--></g></svg>

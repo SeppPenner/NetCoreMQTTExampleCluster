@@ -1,0 +1,79 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Cluster", "NetCoreMQTTExampleCluster.Cluster\NetCoreMQTTExampleCluster.Cluster.csproj", "{FBBE4C77-5DB8-4B9A-8098-620DC967FFE0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.TopicCheck", "NetCoreMQTTExampleCluster.TopicCheck\NetCoreMQTTExampleCluster.TopicCheck.csproj", "{32ACF710-79E5-4FA8-BE08-68B7800ACFA6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.TopicCheck.Tests", "NetCoreMQTTExampleCluster.TopicCheck.Tests\NetCoreMQTTExampleCluster.TopicCheck.Tests.csproj", "{D9E19BF3-45D1-41F4-8D6C-1336888D5528}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Models", "NetCoreMQTTExampleCluster.Models\NetCoreMQTTExampleCluster.Models.csproj", "{C31BAFEB-EE43-4049-AEFB-D1E0A22E886D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Grains.Interfaces", "NetCoreMQTTExampleCluster.Grains.Interfaces\NetCoreMQTTExampleCluster.Grains.Interfaces.csproj", "{76C1472F-5F6F-4BFF-8CE9-ADEABA27BD34}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Grains", "NetCoreMQTTExampleCluster.Grains\NetCoreMQTTExampleCluster.Grains.csproj", "{F136A99E-5073-4F50-8BEF-7B83C9D51E66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Storage", "NetCoreMQTTExampleCluster.Storage\NetCoreMQTTExampleCluster.Storage.csproj", "{BCAE88C5-C01E-4A1C-8596-6B756F7B9CB5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.SiloHost", "NetCoreMQTTExampleCluster.SiloHost\NetCoreMQTTExampleCluster.SiloHost.csproj", "{E145A3A3-82D5-4899-A553-0F3F170C6B92}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.PasswordHashGenerator", "NetCoreMQTTExampleCluster.PasswordHashGenerator\NetCoreMQTTExampleCluster.PasswordHashGenerator.csproj", "{70CB31A4-6C8F-4BD2-A334-F69F57212745}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.DatabaseSetup", "NetCoreMQTTExampleCluster.DatabaseSetup\NetCoreMQTTExampleCluster.DatabaseSetup.csproj", "{E91CD206-5785-4D74-A0B7-2735444C26CC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBBE4C77-5DB8-4B9A-8098-620DC967FFE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBBE4C77-5DB8-4B9A-8098-620DC967FFE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBBE4C77-5DB8-4B9A-8098-620DC967FFE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBBE4C77-5DB8-4B9A-8098-620DC967FFE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32ACF710-79E5-4FA8-BE08-68B7800ACFA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32ACF710-79E5-4FA8-BE08-68B7800ACFA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32ACF710-79E5-4FA8-BE08-68B7800ACFA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32ACF710-79E5-4FA8-BE08-68B7800ACFA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9E19BF3-45D1-41F4-8D6C-1336888D5528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9E19BF3-45D1-41F4-8D6C-1336888D5528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9E19BF3-45D1-41F4-8D6C-1336888D5528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9E19BF3-45D1-41F4-8D6C-1336888D5528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C31BAFEB-EE43-4049-AEFB-D1E0A22E886D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C31BAFEB-EE43-4049-AEFB-D1E0A22E886D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C31BAFEB-EE43-4049-AEFB-D1E0A22E886D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C31BAFEB-EE43-4049-AEFB-D1E0A22E886D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76C1472F-5F6F-4BFF-8CE9-ADEABA27BD34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76C1472F-5F6F-4BFF-8CE9-ADEABA27BD34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76C1472F-5F6F-4BFF-8CE9-ADEABA27BD34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76C1472F-5F6F-4BFF-8CE9-ADEABA27BD34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F136A99E-5073-4F50-8BEF-7B83C9D51E66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F136A99E-5073-4F50-8BEF-7B83C9D51E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F136A99E-5073-4F50-8BEF-7B83C9D51E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F136A99E-5073-4F50-8BEF-7B83C9D51E66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCAE88C5-C01E-4A1C-8596-6B756F7B9CB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCAE88C5-C01E-4A1C-8596-6B756F7B9CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCAE88C5-C01E-4A1C-8596-6B756F7B9CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCAE88C5-C01E-4A1C-8596-6B756F7B9CB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E145A3A3-82D5-4899-A553-0F3F170C6B92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E145A3A3-82D5-4899-A553-0F3F170C6B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E145A3A3-82D5-4899-A553-0F3F170C6B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E145A3A3-82D5-4899-A553-0F3F170C6B92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70CB31A4-6C8F-4BD2-A334-F69F57212745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70CB31A4-6C8F-4BD2-A334-F69F57212745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70CB31A4-6C8F-4BD2-A334-F69F57212745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70CB31A4-6C8F-4BD2-A334-F69F57212745}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E91CD206-5785-4D74-A0B7-2735444C26CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E91CD206-5785-4D74-A0B7-2735444C26CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E91CD206-5785-4D74-A0B7-2735444C26CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E91CD206-5785-4D74-A0B7-2735444C26CC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E92334B7-0EB4-44BB-9B8D-51BB2DB7B73B}
+	EndGlobalSection
+EndGlobal

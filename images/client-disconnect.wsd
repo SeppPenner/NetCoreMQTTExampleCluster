@@ -1,0 +1,24 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Disconnect(MqttServerClientDisconnectedEventArgs)" as DisconnectPackage
+file "MqttServerClientDisconnectedEventArgs" as DisconnectPackage2
+file "ClearUserData()" as ClearUserData
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttClient --> DisconnectPackage
+DisconnectPackage --> MqttBroker
+MqttBroker --> DisconnectPackage2
+DisconnectPackage2 --> SiloHost
+SiloHost --> ClearUserData
+
+@enduml

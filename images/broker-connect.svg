@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="371px" preserveAspectRatio="none" style="width:335px;height:371px;" version="1.1" viewBox="0 0 335 371" width="335px" zoomAndPan="magnify"><defs><filter height="300%" id="fj4mk8f0ky0ra" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity SiloHost--><rect fill="#FFFFFF" filter="url(#fj4mk8f0ky0ra)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="91" x="114" y="214"/><path d="M144.3333,215 L144.3333,219 L137.3333,226 L114,226 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="51" x="129" y="248.5332">SiloHost</text><!--entity MqttBroker--><rect fill="#FFFFFF" filter="url(#fj4mk8f0ky0ra)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="109" x="105" y="8"/><path d="M141.3333,9 L141.3333,13 L134.3333,20 L105,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="69" x="120" y="42.5332">MqttBroker</text><!--entity ConnectPackage--><polygon fill="#FEFECE" filter="url(#fj4mk8f0ky0ra)" points="6,116,6,153.6094,313,153.6094,313,126,303,116,6,116" style="stroke: #000000; stroke-width: 1.5;"/><path d="M303,116 L303,126 L313,126 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="287" x="16" y="140.5332">Connect(brokerConnectionSettings, brokerId)</text><!--entity Dictionary--><polygon fill="#FEFECE" filter="url(#fj4mk8f0ky0ra)" points="64,322,64,359.6094,255,359.6094,255,332,245,322,64,322" style="stroke: #000000; stroke-width: 1.5;"/><path d="M245,322 L245,332 L255,332 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="171" x="74" y="346.5332">StoreBrokerIdInDictionary()</text><!--link MqttBroker to ConnectPackage--><path d="M159.5,56.171 C159.5,72.497 159.5,94.275 159.5,110.641 " fill="none" id="MqttBroker-&gt;ConnectPackage" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="159.5,115.969,163.5,106.969,159.5,110.969,155.5,106.969,159.5,115.969" style="stroke: #A80036; stroke-width: 1.0;"/><!--link ConnectPackage to SiloHost--><path d="M159.5,154.057 C159.5,169.175 159.5,191.019 159.5,208.496 " fill="none" id="ConnectPackage-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="159.5,213.767,163.5,204.767,159.5,208.767,155.5,204.767,159.5,213.767" style="stroke: #A80036; stroke-width: 1.0;"/><!--link SiloHost to Dictionary--><path d="M159.5,262.1714 C159.5,278.4967 159.5,300.2746 159.5,316.6414 " fill="none" id="SiloHost-&gt;Dictionary" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="159.5,321.9687,163.5,312.9687,159.5,316.9687,155.5,312.9687,159.5,321.9687" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+
+skinparam componentStyle uml2
+
+file "Connect(brokerConnectionSettings, brokerId)" as ConnectPackage
+file "StoreBrokerIdInDictionary()" as Dictionary
+
+frame SiloHost {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttBroker - -> ConnectPackage
+ConnectPackage - -> SiloHost
+SiloHost - -> Dictionary
+
+@enduml
+
+PlantUML version 1.2019.09(Mon Aug 26 18:19:51 CEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_222-b10
+Operating System: Windows 10
+OS Version: 10.0
+Default Encoding: Cp1252
+Language: de
+Country: DE
+--></g></svg>

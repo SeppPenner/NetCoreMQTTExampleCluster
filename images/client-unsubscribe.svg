@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="478px" preserveAspectRatio="none" style="width:427px;height:478px;" version="1.1" viewBox="0 0 427 478" width="427px" zoomAndPan="magnify"><defs><filter height="300%" id="fh08qpsdvu4mq" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity SiloHost--><rect fill="#FFFFFF" filter="url(#fh08qpsdvu4mq)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="91" x="160" y="420"/><path d="M190.3333,421 L190.3333,425 L183.3333,432 L160,432 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="51" x="175" y="454.5332">SiloHost</text><!--entity MqttClient--><rect fill="#FFFFFF" filter="url(#fh08qpsdvu4mq)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="103" x="154" y="8"/><path d="M188.3333,9 L188.3333,13 L181.3333,20 L154,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="63" x="169" y="42.5332">MqttClient</text><!--entity MqttBroker--><rect fill="#FFFFFF" filter="url(#fh08qpsdvu4mq)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="109" x="151" y="214"/><path d="M187.3333,215 L187.3333,219 L180.3333,226 L151,226 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="69" x="166" y="248.5332">MqttBroker</text><!--entity UnsubscribePackage--><polygon fill="#FEFECE" filter="url(#fh08qpsdvu4mq)" points="6,116,6,153.6094,405,153.6094,405,126,395,116,6,116" style="stroke: #000000; stroke-width: 1.5;"/><path d="M395,116 L395,126 L405,126 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="379" x="16" y="140.5332">Unsubscribe(MqttServerClientUnsubscribedTopicEventArgs)</text><!--entity UnsubscribePackage2--><polygon fill="#FEFECE" filter="url(#fh08qpsdvu4mq)" points="50,322,50,359.6094,361,359.6094,361,332,351,322,50,322" style="stroke: #000000; stroke-width: 1.5;"/><path d="M351,322 L351,332 L361,332 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="291" x="60" y="346.5332">MqttServerClientUnsubscribedTopicEventArgs</text><!--link MqttClient to UnsubscribePackage--><path d="M205.5,56.171 C205.5,72.497 205.5,94.275 205.5,110.641 " fill="none" id="MqttClient-&gt;UnsubscribePackage" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="205.5,115.969,209.5,106.969,205.5,110.969,201.5,106.969,205.5,115.969" style="stroke: #A80036; stroke-width: 1.0;"/><!--link UnsubscribePackage to MqttBroker--><path d="M205.5,154.057 C205.5,169.175 205.5,191.019 205.5,208.496 " fill="none" id="UnsubscribePackage-&gt;MqttBroker" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="205.5,213.767,209.5,204.767,205.5,208.767,201.5,204.767,205.5,213.767" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttBroker to UnsubscribePackage2--><path d="M205.5,262.171 C205.5,278.497 205.5,300.275 205.5,316.641 " fill="none" id="MqttBroker-&gt;UnsubscribePackage2" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="205.5,321.969,209.5,312.969,205.5,316.969,201.5,312.969,205.5,321.969" style="stroke: #A80036; stroke-width: 1.0;"/><!--link UnsubscribePackage2 to SiloHost--><path d="M205.5,360.057 C205.5,375.1746 205.5,397.0194 205.5,414.4959 " fill="none" id="UnsubscribePackage2-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="205.5,419.7672,209.5,410.7672,205.5,414.7672,201.5,410.7672,205.5,419.7672" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+
+skinparam componentStyle uml2
+
+file "Unsubscribe(MqttServerClientUnsubscribedTopicEventArgs)" as UnsubscribePackage
+file "MqttServerClientUnsubscribedTopicEventArgs" as UnsubscribePackage2
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttClient - -> UnsubscribePackage
+UnsubscribePackage - -> MqttBroker
+MqttBroker - -> UnsubscribePackage2
+UnsubscribePackage2 - -> SiloHost
+
+@enduml
+
+PlantUML version 1.2019.09(Mon Aug 26 18:19:51 CEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_222-b10
+Operating System: Windows 10
+OS Version: 10.0
+Default Encoding: Cp1252
+Language: de
+Country: DE
+--></g></svg>

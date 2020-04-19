@@ -1,0 +1,18 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Disconnect(brokerId)" as DisconnectPackage
+file "RemoveBrokerFromDictionary()" as Dictionary
+
+frame SiloHost {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttBroker --> DisconnectPackage
+DisconnectPackage --> SiloHost
+SiloHost --> Dictionary
+
+@enduml

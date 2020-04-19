@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Extensions\**" />
+      <EmbeddedResource Remove="Extensions\**" />
+      <None Remove="Extensions\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="GitVersionTask" Version="5.2.4">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.3" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.3" />
+        <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="3.1.5">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.1.5" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
+        <PackageReference Include="Npgsql.Json.NET" Version="4.1.3" />
+        <PackageReference Include="MQTTnet" Version="3.0.9" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Models\NetCoreMQTTExampleCluster.Models.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.TopicCheck\NetCoreMQTTExampleCluster.TopicCheck.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Grains.Interfaces\NetCoreMQTTExampleCluster.Grains.Interfaces.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Storage\NetCoreMQTTExampleCluster.Storage.csproj" />
+    </ItemGroup>
+
+</Project>

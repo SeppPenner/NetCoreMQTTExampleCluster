@@ -1,0 +1,26 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "ValidateSubscribe()" as ValidateSubscribe
+file "true" as CanSubscribe
+file "true" as CanSubscribe2
+file "true" as CanSubscribe3
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+ValidateSubscribe --> CanSubscribe
+CanSubscribe --> SiloHost
+SiloHost --> CanSubscribe2
+CanSubscribe2 --> MqttBroker
+MqttBroker --> CanSubscribe3
+CanSubscribe3 --> MqttClient
+
+@enduml

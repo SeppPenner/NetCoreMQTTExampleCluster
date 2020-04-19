@@ -1,0 +1,24 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Connect(MqttConnectionValidatorContext)" as ConnectPackage
+file "SimpleMqttConnectionValidatorContext" as ConnectPackage2
+file "ValidateCredentials()" as ValidateCredentials
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttClient --> ConnectPackage
+ConnectPackage --> MqttBroker
+MqttBroker --> ConnectPackage2
+ConnectPackage2 --> SiloHost
+SiloHost --> ValidateCredentials
+
+@enduml

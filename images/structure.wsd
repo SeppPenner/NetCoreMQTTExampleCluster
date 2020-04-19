@@ -1,0 +1,41 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Synchronization" as Sync
+
+frame SiloHost {
+}
+
+frame "MqttBroker 1" as MqttBroker1 {
+}
+
+frame "MqttBroker 2" as MqttBroker2 {
+}
+
+frame "MqttBroker n" as MqttBrokerN {
+}
+
+frame "MqttClient 1" as MqttClient1 {
+}
+
+frame "MqttClient 2" as MqttClient2 {
+}
+
+frame "MqttClient 3" as MqttClient3 {
+}
+
+frame "MqttClient n" as MqttClientN {
+}
+
+MqttBroker1 --> SiloHost
+MqttBroker2 --> SiloHost
+MqttBrokerN --> SiloHost
+MqttClient1 --> MqttBroker1
+MqttClient2 --> MqttBroker2
+MqttClient3 --> MqttBroker2
+MqttClientN --> MqttBrokerN
+SiloHost --> Sync
+Sync --> SiloHost
+
+@enduml

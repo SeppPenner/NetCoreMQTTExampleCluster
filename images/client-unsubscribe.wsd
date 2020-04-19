@@ -1,0 +1,22 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Unsubscribe(MqttServerClientUnsubscribedTopicEventArgs)" as UnsubscribePackage
+file "MqttServerClientUnsubscribedTopicEventArgs" as UnsubscribePackage2
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttClient --> UnsubscribePackage
+UnsubscribePackage --> MqttBroker
+MqttBroker --> UnsubscribePackage2
+UnsubscribePackage2 --> SiloHost
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Connect(brokerConnectionSettings, brokerId)" as ConnectPackage
+file "StoreBrokerIdInDictionary()" as Dictionary
+
+frame SiloHost {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttBroker --> ConnectPackage
+ConnectPackage --> SiloHost
+SiloHost --> Dictionary
+
+@enduml

@@ -1,0 +1,26 @@
+{
+  "Port": 8883,
+  "UnencryptedPort": 1883,
+  "BrokerConnectionSettings": {
+    "ClientId": "Cluster_1",
+    "HostName": "localhost",
+    "Port": 1883,
+    "UserName": "Test",
+    "Password": "test",
+    "UseTls": false,
+    "UseCleanSession": true
+  },
+  "DatabaseSettings": {
+    "Host": "localhost",
+    "Database": "mqtt",
+    "Username": "postgres",
+    "Password": "postgres",
+    "Port": 5432
+  },
+  "OrleansConfiguration": {
+    "ClusterOptions": {
+      "ClusterId": "mqtt001",
+      "ServiceId": "mqtt-silo-001-A"
+    }
+  }
+}

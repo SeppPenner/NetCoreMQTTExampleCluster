@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="381px" preserveAspectRatio="none" style="width:582px;height:381px;" version="1.1" viewBox="0 0 582 381" width="582px" zoomAndPan="magnify"><defs><filter height="300%" id="fl3hwsgg9wm5" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity SiloHost--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="91" x="225" y="224"/><path d="M255.3333,225 L255.3333,229 L248.3333,236 L225,236 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="51" x="240" y="258.5332">SiloHost</text><!--entity MqttBroker1--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="121" x="20" y="116"/><path d="M60.3333,117 L60.3333,121 L53.3333,128 L20,128 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="81" x="35" y="150.5332">MqttBroker 1</text><!--entity MqttBroker2--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="121" x="210" y="116"/><path d="M250.3333,117 L250.3333,121 L243.3333,128 L210,128 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="81" x="225" y="150.5332">MqttBroker 2</text><!--entity MqttBrokerN--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="121" x="435" y="116"/><path d="M475.3333,117 L475.3333,121 L468.3333,128 L435,128 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="81" x="450" y="150.5332">MqttBroker n</text><!--entity MqttClient1--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="115" x="6" y="8"/><path d="M44.3333,9 L44.3333,13 L37.3333,20 L6,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="75" x="21" y="42.5332">MqttClient 1</text><!--entity MqttClient2--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="115" x="156" y="8"/><path d="M194.3333,9 L194.3333,13 L187.3333,20 L156,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="75" x="171" y="42.5332">MqttClient 2</text><!--entity MqttClient3--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="115" x="306" y="8"/><path d="M344.3333,9 L344.3333,13 L337.3333,20 L306,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="75" x="321" y="42.5332">MqttClient 3</text><!--entity MqttClientN--><rect fill="#FFFFFF" filter="url(#fl3hwsgg9wm5)" height="47.6094" style="stroke: #000000; stroke-width: 1.5;" width="115" x="456" y="8"/><path d="M494.3333,9 L494.3333,13 L487.3333,20 L456,20 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="75" x="471" y="42.5332">MqttClient n</text><!--entity Sync--><polygon fill="#FEFECE" filter="url(#fl3hwsgg9wm5)" points="210.5,332,210.5,369.6094,330.5,369.6094,330.5,342,320.5,332,210.5,332" style="stroke: #000000; stroke-width: 1.5;"/><path d="M320.5,332 L320.5,342 L330.5,342 " fill="#FEFECE" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="100" x="220.5" y="356.5332">Synchronization</text><!--link MqttBroker1 to SiloHost--><path d="M121.727,164 C151.999,180.889 193.131,203.837 224.475,221.323 " fill="none" id="MqttBroker1-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="229.026,223.862,223.1143,215.9847,224.6593,221.4265,219.2175,222.9715,229.026,223.862" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttBroker2 to SiloHost--><path d="M270.5,164 C270.5,180.003 270.5,201.446 270.5,218.528 " fill="none" id="MqttBroker2-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="270.5,223.678,274.5,214.678,270.5,218.678,266.5,214.678,270.5,223.678" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttBrokerN to SiloHost--><path d="M446.678,164 C409.57,181.482 358.68,205.457 321.133,223.146 " fill="none" id="MqttBrokerN-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="316.159,225.489,326.0055,225.2745,320.6827,223.3593,322.5979,218.0365,316.159,225.489" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttClient1 to MqttBroker1--><path d="M67.1887,56 C69.7552,72.003 73.1942,93.446 75.9337,110.528 " fill="none" id="MqttClient1-&gt;MqttBroker1" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="76.7597,115.678,79.282,106.1576,75.9669,110.7413,71.3832,107.4261,76.7597,115.678" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttClient2 to MqttBroker2--><path d="M225.868,56 C234.547,72.141 246.203,93.816 255.427,110.969 " fill="none" id="MqttClient2-&gt;MqttBroker2" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="257.959,115.678,257.2178,105.8571,255.5902,111.2747,250.1726,109.6471,257.959,115.678" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttClient3 to MqttBroker2--><path d="M343.32,56 C328.917,72.417 309.491,94.559 294.325,111.844 " fill="none" id="MqttClient3-&gt;MqttBroker2" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="290.961,115.678,299.9031,111.5501,294.2583,111.9193,293.8891,106.2745,290.961,115.678" style="stroke: #A80036; stroke-width: 1.0;"/><!--link MqttClientN to MqttBrokerN--><path d="M509.594,56 C506.877,72.003 503.236,93.446 500.335,110.528 " fill="none" id="MqttClientN-&gt;MqttBrokerN" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="499.46,115.678,504.9102,107.4747,500.297,110.7486,497.0231,106.1354,499.46,115.678" style="stroke: #A80036; stroke-width: 1.0;"/><!--link SiloHost to Sync--><path d="M259.581,272.1714 C257.149,288.4967 257.14,310.2746 259.553,326.6414 " fill="none" id="SiloHost-&gt;Sync" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="260.464,331.9687,262.8894,322.4232,259.621,327.0403,255.0039,323.7719,260.464,331.9687" style="stroke: #A80036; stroke-width: 1.0;"/><!--link Sync to SiloHost--><path d="M281.126,331.9687 C284.288,316.8337 284.841,294.9435 282.784,277.4477 " fill="none" id="Sync-&gt;SiloHost" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="282.062,272.1714,279.3195,281.6307,282.7401,277.1252,287.2456,280.5458,282.062,272.1714" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+
+skinparam componentStyle uml2
+
+file "Synchronization" as Sync
+
+frame SiloHost {
+}
+
+frame "MqttBroker 1" as MqttBroker1 {
+}
+
+frame "MqttBroker 2" as MqttBroker2 {
+}
+
+frame "MqttBroker n" as MqttBrokerN {
+}
+
+frame "MqttClient 1" as MqttClient1 {
+}
+
+frame "MqttClient 2" as MqttClient2 {
+}
+
+frame "MqttClient 3" as MqttClient3 {
+}
+
+frame "MqttClient n" as MqttClientN {
+}
+
+MqttBroker1 - -> SiloHost
+MqttBroker2 - -> SiloHost
+MqttBrokerN - -> SiloHost
+MqttClient1 - -> MqttBroker1
+MqttClient2 - -> MqttBroker2
+MqttClient3 - -> MqttBroker2
+MqttClientN - -> MqttBrokerN
+SiloHost - -> Sync
+Sync - -> SiloHost
+
+@enduml
+
+PlantUML version 1.2019.09(Mon Aug 26 18:19:51 CEST 2019)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 1.8.0_222-b10
+Operating System: Windows 10
+OS Version: 10.0
+Default Encoding: Cp1252
+Language: de
+Country: DE
+--></g></svg>

@@ -1,0 +1,24 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Subscribe(MqttSubscriptionInterceptorContext)" as SubscribePackage
+file "MqttSubscriptionInterceptorContext" as SubscribePackage2
+file "ValidateSubscribe()" as ValidateSubscribe
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttClient --> SubscribePackage
+SubscribePackage --> MqttBroker
+MqttBroker --> SubscribePackage2
+SubscribePackage2 --> SiloHost
+SiloHost --> ValidateSubscribe
+
+@enduml

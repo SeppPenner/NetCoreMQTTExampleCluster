@@ -1,0 +1,24 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "Publish(MqttApplicationMessageInterceptorContext)" as PublishPackage
+file "Publish(MqttApplicationMessageInterceptorContext, brokerId)" as PublishPackage2
+file "ValidatePublish()" as ValidatePublish
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+MqttClient --> PublishPackage
+PublishPackage --> MqttBroker
+MqttBroker --> PublishPackage2
+PublishPackage2 --> SiloHost
+SiloHost --> ValidatePublish
+
+@enduml

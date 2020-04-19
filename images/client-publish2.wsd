@@ -1,0 +1,36 @@
+@startuml
+
+skinparam componentStyle uml2
+
+file "ValidatePublish()" as ValidatePublish
+file "Publish(MqttApplicationMessageInterceptorContext)" as Publish
+file "true" as CanPublish
+file "true" as CanPublish2
+file "true" as CanPublish3
+
+frame SiloHost {
+}
+
+frame "MqttClient" as MqttClient {
+}
+
+frame "MqttBroker" as MqttBroker {
+}
+
+frame "MqttBroker 2" as MqttBroker2 {
+}
+
+frame "MqttBroker n" as MqttBrokerN {
+}
+
+ValidatePublish --> CanPublish
+CanPublish --> SiloHost
+SiloHost --> CanPublish2
+SiloHost --> Publish
+Publish --> MqttBroker2
+Publish --> MqttBrokerN
+CanPublish2 --> MqttBroker
+MqttBroker --> CanPublish3
+CanPublish3 --> MqttClient
+
+@enduml
