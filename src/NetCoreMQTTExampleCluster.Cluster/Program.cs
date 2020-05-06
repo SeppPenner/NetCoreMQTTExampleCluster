@@ -13,6 +13,7 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Reflection;
+    using System.Runtime.InteropServices;
 
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -56,10 +57,29 @@ namespace NetCoreMQTTExampleCluster.Cluster
 
             try
             {
-                var host = Host
-                    .CreateDefaultBuilder()
-                    .UseWindowsService()
-                    .Build();
+                IHost host = null;
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    host = Host
+                        .CreateDefaultBuilder()
+                        .UseSystemd()
+                        .Build();
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    host = Host
+                        .CreateDefaultBuilder()
+                        .UseWindowsService()
+                        .Build();
+                }
+
+                if (host == null)
+                {
+                    Log.Fatal("You are using a wrong operating system, only Windows and Linux are supported.");
+                    Environment.Exit(-1);
+                }
+
                 var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
                 var mqttService = new MqttService(currentLocation, lifeTimeService);
                 lifeTimeService.ApplicationStopped.Register(() => { mqttService.Dispose(); });
