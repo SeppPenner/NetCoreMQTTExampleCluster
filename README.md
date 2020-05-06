@@ -189,7 +189,7 @@ Example:
 ```
 
 # Structure
-![](images/structure.png)
+![](images/structure.svg)
 
 The MQTT clients connect to any MQTT broker. All inquiries are forwarded to the SiloHost and synchronized there.
 
@@ -201,48 +201,48 @@ Every action is saved by the SiloHost into the table `eventlog`.
 
 ## Broker connect
 
-![](images/broker-connect.png)
+![](images/broker-connect.svg)
 
 The MQTT broker connects to the SiloHost by specifying the `BrokerConnectionSettings` and a random `brokerId` (GUUID).
 The SiloHost stores the `BrokerConnectionSettings` for the `brokerId` in a `Dictionary`.
 
 ## Broker disonnect
 
-![](images/broker-disconnect.png)
+![](images/broker-disconnect.svg)
 
 The MQTT broker disconnects from the SiloHost by specifying its `brokerId`.
 The SiloHost removes the entry with the `brokerId` from its `Dictionary`.
 
 ## Client connect
 
-![](images/client-connect1.png)
-![](images/client-connect2.png)
+![](images/client-connect1.svg)
+![](images/client-connect2.svg)
 
 The MQTT client connects to the MQTT broker by specifying the `MqttConnectionValidatorContext`. The MQTT broker forwards the connection request to the SiloHost as `SimpleMqttConnectionValidatorContext`. This validates the data and returns the MQTT broker whether the MQTT client is allowed to connect or not.
 
 ## Client disconnect
 
-![](images/client-disconnect.png)
+![](images/client-disconnect.svg)
 
 The MQTT client passes the `MqttServerClientDisconnectedEventArgs` to the MQTT broker. The broker passes this on to the SiloHost. This deletes all saved client data from its list.
 
 ## Client subscribe
 
-![](images/client-subscribe1.png)
-![](images/client-subscribe2.png)
+![](images/client-subscribe1.svg)
+![](images/client-subscribe2.svg)
 
 The MQTT client passes the `MqttSubscriptionInterceptorContext` to the MQTT broker. The broker passes this on to the SiloHost. This validates the data and returns the MQTT broker whether the MQTT client can subscribe or not.
 
 ## Client unsubscribe
 
-![](images/client-unsubscribe.png)
+![](images/client-unsubscribe.svg)
 
 The MQTT client passes the `MqttServerClientUnsubscribedTopicEventArgs` to the MQTT broker. The broker passes this on to the SiloHost. In this case, the SiloHost does not have to do anything else.
 
 ## Client publish
 
-![](images/client-publish1.png)
-![](images/client-publish2.png)
+![](images/client-publish1.svg)
+![](images/client-publish2.svg)
 
 The MQTT client passes the `MqttApplicationMessageInterceptorContext` to the MQTT broker. The broker passes this on to the SiloHost and supplements his `brokerId`. The SiloHost validates the data and returns to the MQTT broker whether the MQTT client is allowed to publish or not. If this is the case, the SiloHost sends the packet to all other brokers except the one who initially sent the message.
 
