@@ -31,6 +31,9 @@
     <None Update="certificate.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="NetCoreMQTTExampleCluster.Cluster.dev.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="NetCoreMQTTExampleCluster.Cluster.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

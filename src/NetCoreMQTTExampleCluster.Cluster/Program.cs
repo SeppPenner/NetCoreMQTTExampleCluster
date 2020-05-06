@@ -14,6 +14,8 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using System.IO;
     using System.Reflection;
 
+    using Newtonsoft.Json.Linq;
+
     using Serilog;
 
     using Topshelf;
@@ -34,10 +36,19 @@ namespace NetCoreMQTTExampleCluster.Cluster
         {
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
+#if DEBUG
+            var settingsFile = Path.Combine(currentLocation, "NetCoreMQTTExampleCluster.Cluster.dev.json");
+#else
+            var settingsFile = Path.Combine(currentLocation, "NetCoreMQTTExampleCluster.Cluster.json");
+#endif
+            var settingsString = File.ReadAllText(settingsFile);
+            var parsedSettings = JObject.Parse(settingsString);
+            var logFolderPath = parsedSettings["LogFolderPath"].ToString();
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Async(a => a.Console())
-                .WriteTo.Async(a => a.File(Path.Combine(currentLocation, @"log\NetCoreMQTTExampleCluster.Cluster_.txt"), rollingInterval: RollingInterval.Day))
+                .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.Cluster_.txt"), rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
             Log.Information($"Current directory: {currentLocation}.");

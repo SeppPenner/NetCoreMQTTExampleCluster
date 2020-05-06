@@ -15,6 +15,8 @@ namespace NetCoreMQTTExampleCluster.SiloHost
 
     using Microsoft.Extensions.Configuration;
 
+    using Newtonsoft.Json.Linq;
+
     using Serilog;
 
     using Topshelf;
@@ -31,10 +33,19 @@ namespace NetCoreMQTTExampleCluster.SiloHost
         {
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
+#if DEBUG
+            var settingsFile = Path.Combine(currentLocation, "NetCoreMQTTExampleCluster.SiloHost.dev.json");
+#else
+            var settingsFile = Path.Combine(currentLocation, "NetCoreMQTTExampleCluster.SiloHost.json");
+#endif
+            var settingsString = File.ReadAllText(settingsFile);
+            var parsedSettings = JObject.Parse(settingsString);
+            var logFolderPath = parsedSettings["LogFolderPath"].ToString();
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Async(a => a.Console(outputTemplate: "{Timestamp: HH:mm:ss} {Level:u3} [{Grain}] [{Id}] {Message}{NewLine}{Exception}"))
-                .WriteTo.Async(a => a.File(Path.Combine(currentLocation, @"log\NetCoreMQTTExampleCluster.SiloHost_.txt"), outputTemplate: "{Timestamp: HH:mm:ss} {Level:u3} [{Grain}] [{Id}] {Message}{NewLine}{Exception}", rollingInterval: RollingInterval.Day))
+                .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.SiloHost_.txt"), outputTemplate: "{Timestamp: HH:mm:ss} {Level:u3} [{Grain}] [{Id}] {Message}{NewLine}{Exception}", rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
             Log.Information($"Current directory: {currentLocation}.");

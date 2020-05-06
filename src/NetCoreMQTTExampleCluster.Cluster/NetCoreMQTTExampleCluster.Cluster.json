@@ -1,4 +1,5 @@
 {
+  "LogFolderPath": "C:\\log",
   "Port": 8883,
   "UnencryptedPort": 1883,
   "BrokerConnectionSettings": {
