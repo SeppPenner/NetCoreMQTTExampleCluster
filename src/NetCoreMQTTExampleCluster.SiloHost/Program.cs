@@ -12,14 +12,15 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     using System;
     using System.IO;
     using System.Reflection;
+    using System.Runtime.InteropServices;
 
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
 
     using Newtonsoft.Json.Linq;
 
     using Serilog;
-
-    using Topshelf;
 
     /// <summary>
     /// A class that contains the main program.
@@ -60,25 +61,41 @@ namespace NetCoreMQTTExampleCluster.SiloHost
 
             var configuration = configurationBuilder.Build();
 
-            var rc = HostFactory.Run(x =>
+            try
+            {
+                IHost host = null;
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    x.Service<SiloHostServiceMain>(s =>
-                        {
-                            s.ConstructUsing(name => new SiloHostServiceMain(configuration));
-                            s.WhenStarted(tc => tc.Start());
-                            s.WhenStopped(tc => tc.Stop());
-                        });
+                    host = Host
+                        .CreateDefaultBuilder()
+                        .UseSystemd()
+                        .Build();
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    host = Host
+                        .CreateDefaultBuilder()
+                        .UseWindowsService()
+                        .Build();
+                }
 
-                    x.UseSerilog();
+                if (host == null)
+                {
+                    Log.Fatal("You are using a wrong operating system, only Windows and Linux are supported.");
+                    Environment.Exit(-1);
+                }
 
-                    x.RunAsLocalSystem();
-
-                    x.SetDescription("Orleans Silo Host for the MQTT broker.");
-                    x.SetDisplayName("NetCoreMQTTExampleCluster.SiloHost");
-                    x.SetServiceName("NetCoreMQTTExampleCluster.SiloHost");
-                });
-
-            Environment.ExitCode = (int)rc;
+                var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
+                var siloHostService = new SiloHostServiceMain(configuration, lifeTimeService);
+                lifeTimeService.ApplicationStopped.Register(() => { siloHostService.Dispose(); });
+                siloHostService.Start();
+                host.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, ex.Message);
+            }
         }
     }
 }

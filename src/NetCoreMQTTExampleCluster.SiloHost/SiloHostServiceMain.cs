@@ -10,15 +10,17 @@
 namespace NetCoreMQTTExampleCluster.SiloHost
 {
     using System;
+    using System.Threading;
+
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
     using NetCoreMQTTExampleCluster.Grains;
     using NetCoreMQTTExampleCluster.Storage;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
-
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
 
     using Orleans;
     using Orleans.Configuration;
@@ -26,15 +28,22 @@ namespace NetCoreMQTTExampleCluster.SiloHost
 
     using Serilog;
 
+    /// <inheritdoc cref="IDisposable"/>
     /// <summary>
     ///     A class that contains the Orleans silo host main service.
     /// </summary>
-    public class SiloHostServiceMain
+    /// <seealso cref="IDisposable"/>
+    public class SiloHostServiceMain : IDisposable
     {
         /// <summary>
         ///     The configuration.
         /// </summary>
         private readonly IConfigurationRoot configuration;
+
+        /// <summary>
+        /// The cancellation token.
+        /// </summary>
+        private readonly CancellationToken cancellationToken;
 
         /// <summary>
         ///     The silo host.
@@ -45,9 +54,11 @@ namespace NetCoreMQTTExampleCluster.SiloHost
         ///     Initializes a new instance of the <see cref="SiloHostServiceMain" /> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public SiloHostServiceMain(IConfigurationRoot configuration)
+        /// <param name="applicationLifetime">The application life time.</param>
+        public SiloHostServiceMain(IConfigurationRoot configuration, IHostApplicationLifetime applicationLifetime)
         {
             this.configuration = configuration;
+            this.cancellationToken = applicationLifetime.ApplicationStopping;
         }
 
         /// <summary>
@@ -58,7 +69,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             try
             {
                 this.siloHost = this.StartSilo();
-                this.siloHost.StartAsync();
+                this.siloHost.StartAsync(this.cancellationToken);
             }
             catch (Exception ex)
             {
@@ -67,12 +78,19 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             }
         }
 
+        /// <inheritdoc cref="IDisposable"/>
         /// <summary>
-        ///     Stops the service.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Stop()
+        /// <seealso cref="IDisposable"/>
+        public async void Dispose()
         {
-            this.siloHost?.StopAsync().Wait();
+            if (this.siloHost != null)
+            {
+                await this.siloHost.StopAsync(this.cancellationToken);
+            }
+
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
