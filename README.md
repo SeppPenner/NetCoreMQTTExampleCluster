@@ -12,6 +12,10 @@ The project was written and tested in .NetCore 3.1 and NetStandard 2.1.
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://raw.githubusercontent.com/SeppPenner/NetCoreMQTTExampleCluster/master/License.txt)
 [![Known Vulnerabilities](https://snyk.io/test/github/SeppPenner/NetCoreMQTTExampleCluster/badge.svg)](https://snyk.io/test/github/SeppPenner/NetCoreMQTTExampleCluster)
 
+# Hints
+
+Currently, only JSON is supported as MQTT payload.
+
 # Setup
 
 1. Create the database with the project `NetCoreMQTTExampleCluster.DatabaseSetup`, adapting the `appsettings.json` as required.
@@ -459,5 +463,6 @@ An example certificate is in the folder. Password for all is `test`.
 Change history
 --------------
 
+* **Version 1.2.0.0 (2020-05-06)** : Switched to Windows service template.
 * **Version 1.1.0.0 (2020-05-06)** : Added log folder path.
 * **Version 1.0.0.0 (2020-04-19)** : 1.0 release.
