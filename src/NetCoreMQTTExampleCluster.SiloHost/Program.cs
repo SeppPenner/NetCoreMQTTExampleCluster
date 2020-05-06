@@ -51,7 +51,13 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             Log.Information($"Current directory: {currentLocation}.");
 
             var configurationBuilder = new ConfigurationBuilder();
-            configurationBuilder.AddMqttConfig();
+
+#if DEBUG
+            configurationBuilder.AddMqttConfig("NetCoreMQTTExampleCluster.SiloHost.dev.json");
+#else
+            configurationBuilder.AddMqttConfig("NetCoreMQTTExampleCluster.SiloHost.json");
+#endif
+
             var configuration = configurationBuilder.Build();
 
             var rc = HostFactory.Run(x =>

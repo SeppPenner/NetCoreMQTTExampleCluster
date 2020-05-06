@@ -14,16 +14,17 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using System.IO;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading;
     using System.Threading.Tasks;
 
-    using NetCoreMQTTExampleCluster.Grains.Interfaces;
-
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
     using MQTTnet;
     using MQTTnet.Protocol;
     using MQTTnet.Server;
 
+    using NetCoreMQTTExampleCluster.Grains.Interfaces;
     using NetCoreMQTTExampleCluster.Models;
 
     using Newtonsoft.Json;
@@ -36,10 +37,12 @@ namespace NetCoreMQTTExampleCluster.Cluster
 
     using OrleansMessageRejectionException = Orleans.Runtime.OrleansMessageRejectionException;
 
+    /// <inheritdoc cref="IDisposable"/>
     /// <summary>
     ///     The main class that runs the MQTT service.
     /// </summary>
-    public class MqttService
+    /// <seealso cref="IDisposable"/>
+    public class MqttService : IDisposable
     {
         /// <summary>
         ///     The current assembly's executing path.
@@ -50,6 +53,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// The broker identifier.
         /// </summary>
         private readonly Guid brokerId;
+
+        /// <summary>
+        /// The cancellation token.
+        /// </summary>
+        private readonly CancellationToken cancellationToken;
 
         /// <summary>
         ///     The MQTT server.
@@ -67,9 +75,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// <param name="currentPath">
         ///     The current assembly's executing path.
         /// </param>
-        public MqttService(string currentPath)
+        /// <param name="applicationLifetime">The application life time.</param>
+        public MqttService(string currentPath, IHostApplicationLifetime applicationLifetime)
         {
             this.currentPath = currentPath;
+            this.cancellationToken = applicationLifetime.ApplicationStopping;
             this.brokerId = Guid.NewGuid();
         }
 
@@ -87,11 +97,19 @@ namespace NetCoreMQTTExampleCluster.Cluster
 
                 Config config;
 
+#if DEBUG
+                using (var r = new StreamReader($"{this.currentPath}\\NetCoreMQTTExampleCluster.Cluster.dev.json"))
+                {
+                    var json = r.ReadToEnd();
+                    config = JsonConvert.DeserializeObject<Config>(json);
+                }
+#else
                 using (var r = new StreamReader($"{this.currentPath}\\NetCoreMQTTExampleCluster.Cluster.json"))
                 {
                     var json = r.ReadToEnd();
                     config = JsonConvert.DeserializeObject<Config>(json);
                 }
+#endif
 
                 var optionsBuilder = new MqttServerOptionsBuilder();
 
@@ -121,24 +139,29 @@ namespace NetCoreMQTTExampleCluster.Cluster
             catch (Exception ex)
             {
                 Log.Fatal(ex.Message, ex);
+                Environment.Exit(0);
             }
         }
 
+        /// <inheritdoc cref="IDisposable"/>
         /// <summary>
-        ///     Stops the service.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Stop()
+        /// <seealso cref="IDisposable"/>
+        public async void Dispose()
         {
             try
             {
-                this.mqttServer.StopAsync();
+                await this.mqttServer.StopAsync();
                 var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
                 repositoryGrain.DisconnectBroker(this.brokerId);
                 Log.Information("Stopped MQTT server.");
+                GC.SuppressFinalize(this);
             }
             catch (Exception ex)
             {
                 Log.Fatal(ex.Message, ex);
+                Environment.Exit(0);
             }
         }
 
@@ -209,6 +232,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private void HandleUnsubscription(MqttServerClientUnsubscribedTopicEventArgs eventArgs)
         {
+            if (this.cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
             repositoryGrain.ProceedUnsubscription(eventArgs);
         }
@@ -219,6 +247,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// <param name="eventArgs">The MQTT client unsubscribed event args.</param>
         private void HandleDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
         {
+            if (this.cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
             repositoryGrain.ProceedDisconnect(eventArgs);
         }
@@ -229,6 +262,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// <param name="context">The context.</param>
         private void ValidateConnection(MqttConnectionValidatorContext context)
         {
+            if (this.cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
             var connectionValid = repositoryGrain.ProceedConnect(new SimpleMqttConnectionValidatorContext(context)).Result;
             context.ReasonCode = connectionValid ? MqttConnectReasonCode.Success : MqttConnectReasonCode.BadUserNameOrPassword;
@@ -240,6 +278,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// <param name="context">The context.</param>
         private void ValidatePublish(MqttApplicationMessageInterceptorContext context)
         {
+            if (this.cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
             var publishValid = repositoryGrain.ProceedPublish(context, this.brokerId).Result;
             context.AcceptPublish = publishValid;
@@ -251,6 +294,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// <param name="context">The context.</param>
         private void ValidateSubscription(MqttSubscriptionInterceptorContext context)
         {
+            if (this.cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
             var subscriptionValid = repositoryGrain.ProceedSubscription(context).Result;
             context.AcceptSubscription = subscriptionValid;

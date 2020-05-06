@@ -14,11 +14,12 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using System.IO;
     using System.Reflection;
 
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+
     using Newtonsoft.Json.Linq;
 
     using Serilog;
-
-    using Topshelf;
 
     /// <summary>
     ///     The main program.
@@ -53,27 +54,22 @@ namespace NetCoreMQTTExampleCluster.Cluster
 
             Log.Information($"Current directory: {currentLocation}.");
 
-            var rc = HostFactory.Run(
-                x =>
-                {
-                    x.Service<MqttService>(
-                        s =>
-                        {
-                            s.ConstructUsing(name => new MqttService(currentLocation));
-                            s.WhenStarted(tc => tc.Start());
-                            s.WhenStopped(tc => tc.Stop());
-                        });
-
-                    x.UseSerilog();
-
-                    x.RunAsLocalSystem();
-
-                    x.SetDescription("The NetCoreMQTTExampleCluster cluster.");
-                    x.SetDisplayName("NetCoreMQTTExampleCluster.Cluster");
-                    x.SetServiceName("NetCoreMQTTExampleCluster.Cluster");
-                });
-
-            Environment.ExitCode = (int)rc;
+            try
+            {
+                var host = Host
+                    .CreateDefaultBuilder()
+                    .UseWindowsService()
+                    .Build();
+                var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
+                var mqttService = new MqttService(currentLocation, lifeTimeService);
+                lifeTimeService.ApplicationStopped.Register(() => { mqttService.Dispose(); });
+                mqttService.Start();
+                host.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, ex.Message);
+            }
         }
     }
 }
