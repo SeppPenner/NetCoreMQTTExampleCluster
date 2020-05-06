@@ -1,1 +1,2 @@
 Use user properties for the broker publishing (MQTTv5) once it's possible
+Support other payloads, not only JSON!
