@@ -50,6 +50,7 @@ To do this, change the file `NetCoreMQTTExampleCluster.Cluster.json`.
 
 |Setting|Description|Optional|
 |-|-|-|
+|`LogFolderPath`|The folder the service logs to.|No|
 |`Port`|The encrypted port of the MQTT cluster client.|No|
 |`UnencryptedPort`|The unencrypted port of the MQTT cluster client. (This should only be used locally).|Yes|
 |`BrokerConnectionSettings`|The connection that the SiloHost establishes to the broker if a message is published by another MQTT cluster client.|No|
@@ -74,6 +75,7 @@ Example:
 
 ```json
 {
+  "LogFolderPath": "C:\\log",
   "Port": 8883,
   "UnencryptedPort": 1883,
   "BrokerConnectionSettings": {
@@ -133,6 +135,7 @@ To do this, change the file `NetCoreMQTTExampleCluster.Cluster.json`.
 
 |Setting|Description|Optional|
 |-|-|-|
+|`LogFolderPath`|The folder the service logs to.|No|
 |`Database`|The database connection settings.|No|
 |`Database.Host`|The host of the database connection.|No|
 |`Database.Database`|The database of the database connection.|No|
@@ -159,6 +162,7 @@ Example:
 
 ```json
 {
+  "LogFolderPath": "C:\\log",
   "Database": {
     "Host": "localhost",
     "Database": "mqtt",
@@ -455,4 +459,5 @@ An example certificate is in the folder. Password for all is `test`.
 Change history
 --------------
 
+* **Version 1.1.0.0 (2020-05-06)** : Added log folder path.
 * **Version 1.0.0.0 (2020-04-19)** : 1.0 release.
