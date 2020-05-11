@@ -43,7 +43,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <returns>A <see cref="string"></see> representation of the <see cref="PublishedMessagePayload" /> class.</returns>
         public override string ToString()
         {
-            return $"{{{nameof(this.Message)}: {this.Message}}}";
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

@@ -42,7 +42,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <returns>A <see cref="string"></see> representation of the <see cref="EventLog"/> class.</returns>
         public override string ToString()
         {
-            return $"{{{nameof(this.Id)}: {this.Id}, {nameof(this.EventType)}: {this.EventType}, {nameof(this.EventDetails)}: {this.EventDetails}, {nameof(this.CreatedAt)}: {this.CreatedAt}}}";
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

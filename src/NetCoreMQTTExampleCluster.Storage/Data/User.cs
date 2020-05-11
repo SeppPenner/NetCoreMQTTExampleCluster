@@ -29,6 +29,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <summary>
         ///     Gets or sets a salted and hashed representation of the password.
         /// </summary>
+        [JsonIgnore]
         public string PasswordHash { get; set; }
 
         /// <summary>
@@ -77,8 +78,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <returns>A <see cref="string"></see> representation of the <see cref="User" /> class.</returns>
         public override string ToString()
         {
-            return
-                $"{{{nameof(this.Id)}: {this.Id}, {nameof(this.UserName)}: {this.UserName}, {nameof(this.ClientIdPrefix)}: {this.ClientIdPrefix}, {nameof(this.ClientId)}: {this.ClientId}, {nameof(this.ValidateClientId)}: {this.ValidateClientId}, {nameof(this.ClientId)}: {this.ClientId}, {nameof(this.ThrottleUser)}: {this.ThrottleUser}, {nameof(this.MonthlyByteLimit)}: {this.MonthlyByteLimit}, {nameof(this.CreatedAt)}: {this.CreatedAt}, {nameof(this.DeletedAt)}: {this.DeletedAt}, {nameof(this.UpdatedAt)}: {this.UpdatedAt}}}";
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

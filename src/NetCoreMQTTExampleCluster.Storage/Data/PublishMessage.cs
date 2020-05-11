@@ -59,7 +59,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <returns>A <see cref="string"></see> representation of the <see cref="PublishMessage"/> class.</returns>
         public override string ToString()
         {
-            return $"{{{nameof(this.Id)}: {this.Id}, {nameof(this.ClientId)}: {this.ClientId}, {nameof(this.Topic)}: {this.Topic}, {nameof(this.Payload)}: {this.Payload}, {nameof(this.QoS)}: {this.QoS}, {nameof(this.Retain)}: {this.Retain}, {nameof(this.CreatedAt)}: {this.CreatedAt}}}";
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

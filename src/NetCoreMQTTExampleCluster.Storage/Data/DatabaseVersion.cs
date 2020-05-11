@@ -42,7 +42,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <returns>A <see cref="string"></see> representation of the <see cref="DatabaseVersion" /> class.</returns>
         public override string ToString()
         {
-            return $"{{{nameof(this.Id)}: {this.Id}, {nameof(this.Name)}: {this.Name}, {nameof(this.Number)}: {this.Number}, {nameof(this.CreatedAt)}: {this.CreatedAt}}}";
+            return JsonConvert.SerializeObject(this);
         }
     }
 }
