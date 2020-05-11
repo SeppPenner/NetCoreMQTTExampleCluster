@@ -40,10 +40,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="NetCoreMQTTExampleCluster.SiloHost.dev.json">
+      <None Update="appsettings.Development.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="NetCoreMQTTExampleCluster.SiloHost.json">
+      <None Update="appsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

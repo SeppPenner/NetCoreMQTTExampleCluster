@@ -29,7 +29,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
         /// <returns>An <see cref="IConfigurationBuilder"/>.</returns>
         public static IConfigurationBuilder AddMqttConfig(
             this IConfigurationBuilder configurationBuilder,
-            string configFileName = "NetCoreMQTTExampleCluster.SiloHost.json")
+            string configFileName = "appsettings.json")
         {
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var configFilePath = FindConfigFile(currentLocation, configFileName);
@@ -51,7 +51,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
         /// <param name="directory">The directory.</param>
         /// <param name="fileName">The file name.</param>
         /// <returns>A <see cref="string"/> from the configuration file.</returns>
-        private static string FindConfigFile(string directory, string fileName = "NetCoreMQTTExampleCluster.SiloHost.json")
+        private static string FindConfigFile(string directory, string fileName = "appsettings.json")
         {
             while (true)
             {

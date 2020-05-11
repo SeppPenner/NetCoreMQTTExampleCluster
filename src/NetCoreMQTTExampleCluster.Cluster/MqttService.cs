@@ -98,13 +98,13 @@ namespace NetCoreMQTTExampleCluster.Cluster
                 Config config;
 
 #if DEBUG
-                using (var r = new StreamReader($"{this.currentPath}\\NetCoreMQTTExampleCluster.Cluster.dev.json"))
+                using (var r = new StreamReader($"{this.currentPath}\\appsettings.Development.json"))
                 {
                     var json = r.ReadToEnd();
                     config = JsonConvert.DeserializeObject<Config>(json);
                 }
 #else
-                using (var r = new StreamReader($"{this.currentPath}\\NetCoreMQTTExampleCluster.Cluster.json"))
+                using (var r = new StreamReader($"{this.currentPath}\\appsettings.json"))
                 {
                     var json = r.ReadToEnd();
                     config = JsonConvert.DeserializeObject<Config>(json);

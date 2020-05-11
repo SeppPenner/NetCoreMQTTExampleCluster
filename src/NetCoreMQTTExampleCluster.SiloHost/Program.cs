@@ -35,9 +35,9 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 #if DEBUG
-            var settingsFile = Path.Combine(currentLocation, "NetCoreMQTTExampleCluster.SiloHost.dev.json");
+            var settingsFile = Path.Combine(currentLocation, "appsettings.Development.json");
 #else
-            var settingsFile = Path.Combine(currentLocation, "NetCoreMQTTExampleCluster.SiloHost.json");
+            var settingsFile = Path.Combine(currentLocation, "appsettings.json");
 #endif
             var settingsString = File.ReadAllText(settingsFile);
             var parsedSettings = JObject.Parse(settingsString);
@@ -54,9 +54,9 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             var configurationBuilder = new ConfigurationBuilder();
 
 #if DEBUG
-            configurationBuilder.AddMqttConfig("NetCoreMQTTExampleCluster.SiloHost.dev.json");
+            configurationBuilder.AddMqttConfig("appsettings.Development.json");
 #else
-            configurationBuilder.AddMqttConfig("NetCoreMQTTExampleCluster.SiloHost.json");
+            configurationBuilder.AddMqttConfig("appsettings.json");
 #endif
 
             var configuration = configurationBuilder.Build();
