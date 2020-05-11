@@ -50,7 +50,7 @@ The project requires at least NetCore 3.1 and NetStandard 2.1.
 
 ## NetCoreMQTTExampleCluster.Cluster
 
-To do this, change the file `NetCoreMQTTExampleCluster.Cluster.json`.
+To do this, change the file `appsettings.json`.
 
 |Setting|Description|Optional|
 |-|-|-|
@@ -135,7 +135,7 @@ Example:
 
 ## NetCoreMQTTExampleCluster.SiloHost
 
-To do this, change the file `NetCoreMQTTExampleCluster.Cluster.json`.
+To do this, change the file `appsettings.json`.
 
 |Setting|Description|Optional|
 |-|-|-|
