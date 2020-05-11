@@ -45,8 +45,8 @@ namespace NetCoreMQTTExampleCluster.SiloHost
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.Async(a => a.Console(outputTemplate: "{Timestamp: HH:mm:ss} {Level:u3} [{Grain}] [{Id}] {Message}{NewLine}{Exception}"))
-                .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.SiloHost_.txt"), outputTemplate: "{Timestamp: HH:mm:ss} {Level:u3} [{Grain}] [{Id}] {Message}{NewLine}{Exception}", rollingInterval: RollingInterval.Day))
+                .WriteTo.Async(a => a.Console())
+                .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.SiloHost_.txt"), rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
             Log.Information($"Current directory: {currentLocation}.");
