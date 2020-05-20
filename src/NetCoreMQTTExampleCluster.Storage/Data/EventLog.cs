@@ -11,6 +11,8 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
 {
     using System;
 
+    using Newtonsoft.Json;
+
     /// <summary>
     /// The event log class. It contains information about events that occurred on the other database tables.
     /// </summary>

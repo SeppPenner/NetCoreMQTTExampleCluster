@@ -11,6 +11,8 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
 {
     using System;
 
+    using Newtonsoft.Json;
+
     /// <summary>
     ///     The database version class. It contains information about the database version used.
     /// </summary>

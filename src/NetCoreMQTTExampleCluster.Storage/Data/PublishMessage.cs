@@ -13,6 +13,8 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
 
     using MQTTnet.Protocol;
 
+    using Newtonsoft.Json;
+
     /// <summary>
     /// The publish message class. It contains all published messages.
     /// </summary>

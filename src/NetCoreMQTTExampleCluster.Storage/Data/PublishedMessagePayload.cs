@@ -9,6 +9,8 @@
 
 namespace NetCoreMQTTExampleCluster.Storage.Data
 {
+    using Newtonsoft.Json;
+
     /// <summary>
     /// A class to serialize n published message payload to the JSON binary field in the database.
     /// </summary>

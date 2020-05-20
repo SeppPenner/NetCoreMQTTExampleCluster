@@ -11,6 +11,8 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
 {
     using System;
 
+    using Newtonsoft.Json;
+
     /// <summary>
     ///     The blacklist or whitelist class.
     /// </summary>
