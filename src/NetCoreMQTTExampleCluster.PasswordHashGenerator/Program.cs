@@ -23,7 +23,7 @@ namespace NetCoreMQTTExampleCluster.PasswordHashGenerator
         /// <summary>
         /// The password hasher.
         /// </summary>
-        private static readonly PasswordHasher<User> PasswordHasher = new PasswordHasher<User>();
+        private static readonly IPasswordHasher<User> PasswordHasher = new PasswordHasher<User>();
 
         /// <summary>
         ///     The main method of the program.

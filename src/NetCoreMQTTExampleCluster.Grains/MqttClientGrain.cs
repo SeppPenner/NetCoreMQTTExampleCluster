@@ -47,7 +47,7 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <summary>
         ///     The <see cref="PasswordHasher{TUser}" />.
         /// </summary>
-        private static readonly PasswordHasher<User> Hasher = new PasswordHasher<User>();
+        private static readonly IPasswordHasher<User> Hasher = new PasswordHasher<User>();
 
         /// <summary>
         ///     The user repository.
