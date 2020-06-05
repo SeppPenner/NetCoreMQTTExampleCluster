@@ -66,8 +66,8 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
                 ClientId = "Test",
                 CleanSession = true,
                 Endpoint = "127.0.0.1",
-                Password = "Test",
-                UserName = "test"
+                Password = "test",
+                UserName = "Test"
             };
 
             var result = await this.mqttValidator.ValidateConnection(

@@ -98,7 +98,7 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests.Helper
                         {
                             Type = BlacklistWhitelistType.Subscribe,
                             UserId = user1Id,
-                            Value = "d"
+                            Value = "e"
                         }
                     }
                 }

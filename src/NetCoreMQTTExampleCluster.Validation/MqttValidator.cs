@@ -23,6 +23,7 @@ namespace NetCoreMQTTExampleCluster.Validation
     using NetCoreMQTTExampleCluster.Models.Extensions;
     using NetCoreMQTTExampleCluster.Storage.Data;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
+    using NetCoreMQTTExampleCluster.TopicCheck;
 
     using Serilog;
 
