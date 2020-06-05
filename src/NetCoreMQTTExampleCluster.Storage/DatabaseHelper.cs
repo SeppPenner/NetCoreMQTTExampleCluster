@@ -18,10 +18,6 @@ namespace NetCoreMQTTExampleCluster.Storage
 
     using NetCoreMQTTExampleCluster.Storage.Statements;
 
-    using Microsoft.AspNetCore.Authentication;
-
-    using Newtonsoft.Json;
-
     using Npgsql;
 
     using Serilog;
