@@ -178,12 +178,17 @@ namespace NetCoreMQTTExampleCluster.DatabaseSetup
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         private static async Task InsertDatabaseVersion()
         {
-            await databaseVersionRepository.InsertDatabaseVersion(
-                new DatabaseVersion
-                {
-                    Name = "1.0.0.0",
-                    Number = 1000
-                });
+            var databaseVersions = await databaseVersionRepository.GetDatabaseVersions() ?? new List<DatabaseVersion>();
+
+            if (!databaseVersions.Any())
+            {
+                await databaseVersionRepository.InsertDatabaseVersion(
+                    new DatabaseVersion
+                    {
+                        Name = "1.0.0",
+                        Number = 100
+                    });
+            }
         }
     }
 }

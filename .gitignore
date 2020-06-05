@@ -32,3 +32,5 @@ _ReSharper*/
 packages/
 private-packages/
 InstallFiles.wxs
+node_modules/
+package-lock.json
