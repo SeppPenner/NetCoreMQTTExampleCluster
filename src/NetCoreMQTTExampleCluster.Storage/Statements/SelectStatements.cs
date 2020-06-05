@@ -56,7 +56,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public static string SelectAllUsers =
-            @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, createdat, updatedat, deletedat
+            @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, createdat, updatedat, deletedat
             FROM mqttuser
 			WHERE deletedat IS NULL;";
 
@@ -74,7 +74,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public static string SelectUserById =
-            @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, createdat, updatedat, deletedat
+            @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, createdat, updatedat, deletedat
             FROM mqttuser
             WHERE id = @Id
 			AND deletedat IS NULL;";
@@ -84,7 +84,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public static string SelectUserByUserName =
-            @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, createdat, updatedat, deletedat
+            @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, createdat, updatedat, deletedat
             FROM mqttuser
             WHERE username = @UserName
 			AND deletedat IS NULL;";

@@ -11,6 +11,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using Dapper;
@@ -48,11 +49,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IDatabaseVersionRepository" />
-        public async Task<IEnumerable<DatabaseVersion>> GetDatabaseVersions()
+        public async Task<List<DatabaseVersion>> GetDatabaseVersions()
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<DatabaseVersion>(SelectStatements.SelectAllDatabaseVersions);
+            var databaseVersions = await connection.QueryAsync<DatabaseVersion>(SelectStatements.SelectAllDatabaseVersions);
+            return databaseVersions?.ToList() ?? new List<DatabaseVersion>();
         }
 
         /// <inheritdoc cref="IDatabaseVersionRepository" />

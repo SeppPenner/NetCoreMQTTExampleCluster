@@ -24,15 +24,13 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// Gets a <see cref="List{T}"/> of all <see cref="EventLog"/>s.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
-        Task<IEnumerable<EventLog>> GetEventLogs();
+        Task<List<EventLog>> GetEventLogs();
 
         /// <summary>
         ///     Gets a <see cref="EventLog" /> by its identifier.
         /// </summary>
         /// <param name="eventLogId">The <see cref="EventLog"/>'s identifier to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<EventLog> GetEventLogById(Guid eventLogId);
 
         /// <summary>

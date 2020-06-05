@@ -11,6 +11,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using Dapper;
@@ -50,11 +51,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IBlacklistRepository" />
-        public async Task<IEnumerable<BlacklistWhitelist>> GetAllBlacklistItems()
+        public async Task<List<BlacklistWhitelist>> GetAllBlacklistItems()
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectAllBlacklistItems);
+            var blacklistItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectAllBlacklistItems);
+            return blacklistItems?.ToList() ?? new List<BlacklistWhitelist>();
         }
 
         /// <inheritdoc cref="IBlacklistRepository" />

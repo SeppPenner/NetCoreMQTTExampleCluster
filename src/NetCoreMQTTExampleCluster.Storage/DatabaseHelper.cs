@@ -32,6 +32,11 @@ namespace NetCoreMQTTExampleCluster.Storage
     public class DatabaseHelper : IDatabaseHelper
     {
         /// <summary>
+        /// The logger.
+        /// </summary>
+        private readonly ILogger logger = Log.ForContext<DatabaseHelper>();
+
+        /// <summary>
         ///     The connection settings to use.
         /// </summary>
         private readonly MqttDatabaseConnectionSettings connectionSettings;
@@ -56,14 +61,14 @@ namespace NetCoreMQTTExampleCluster.Storage
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
             await connection.OpenAsync();
-            var checkDatabaseExists = connection.ExecuteScalar(ExistsStatements.CheckDatabaseExists, new { this.connectionSettings.Database });
+            var checkDatabaseExists = await connection.ExecuteScalarAsync(ExistsStatements.CheckDatabaseExists, new { this.connectionSettings.Database });
 
             if (Convert.ToBoolean(checkDatabaseExists) == false)
             {
-                Log.Information("The database doesn't exist. I'm creating it.");
+                this.logger.Information("The database doesn't exist. I'm creating it.");
                 var sql = CreateStatements.CreateDatabase.Replace("@Database", database);
                 await connection.ExecuteAsync(sql);
-                Log.Information("Created database.");
+                this.logger.Information("Created database.");
             }
         }
 
@@ -113,20 +118,20 @@ namespace NetCoreMQTTExampleCluster.Storage
 
             if (forceDelete)
             {
-                Log.Information("Force delete the event log table.");
+                this.logger.Information("Force delete the event log table.");
                 await connection.ExecuteAsync(DropStatements.DropEventLogTable);
-                Log.Information("Deleted event log table.");
+                this.logger.Information("Deleted event log table.");
                 await connection.ExecuteAsync(CreateStatements.CreateEventLogTable);
-                Log.Information("Created event log table.");
+                this.logger.Information("Created event log table.");
             }
             else
             {
-                var checkTableExistsResult = connection.ExecuteScalar(ExistsStatements.CheckEventLogTableExists);
+                var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckEventLogTableExists);
                 if (Convert.ToBoolean(checkTableExistsResult) == false)
                 {
-                    Log.Information("The event log table doesn't exist. I'm creating it.");
+                    this.logger.Information("The event log table doesn't exist. I'm creating it.");
                     await connection.ExecuteAsync(CreateStatements.CreateEventLogTable);
-                    Log.Information("Created event log table.");
+                    this.logger.Information("Created event log table.");
                 }
             }
         }
@@ -145,20 +150,20 @@ namespace NetCoreMQTTExampleCluster.Storage
 
             if (forceDelete)
             {
-                Log.Information("Force delete the publish message table.");
+                this.logger.Information("Force delete the publish message table.");
                 await connection.ExecuteAsync(DropStatements.DropPublishMessageTable);
-                Log.Information("Deleted publish message table.");
+                this.logger.Information("Deleted publish message table.");
                 await connection.ExecuteAsync(CreateStatements.CreatePublishMessageTable);
-                Log.Information("Created publish message table.");
+                this.logger.Information("Created publish message table.");
             }
             else
             {
-                var checkTableExistsResult = connection.ExecuteScalar(ExistsStatements.CheckPublishMessageTableExists);
+                var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckPublishMessageTableExists);
                 if (Convert.ToBoolean(checkTableExistsResult) == false)
                 {
-                    Log.Information("The publish message table doesn't exist. I'm creating it.");
+                    this.logger.Information("The publish message table doesn't exist. I'm creating it.");
                     await connection.ExecuteAsync(CreateStatements.CreatePublishMessageTable);
-                    Log.Information("Created publish message table.");
+                    this.logger.Information("Created publish message table.");
                 }
             }
         }
@@ -172,26 +177,26 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateDatabaseVersionTable(bool forceDelete)
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
             if (forceDelete)
             {
-                Log.Information("Force delete the database version table.");
+                this.logger.Information("Force delete the database version table.");
                 await connection.ExecuteAsync(DropStatements.DropDatabaseVersionTable);
-                Log.Information("Deleted database version table.");
+                this.logger.Information("Deleted database version table.");
                 await connection.ExecuteAsync(CreateStatements.CreateDatabaseVersionTable);
-                Log.Information("Created database version table.");
+                this.logger.Information("Created database version table.");
             }
             else
             {
-                var checkTableExistsResult = connection.ExecuteScalar(ExistsStatements.CheckDatabaseVersionTableExists);
+                var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckDatabaseVersionTableExists);
 
                 if (Convert.ToBoolean(checkTableExistsResult) == false)
                 {
-                    Log.Information("The database version table doesn't exist. I'm creating it.");
+                    this.logger.Information("The database version table doesn't exist. I'm creating it.");
                     await connection.ExecuteAsync(CreateStatements.CreateDatabaseVersionTable);
-                    Log.Information("Created database version table.");
+                    this.logger.Information("Created database version table.");
                 }
             }
         }
@@ -205,26 +210,26 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateWhitelistTable(bool forceDelete)
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
             if (forceDelete)
             {
-                Log.Information("Force delete the whitelist table.");
+                this.logger.Information("Force delete the whitelist table.");
                 await connection.ExecuteAsync(DropStatements.DropWhitelistTable);
-                Log.Information("Deleted whitelist table.");
+                this.logger.Information("Deleted whitelist table.");
                 await connection.ExecuteAsync(CreateStatements.CreateWhitelistTable);
-                Log.Information("Created whitelist table.");
+                this.logger.Information("Created whitelist table.");
             }
             else
             {
-                var checkTableExistsResult = connection.ExecuteScalar(ExistsStatements.CheckWhitelistTableExists);
+                var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckWhitelistTableExists);
 
                 if (Convert.ToBoolean(checkTableExistsResult) == false)
                 {
-                    Log.Information("The whitelist table doesn't exist. I'm creating it.");
+                    this.logger.Information("The whitelist table doesn't exist. I'm creating it.");
                     await connection.ExecuteAsync(CreateStatements.CreateWhitelistTable);
-                    Log.Information("Created whitelist table.");
+                    this.logger.Information("Created whitelist table.");
                 }
             }
         }
@@ -238,26 +243,26 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateBlacklistTable(bool forceDelete)
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
             if (forceDelete)
             {
-                Log.Information("Force delete the blacklist table.");
+                this.logger.Information("Force delete the blacklist table.");
                 await connection.ExecuteAsync(DropStatements.DropBlacklistTable);
-                Log.Information("Deleted blacklist table.");
+                this.logger.Information("Deleted blacklist table.");
                 await connection.ExecuteAsync(CreateStatements.CreateBlacklistTable);
-                Log.Information("Created blacklist table.");
+                this.logger.Information("Created blacklist table.");
             }
             else
             {
-                var checkTableExistsResult = connection.ExecuteScalar(ExistsStatements.CheckBlacklistTableExists);
+                var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckBlacklistTableExists);
 
                 if (Convert.ToBoolean(checkTableExistsResult) == false)
                 {
-                    Log.Information("The blacklist table doesn't exist. I'm creating it.");
+                    this.logger.Information("The blacklist table doesn't exist. I'm creating it.");
                     await connection.ExecuteAsync(CreateStatements.CreateBlacklistTable);
-                    Log.Information("Created blacklist table.");
+                    this.logger.Information("Created blacklist table.");
                 }
             }
         }
@@ -271,26 +276,26 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateUserTable(bool forceDelete)
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
             if (forceDelete)
             {
-                Log.Information("Force delete the user table.");
+                this.logger.Information("Force delete the user table.");
                 await connection.ExecuteAsync(DropStatements.DropUserTable);
-                Log.Information("Deleted user table.");
+                this.logger.Information("Deleted user table.");
                 await connection.ExecuteAsync(CreateStatements.CreateUserTable);
-                Log.Information("Created user table.");
+                this.logger.Information("Created user table.");
             }
             else
             {
-                var checkTableExistsResult = connection.ExecuteScalar(ExistsStatements.CheckUserTableExists);
+                var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckUserTableExists);
 
                 if (Convert.ToBoolean(checkTableExistsResult) == false)
                 {
-                    Log.Information("The user table doesn't exist. I'm creating it.");
+                    this.logger.Information("The user table doesn't exist. I'm creating it.");
                     await connection.ExecuteAsync(CreateStatements.CreateUserTable);
-                    Log.Information("Created user table.");
+                    this.logger.Information("Created user table.");
                 }
             }
         }
@@ -303,12 +308,12 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task EnableTimeScaleDbExtension()
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
-            Log.Information("Enabling TimeScaleDB extension.");
+            this.logger.Information("Enabling TimeScaleDB extension.");
             await connection.ExecuteAsync(CreateStatements.EnableTimeScaleDbExtension);
-            Log.Information("Enabled TimeScaleDB extension.");
+            this.logger.Information("Enabled TimeScaleDB extension.");
         }
 
         /// <inheritdoc cref="IDatabaseHelper" />
@@ -319,13 +324,13 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateHyperTables()
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
-            Log.Information("Creating hyper tables.");
+            this.logger.Information("Creating hyper tables.");
             await connection.ExecuteAsync(CreateStatements.CreateEventLogHyperTable);
             await connection.ExecuteAsync(CreateStatements.CreatePublishMessageHyperTable);
-            Log.Information("Created hyper tables.");
+            this.logger.Information("Created hyper tables.");
         }
 
         /// <inheritdoc cref="IDatabaseHelper" />
@@ -336,10 +341,10 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// <seealso cref="IDatabaseHelper" />
         public async Task CreateOrleansTables()
         {
-            await using var connection = new NpgsqlConnection(connectionSettings.ToConnectionString());
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
 
-            Log.Information("Creating Orleans tables.");
+            this.logger.Information("Creating Orleans tables.");
 
             // Load PostgreSQL-Main.sql
             var mainStatements = ReadSqlFile("NetCoreMQTTExampleCluster.Storage.OrleansQueries.PostgreSQL-Main.sql");
@@ -365,7 +370,23 @@ namespace NetCoreMQTTExampleCluster.Storage
                 await connection.ExecuteAsync(remindersStatements);
             }
 
-            Log.Information("Created Orleans tables.");
+            this.logger.Information("Created Orleans tables.");
+        }
+
+        /// <inheritdoc cref="IDatabaseHelper" />
+        /// <summary>
+        /// Creates a compound index for the publish message table on timestamp and client identifier.
+        /// </summary>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        /// <seealso cref="IDatabaseHelper" />
+        public async Task CreateCompoundIndex()
+        {
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await connection.OpenAsync();
+
+            Log.Information("Creating compound index.");
+            await connection.ExecuteAsync(CreateStatements.CreatePublishMessageCompoundIndex);
+            Log.Information("Created compound index.");
         }
 
         /// <summary>
@@ -376,18 +397,15 @@ namespace NetCoreMQTTExampleCluster.Storage
         private static string ReadSqlFile(string resourceName)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            string file;
 
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
             {
-                if (stream == null)
-                {
-                    return string.Empty;
-                }
-
-                using var reader = new StreamReader(stream);
-                file = reader.ReadToEnd();
+                return string.Empty;
             }
+
+            using var reader = new StreamReader(stream);
+            var file = reader.ReadToEnd();
 
             return file;
         }

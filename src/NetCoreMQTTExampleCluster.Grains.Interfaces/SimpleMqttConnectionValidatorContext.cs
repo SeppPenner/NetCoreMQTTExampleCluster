@@ -17,6 +17,13 @@ namespace NetCoreMQTTExampleCluster.Grains.Interfaces
     public class SimpleMqttConnectionValidatorContext
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="SimpleMqttConnectionValidatorContext"/> class. This is used for testing purposes only!
+        /// </summary>
+        public SimpleMqttConnectionValidatorContext()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SimpleMqttConnectionValidatorContext"/> class.
         /// </summary>
         /// <param name="context">The context.</param>

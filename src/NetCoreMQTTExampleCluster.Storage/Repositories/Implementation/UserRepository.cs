@@ -11,6 +11,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using Dapper;
@@ -49,11 +50,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IUserRepository" />
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<List<User>> GetUsers()
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<User>(SelectStatements.SelectAllUsers);
+            var users = await connection.QueryAsync<User>(SelectStatements.SelectAllUsers);
+            return users?.ToList() ?? new List<User>();
         }
 
         /// <inheritdoc cref="IUserRepository" />
@@ -133,11 +135,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IUserRepository" />
-        public async Task<IEnumerable<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type)
+        public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type)
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemsForUser, new {UserId = userId, Type = type});
+            var blacklistItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemsForUser, new { UserId = userId, Type = type });
+            return blacklistItems?.ToList() ?? new List<BlacklistWhitelist>();
         }
 
         /// <inheritdoc cref="IUserRepository" />
@@ -148,11 +151,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IUserRepository" />
-        public async Task<IEnumerable<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type)
+        public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type)
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemsForUser, new {UserId = userId, Type = type});
+            var whiteListItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemsForUser, new { UserId = userId, Type = type });
+            return whiteListItems?.ToList() ?? new List<BlacklistWhitelist>();
         }
 
         /// <inheritdoc cref="IUserRepository" />
@@ -161,11 +165,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IUserRepository" />
-        public async Task<IEnumerable<string>> GetAllClientIdPrefixes()
+        public async Task<List<string>> GetAllClientIdPrefixes()
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
+            var clientIdPrefixes = await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
+            return clientIdPrefixes?.ToList() ?? new List<string>();
         }
     }
 }

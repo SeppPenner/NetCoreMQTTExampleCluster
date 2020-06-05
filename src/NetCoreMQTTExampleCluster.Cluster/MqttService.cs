@@ -35,6 +35,7 @@ namespace NetCoreMQTTExampleCluster.Cluster
 
     using Serilog;
 
+    using ILogger = Serilog.ILogger;
     using OrleansMessageRejectionException = Orleans.Runtime.OrleansMessageRejectionException;
 
     /// <inheritdoc cref="IDisposable"/>
@@ -58,6 +59,11 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// The cancellation token.
         /// </summary>
         private readonly CancellationToken cancellationToken;
+
+        /// <summary>
+        /// The logger.
+        /// </summary>
+        private readonly ILogger logger = Log.ForContext<MqttService>();
 
         /// <summary>
         ///     The MQTT server.
@@ -130,15 +136,15 @@ namespace NetCoreMQTTExampleCluster.Cluster
                 this.mqttServer.ClientUnsubscribedTopicHandler = new MqttServerClientUnsubscribedTopicHandlerDelegate(this.HandleUnsubscription);
                 this.mqttServer.ClientDisconnectedHandler = new MqttServerClientDisconnectedHandlerDelegate(this.HandleDisconnect);
 
-                this.clusterClient = ConnectOrleansClient(config).Result;
+                this.clusterClient = this.ConnectOrleansClient(config).Result;
                 var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
                 repositoryGrain.ConnectBroker(config.BrokerConnectionSettings, this.brokerId);
 
-                Log.Information("Started MQTT server.");
+                this.logger.Information("Started MQTT server.");
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex.Message, ex);
+                this.logger.Fatal("An error occured: {ex}.", ex);
                 Environment.Exit(0);
             }
         }
@@ -155,12 +161,12 @@ namespace NetCoreMQTTExampleCluster.Cluster
                 await this.mqttServer.StopAsync();
                 var repositoryGrain = this.clusterClient.GetGrain<IMqttRepositoryGrain>(0);
                 repositoryGrain.DisconnectBroker(this.brokerId);
-                Log.Information("Stopped MQTT server.");
+                this.logger.Information("Stopped MQTT server.");
                 GC.SuppressFinalize(this);
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex.Message, ex);
+                this.logger.Fatal("An error occured: {ex}.", ex);
                 Environment.Exit(0);
             }
         }
@@ -170,9 +176,9 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// </summary>
         /// <param name="config">The configuration.</param>
         /// <returns>A <see cref="IClusterClient"/>.</returns>
-        private static async Task<IClusterClient> ConnectOrleansClient(Config config)
+        private async Task<IClusterClient> ConnectOrleansClient(Config config)
         {
-            Log.Information("Connecting to Orleans cluster.");
+            this.logger.Information("Connecting to Orleans cluster.");
 
             var repeatCount = 0;
 
@@ -196,31 +202,31 @@ namespace NetCoreMQTTExampleCluster.Cluster
                        .ConfigureLogging(logging =>
                        {
                            logging.ClearProviders();
-                           logging.AddSerilog(dispose: true, logger: Log.Logger);
+                           logging.AddSerilog(dispose: true, logger: this.logger);
                        })
                        .Build();
 
                     await client.Connect();
-                    Log.Information("Client successfully connected to silo host.");
+                    this.logger.Information("Client successfully connected to silo host.");
                     return client;
                 }
                 catch (OrleansMessageRejectionException ex)
                 {
-                    Log.Error($"Connect failed: {ex.Message}.");
+                    this.logger.Error("Connect failed: {ex}.", ex);
                 }
 
                 repeatCount++;
                 if (repeatCount > 50)
                 {
-                    await Task.Delay(16000);
+                    await Task.Delay(16000, this.cancellationToken);
                 }
                 else if (repeatCount > 30)
                 {
-                    await Task.Delay(4000);
+                    await Task.Delay(4000, this.cancellationToken);
                 }
                 else
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(1000, this.cancellationToken);
                 }
             }
         }

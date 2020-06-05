@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />
-    <PackageReference Include="GitVersionTask" Version="5.3.3">
+    <PackageReference Include="GitVersionTask" Version="5.3.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

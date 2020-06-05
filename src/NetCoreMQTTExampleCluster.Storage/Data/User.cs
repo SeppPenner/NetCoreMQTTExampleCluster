@@ -60,6 +60,11 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         public long? MonthlyByteLimit { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the user is a sync user or not.
+        /// </summary>
+        public bool IsSyncUser { get; set; }
+
+        /// <summary>
         ///     Gets or sets the created at timestamp.
         /// </summary>
         public DateTimeOffset CreatedAt { get; set; }

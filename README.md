@@ -14,7 +14,7 @@ The project was written and tested in .NetCore 3.1 and NetStandard 2.1.
 
 # Hints
 
-Currently, only JSON is supported as MQTT payload.
+The user `mqtt-broker-sync` must be present and must not be used for anything else than the broker synchronization!
 
 # Setup
 
@@ -79,15 +79,15 @@ Example:
 
 ```json
 {
-  "LogFolderPath": "C:\\log",
+  "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.Cluster",
   "Port": 8883,
   "UnencryptedPort": 1883,
   "BrokerConnectionSettings": {
-    "ClientId": "mqtt-broker-cluster-1",
+    "ClientId": "mqtt-broker-sync-1",
     "HostName": "localhost",
     "Port": 8883,
-    "UserName": "mqtt-broker-cluster",
     "Password": "Test",
+    "UserName": "mqtt-broker-sync",
     "UseTls": true,
     "UseCleanSession": true
   },
@@ -166,7 +166,7 @@ Example:
 
 ```json
 {
-  "LogFolderPath": "C:\\log",
+  "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.SiloHost",
   "Database": {
     "Host": "localhost",
     "Database": "mqtt",

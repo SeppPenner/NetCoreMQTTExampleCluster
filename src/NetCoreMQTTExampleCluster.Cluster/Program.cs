@@ -39,12 +39,14 @@ namespace NetCoreMQTTExampleCluster.Cluster
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 #if DEBUG
+            // ReSharper disable once AssignNullToNotNullAttribute
             var settingsFile = Path.Combine(currentLocation, "appsettings.Development.json");
 #else
             var settingsFile = Path.Combine(currentLocation, "appsettings.json");
 #endif
             var settingsString = File.ReadAllText(settingsFile);
             var parsedSettings = JObject.Parse(settingsString);
+            // ReSharper disable once PossibleNullReferenceException
             var logFolderPath = parsedSettings["LogFolderPath"].ToString();
 
             Log.Logger = new LoggerConfiguration()
@@ -53,7 +55,7 @@ namespace NetCoreMQTTExampleCluster.Cluster
                 .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.Cluster_.txt"), rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
-            Log.Information($"Current directory: {currentLocation}.");
+            Log.Information("Current directory: {currentLocation}.", currentLocation);
 
             try
             {
@@ -83,12 +85,12 @@ namespace NetCoreMQTTExampleCluster.Cluster
                 var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
                 var mqttService = new MqttService(currentLocation, lifeTimeService);
                 lifeTimeService.ApplicationStopped.Register(() => { mqttService.Dispose(); });
-                mqttService.Start();
+                 mqttService.Start();
                 host.Run();
             }
             catch (Exception ex)
             {
-                Log.Error(ex, ex.Message);
+                Log.Error("An error occured: {ex}.", ex);
             }
         }
     }

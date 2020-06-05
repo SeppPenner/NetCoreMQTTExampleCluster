@@ -25,8 +25,6 @@ namespace NetCoreMQTTExampleCluster.Grains
     using MQTTnet.Client.Options;
     using MQTTnet.Server;
 
-    using Newtonsoft.Json;
-
     using Orleans;
 
     using Serilog;
@@ -51,7 +49,7 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <summary>
         ///     The logger.
         /// </summary>
-        private readonly ILogger log;
+        private readonly ILogger logger;
 
         /// <summary>
         ///     The publish message repository.
@@ -68,7 +66,7 @@ namespace NetCoreMQTTExampleCluster.Grains
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public MqttRepositoryGrain(IEventLogRepository eventLogRepository, IPublishMessageRepository publishMessageRepository)
         {
-            this.log = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
+            this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
             this.eventLogRepository = eventLogRepository;
             this.publishMessageRepository = publishMessageRepository;
         }
@@ -98,7 +96,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
             }
         }
 
@@ -122,12 +120,12 @@ namespace NetCoreMQTTExampleCluster.Grains
 
                 await this.eventLogRepository.InsertEventLog(eventLog);
 
-                // Remove from dictionary
+                // Remove from broker list
                 this.brokers.Remove(brokerId);
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
             }
         }
 
@@ -163,7 +161,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
         }
@@ -193,13 +191,13 @@ namespace NetCoreMQTTExampleCluster.Grains
 
                 await this.eventLogRepository.InsertEventLog(eventLog);
 
-                // Handle disconnect in grains
+                // Handle disconnect in grain
                 var mqttClientGrain = this.GrainFactory.GetGrain<IMqttClientGrain>(eventArgs.ClientId);
                 mqttClientGrain.ProceedDisconnect(eventArgs);
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
             }
         }
 
@@ -226,7 +224,7 @@ namespace NetCoreMQTTExampleCluster.Grains
                 }
 
                 // Save published message to the database
-                var payloadString = context.ApplicationMessage?.Payload == null ? null : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
+                var payloadString = context.ApplicationMessage?.Payload == null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
 
                 var publishMessage = new PublishMessage
                 {
@@ -239,21 +237,20 @@ namespace NetCoreMQTTExampleCluster.Grains
 
                 await this.publishMessageRepository.InsertPublishMessage(publishMessage);
 
-                // Deserialize payload, add hint that the message was sent by the broker
-                dynamic payloadObject = JsonConvert.DeserializeObject(payloadString);
+                // Publish messages to the broker if the publishing user is not the synchronization user
+                var isUserBrokerUser = await mqttClientGrain.IsUserBrokerUser(context.ClientId);
 
-                if (payloadObject._IsSentByBroker != null)
+                if (!isUserBrokerUser)
                 {
-                    return true;
+                    // ReSharper disable once AssignmentIsFullyDiscarded
+                    _ = this.PublishMessageToBrokers(context, brokerId);
                 }
 
-                // ReSharper disable once AssignmentIsFullyDiscarded
-                _ = this.PublishMessageToBrokers(context);
-                return false;
+                return true;
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
         }
@@ -290,7 +287,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
         }
@@ -325,7 +322,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
             }
         }
 
@@ -355,18 +352,14 @@ namespace NetCoreMQTTExampleCluster.Grains
 
             var options = optionsBuilder.Build();
 
-            // Deserialize payload, add hint that the message was sent by the broker
+            // Deserialize payload
             var payloadString = context.ApplicationMessage?.Payload == null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
-            dynamic payloadObject = JsonConvert.DeserializeObject(payloadString);
-            payloadObject._IsSentByBroker = true;
-            var newPayloadString = JsonConvert.SerializeObject(payloadObject);
-            var newPayload = Encoding.UTF8.GetBytes(newPayloadString);
 
             // Connect the MQTT client
             await mqttClient.ConnectAsync(options, CancellationToken.None);
 
             // Send the message
-            var message = new MqttApplicationMessageBuilder().WithTopic(context.ApplicationMessage.Topic).WithPayload(newPayload).WithQualityOfServiceLevel(context.ApplicationMessage.QualityOfServiceLevel)
+            var message = new MqttApplicationMessageBuilder().WithTopic(context.ApplicationMessage.Topic).WithPayload(payloadString).WithQualityOfServiceLevel(context.ApplicationMessage.QualityOfServiceLevel)
                 .WithRetainFlag(context.ApplicationMessage.Retain).Build();
 
             await mqttClient.PublishAsync(message, CancellationToken.None);
@@ -377,12 +370,18 @@ namespace NetCoreMQTTExampleCluster.Grains
         ///     Publishes a message to all remote brokers that haven't initially sent the message to the cluster.
         /// </summary>
         /// <param name="context">The context.</param>
+        /// <param name="brokerId">The broker identifier.</param>
         /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-        private async Task PublishMessageToBrokers(MqttApplicationMessageInterceptorContext context)
+        private async Task PublishMessageToBrokers(MqttApplicationMessageInterceptorContext context, Guid brokerId)
         {
-            foreach (var (_, value) in this.brokers)
+            foreach (var (key, settings) in this.brokers)
             {
-                await PublishMessageToBroker(context, value);
+                if (key == brokerId)
+                {
+                    continue;
+                }
+
+                await PublishMessageToBroker(context, settings);
             }
         }
     }

@@ -21,12 +21,15 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     using NetCoreMQTTExampleCluster.Storage;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
+    using NetCoreMQTTExampleCluster.Validation;
 
     using Orleans;
     using Orleans.Configuration;
     using Orleans.Hosting;
 
     using Serilog;
+
+    using ILogger = Serilog.ILogger;
 
     /// <inheritdoc cref="IDisposable"/>
     /// <summary>
@@ -35,6 +38,11 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     /// <seealso cref="IDisposable"/>
     public class SiloHostServiceMain : IDisposable
     {
+        /// <summary>
+        /// The logger.
+        /// </summary>
+        private readonly ILogger logger = Log.ForContext<SiloHostServiceMain>();
+
         /// <summary>
         ///     The configuration.
         /// </summary>
@@ -73,7 +81,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Start of the silo host failed.");
+                this.logger.Error("Start of the silo host failed: {ex}.", ex);
                 throw;
             }
         }
@@ -122,6 +130,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
                     s.AddSingleton<IPublishMessageRepository>(a => new PublishMessageRepository(connectionSettings));
                     s.AddSingleton<IUserRepository>(u => new UserRepository(connectionSettings));
                     s.AddSingleton<IWhitelistRepository>(u => new WhitelistRepository(connectionSettings));
+                    s.AddSingleton<IMqttValidator>(new MqttValidator());
                 }).UseAdoNetClustering(
                 options =>
                 {
@@ -142,7 +151,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
                 logging =>
                 {
                     logging.ClearProviders();
-                    logging.AddSerilog(dispose: true, logger: Log.Logger);
+                    logging.AddSerilog(dispose: true, logger: this.logger);
                 });
 
             if (dashboardOptions != null)

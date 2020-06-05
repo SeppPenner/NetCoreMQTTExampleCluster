@@ -46,5 +46,12 @@ namespace NetCoreMQTTExampleCluster.Grains.Interfaces
         /// </summary>
         /// <param name="eventArgs">The event args.</param>
         void ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs);
+
+        /// <summary>
+        /// Checks whether the user is a user used for synchronization.
+        /// </summary>
+        /// <param name="clientId">The client identifier.</param>
+        /// <returns>A value indicating whether the user is a broker user or not.</returns>
+        Task<bool> IsUserBrokerUser(string clientId);
     }
 }

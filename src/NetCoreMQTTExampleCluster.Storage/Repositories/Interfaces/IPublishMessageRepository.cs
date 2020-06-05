@@ -24,15 +24,13 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// Gets a <see cref="List{T}"/> of all <see cref="PublishMessage"/>s.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
-        Task<IEnumerable<PublishMessage>> GetPublishMessages();
+        Task<List<PublishMessage>> GetPublishMessages();
 
         /// <summary>
         ///     Gets a <see cref="PublishMessage" /> by its identifier.
         /// </summary>
         /// <param name="publishMessageId">The <see cref="PublishMessage"/>'s identifier to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<PublishMessage> GetPublishMessageById(Guid publishMessageId);
 
         /// <summary>

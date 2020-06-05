@@ -24,15 +24,13 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         ///     Gets a <see cref="List{T}" /> of all <see cref="BlacklistWhitelist" /> items.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
-        Task<IEnumerable<BlacklistWhitelist>> GetAllBlacklistItems();
+        Task<List<BlacklistWhitelist>> GetAllBlacklistItems();
 
         /// <summary>
         ///     Gets a <see cref="BlacklistWhitelist" /> item by its identifier.
         /// </summary>
         /// <param name="blacklistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<BlacklistWhitelist> GetBlacklistItemById(Guid blacklistItemId);
 
         /// <summary>
@@ -49,7 +47,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// <param name="blacklistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
         /// <param name="blacklistItemType">The <see cref="BlacklistWhitelistType" /> to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<BlacklistWhitelist> GetBlacklistItemByIdAndType(Guid blacklistItemId, BlacklistWhitelistType blacklistItemType);
 
         /// <summary>
@@ -57,7 +54,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="blacklistItem">The <see cref="BlacklistWhitelist" /> item to insert.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<bool> InsertBlacklistItem(BlacklistWhitelist blacklistItem);
     }
 }

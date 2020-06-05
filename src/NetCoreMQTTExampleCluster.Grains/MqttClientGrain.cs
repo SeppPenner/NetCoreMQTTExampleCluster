@@ -13,20 +13,17 @@ namespace NetCoreMQTTExampleCluster.Grains
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using System.Threading.Tasks;
-
-    using NetCoreMQTTExampleCluster.Grains.Interfaces;
-    using NetCoreMQTTExampleCluster.Storage.Data;
-    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
 
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Caching.Memory;
 
     using MQTTnet.Server;
 
-    using NetCoreMQTTExampleCluster.Models.Extensions;
-    using NetCoreMQTTExampleCluster.TopicCheck;
+    using NetCoreMQTTExampleCluster.Grains.Interfaces;
+    using NetCoreMQTTExampleCluster.Storage.Data;
+    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
+    using NetCoreMQTTExampleCluster.Validation;
 
     using Orleans;
 
@@ -45,9 +42,9 @@ namespace NetCoreMQTTExampleCluster.Grains
         private static readonly MemoryCache DataLimitCacheMonth = new MemoryCache(new MemoryCacheOptions());
 
         /// <summary>
-        ///     The <see cref="PasswordHasher{TUser}" />.
+        ///     The <see cref="IPasswordHasher{TUser}" />.
         /// </summary>
-        private static readonly IPasswordHasher<User> Hasher = new PasswordHasher<User>();
+        private static readonly IPasswordHasher<User> PasswordHasher = new PasswordHasher<User>();
 
         /// <summary>
         ///     The user repository.
@@ -55,7 +52,12 @@ namespace NetCoreMQTTExampleCluster.Grains
         private readonly IUserRepository userRepository;
 
         /// <summary>
-        ///     The session items.
+        /// The MQTT validator.
+        /// </summary>
+        private readonly IMqttValidator mqttValidator;
+
+        /// <summary>
+        ///     The users.
         /// </summary>
         private readonly IDictionary<string, User> users = new ConcurrentDictionary<string, User>();
 
@@ -67,19 +69,21 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <summary>
         ///     The logger.
         /// </summary>
-        private ILogger log;
+        private ILogger logger;
 
         /// <inheritdoc cref="IMqttClientGrain" />
         /// <summary>
         ///     Initializes a new instance of the <see cref="MqttClientGrain" /> class.
         /// </summary>
         /// <param name="userRepository">The user repository.</param>
+        /// <param name="mqttValidator">The MQTT validator.</param>
         /// <seealso cref="IMqttClientGrain" />
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
-        public MqttClientGrain(IUserRepository userRepository)
+        public MqttClientGrain(IUserRepository userRepository, IMqttValidator mqttValidator)
         {
             this.userRepository = userRepository;
-            this.log = Log.ForContext("Grain", nameof(MqttClientGrain));
+            this.mqttValidator = mqttValidator;
+            this.logger = Log.ForContext("Grain", nameof(MqttClientGrain));
         }
 
         /// <inheritdoc cref="Grain" />
@@ -93,7 +97,7 @@ namespace NetCoreMQTTExampleCluster.Grains
         public override Task OnActivateAsync()
         {
             this.clientId = this.GetPrimaryKeyString();
-            this.log = Log.ForContext("Grain", nameof(MqttClientGrain)).ForContext("Id", this.clientId);
+            this.logger = Log.ForContext("Grain", nameof(MqttClientGrain)).ForContext("Id", this.clientId);
             return base.OnActivateAsync();
         }
 
@@ -108,11 +112,11 @@ namespace NetCoreMQTTExampleCluster.Grains
         {
             try
             {
-                return await this.ValidateConnection(context);
+                return await this.mqttValidator.ValidateConnection(context, this.userRepository, this.users, PasswordHasher);
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
         }
@@ -128,11 +132,11 @@ namespace NetCoreMQTTExampleCluster.Grains
         {
             try
             {
-                return await this.ValidatePublish(context);
+                return await this.mqttValidator.ValidatePublish(context, this.userRepository, this.users, DataLimitCacheMonth);
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
         }
@@ -148,19 +152,21 @@ namespace NetCoreMQTTExampleCluster.Grains
         {
             try
             {
-                return await this.ValidateSubscription(context);
+                return await this.mqttValidator.ValidateSubscription(context, this.userRepository, this.users);
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
         }
 
+        /// <inheritdoc cref="IMqttClientGrain" />
         /// <summary>
         /// Proceeds the disconnection message for one client identifier.
         /// </summary>
         /// <param name="eventArgs">The event args.</param>
+        /// <seealso cref="IMqttClientGrain" />
         public void ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
         {
             try
@@ -169,294 +175,28 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.log.Error(ex.Message, ex.StackTrace);
+                this.logger.Error("An error occured: {ex}.", ex);
             }
         }
 
+        /// <inheritdoc cref="IMqttClientGrain" />
         /// <summary>
-        ///     Checks whether a user has used the maximum of its publishing limit for the month or not.
+        /// Checks whether the user is a user used for synchronization.
         /// </summary>
-        /// <param name="clientId">The client identifier.</param>
-        /// <param name="sizeInBytes">The message size in bytes.</param>
-        /// <param name="monthlyByteLimit">The monthly byte limit.</param>
-        /// <returns>A value indicating whether the user will be throttled or not.</returns>
-        private static bool IsUserThrottled(string clientId, long sizeInBytes, long monthlyByteLimit)
+        /// <param name="clientIdParameter">The client identifier.</param>
+        /// <returns>A value indicating whether the user is a broker user or not.</returns>
+        /// <seealso cref="IMqttClientGrain" />
+        public async Task<bool> IsUserBrokerUser(string clientIdParameter)
         {
-            DataLimitCacheMonth.TryGetValue(clientId, out var foundByteLimit);
-
-            // ReSharper disable once StyleCop.SA1126
-            if (foundByteLimit == null)
-            {
-                DataLimitCacheMonth.Set(clientId, sizeInBytes, DateTimeOffset.Now.EndOfMonth());
-
-                if (sizeInBytes < monthlyByteLimit)
-                {
-                    return false;
-                }
-
-                Log.Information($"The client with client identifier {clientId} is now locked until the end of this month because it already used its data limit.");
-                return true;
-            }
-
             try
             {
-                var currentValue = Convert.ToInt64(foundByteLimit);
-                currentValue = checked(currentValue + sizeInBytes);
-                DataLimitCacheMonth.Remove(clientId);
-                DataLimitCacheMonth.Set(clientId, currentValue, DateTimeOffset.Now.EndOfMonth());
-
-                if (currentValue >= monthlyByteLimit)
-                {
-                    Log.Information($"The client with client identifier {clientId} is now locked until the end of this month because it already used its data limit.");
-                    return true;
-                }
+                return await this.mqttValidator.IsUserBrokerUser(clientIdParameter, this.userRepository, this.users);
             }
-            catch (OverflowException)
+            catch (Exception ex)
             {
-                Log.Information("OverflowException thrown.");
-                Log.Information($"The client with client identifier {clientId} is now locked until the end of this month because it already used its data limit.");
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        ///     Gets the client identifier prefix for a client identifier if there is one or <c>null</c> else.
-        /// </summary>
-        /// <param name="clientIdentifierParam">The client identifier.</param>
-        /// <returns>The client identifier prefix for a client identifier if there is one or <c>null</c> else.</returns>
-        private async Task<string> GetClientIdPrefix(string clientIdentifierParam)
-        {
-            var clientIdPrefixes = await this.userRepository.GetAllClientIdPrefixes();
-            return clientIdPrefixes.FirstOrDefault(clientIdentifierParam.StartsWith);
-        }
-
-        /// <summary>
-        ///     Validates the connection.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>A value indicating whether the connection is accepted or not.</returns>
-        private async Task<bool> ValidateConnection(SimpleMqttConnectionValidatorContext context)
-        {
-            var currentUser = await this.userRepository.GetUserByName(context.UserName).ConfigureAwait(false);
-
-            if (currentUser == null)
-            {
+                this.logger.Error("An error occured: {ex}.", ex);
                 return false;
             }
-
-            if (context.UserName != currentUser.UserName)
-            {
-                return false;
-            }
-
-            var hashingResult = Hasher.VerifyHashedPassword(currentUser, currentUser.PasswordHash, context.Password);
-
-            if (hashingResult == PasswordVerificationResult.Failed)
-            {
-                return false;
-            }
-
-            if (!currentUser.ValidateClientId)
-            {
-                this.users[context.ClientId] = currentUser;
-                return true;
-            }
-
-            if (string.IsNullOrWhiteSpace(currentUser.ClientIdPrefix))
-            {
-                if (context.ClientId != currentUser.ClientId)
-                {
-                    return false;
-                }
-
-                this.users[context.ClientId] = currentUser;
-            }
-            else
-            {
-                this.users[currentUser.ClientIdPrefix] = currentUser;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        ///     Validates the message publication.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>A value indicating whether the published message is accepted or not.</returns>
-        private async Task<bool> ValidatePublish(MqttApplicationMessageInterceptorContext context)
-        {
-            var clientIdPrefix = await this.GetClientIdPrefix(context.ClientId);
-            User currentUser;
-            bool userFound;
-
-            if (string.IsNullOrWhiteSpace(clientIdPrefix))
-            {
-                userFound = this.users.TryGetValue(context.ClientId, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-            }
-            else
-            {
-                userFound = this.users.TryGetValue(clientIdPrefix, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-            }
-
-            if (!userFound || currentUser == null)
-            {
-                return false;
-            }
-
-            var topic = context.ApplicationMessage.Topic;
-
-            if (currentUser.ThrottleUser)
-            {
-                var payload = context.ApplicationMessage?.Payload;
-
-                if (payload != null)
-                {
-                    if (currentUser.MonthlyByteLimit != null)
-                    {
-                        if (IsUserThrottled(context.ClientId, payload.Length, currentUser.MonthlyByteLimit.Value))
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-
-            // Get blacklist
-            var publishBlackList = await this.userRepository.GetBlacklistItemsForUser(currentUser.Id, BlacklistWhitelistType.Publish);
-            var blacklist = publishBlackList?.ToList() ?? new List<BlacklistWhitelist>();
-
-            // Get whitelist
-            var publishWhitelist = await this.userRepository.GetWhitelistItemsForUser(currentUser.Id, BlacklistWhitelistType.Publish);
-            var whitelist = publishWhitelist?.ToList() ?? new List<BlacklistWhitelist>();
-
-            // Check matches
-            if (blacklist.Any(b => b.Value == topic))
-            {
-                return false;
-            }
-
-            if (whitelist.Any(b => b.Value == topic))
-            {
-                return true;
-            }
-
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-            foreach (var forbiddenTopic in blacklist)
-            {
-                var doesTopicMatch = TopicChecker.Regex(forbiddenTopic.Value, topic);
-
-                if (!doesTopicMatch)
-                {
-                    continue;
-                }
-
-                return false;
-            }
-
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-            foreach (var allowedTopic in whitelist)
-            {
-                var doesTopicMatch = TopicChecker.Regex(allowedTopic.Value, topic);
-
-                if (!doesTopicMatch)
-                {
-                    continue;
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        ///     Validates the subscription.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-        private async Task<bool> ValidateSubscription(MqttSubscriptionInterceptorContext context)
-        {
-            var clientIdPrefix = await this.GetClientIdPrefix(context.ClientId);
-            User currentUser;
-            bool userFound;
-
-            if (string.IsNullOrWhiteSpace(clientIdPrefix))
-            {
-                userFound = this.users.TryGetValue(context.ClientId, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-            }
-            else
-            {
-                userFound = this.users.TryGetValue(clientIdPrefix, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-            }
-
-            if (!userFound || currentUser == null)
-            {
-                return false;
-            }
-
-            var topic = context.TopicFilter.Topic;
-
-            // Get blacklist
-            var publishBlackList = await this.userRepository.GetBlacklistItemsForUser(currentUser.Id, BlacklistWhitelistType.Subscribe);
-            var blacklist = publishBlackList?.ToList() ?? new List<BlacklistWhitelist>();
-
-            // Get whitelist
-            var publishWhitelist = await this.userRepository.GetWhitelistItemsForUser(currentUser.Id, BlacklistWhitelistType.Subscribe);
-            var whitelist = publishWhitelist?.ToList() ?? new List<BlacklistWhitelist>();
-
-            // Check matches
-            if (blacklist.Any(b => b.Value == topic))
-            {
-                return false;
-            }
-
-            if (whitelist.Any(b => b.Value == topic))
-            {
-                return true;
-            }
-
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-            foreach (var forbiddenTopic in blacklist)
-            {
-                var doesTopicMatch = TopicChecker.Regex(forbiddenTopic.Value, topic);
-
-                if (!doesTopicMatch)
-                {
-                    continue;
-                }
-
-                return false;
-            }
-
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-            foreach (var allowedTopic in whitelist)
-            {
-                var doesTopicMatch = TopicChecker.Regex(allowedTopic.Value, topic);
-
-                if (!doesTopicMatch)
-                {
-                    continue;
-                }
-
-                return true;
-            }
-
-            return false;
         }
     }
 }

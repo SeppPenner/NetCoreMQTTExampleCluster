@@ -105,6 +105,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
                 validateclientid                        BOOLEAN         DEFAULT false,
                 throttleuser                            BOOLEAN         DEFAULT false,
                 monthlybytelimit                        BIGINT          NULL,
+                issyncuser                              BOOL            DEFAULT false,
                 createdat                               TIMESTAMPTZ     DEFAULT now() NOT NULL,
                 updatedat                               TIMESTAMPTZ     NULL,
                 deletedat                               TIMESTAMPTZ     NULL
@@ -128,5 +129,11 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public static string CreatePublishMessageHyperTable = @"SELECT create_hypertable('publishmessage', 'createdat');";
+
+        /// <summary>
+        ///     A SQL query string to create a compound index for timestamp and city identifier for the weather data table.
+        /// </summary>
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
+        public static string CreatePublishMessageCompoundIndex = @"CREATE INDEX ON publishmessage (createdat DESC, clientid);";
     }
 }

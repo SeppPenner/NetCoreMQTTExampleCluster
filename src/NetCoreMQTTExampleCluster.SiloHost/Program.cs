@@ -35,12 +35,14 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
 #if DEBUG
+            // ReSharper disable once AssignNullToNotNullAttribute
             var settingsFile = Path.Combine(currentLocation, "appsettings.Development.json");
 #else
             var settingsFile = Path.Combine(currentLocation, "appsettings.json");
 #endif
             var settingsString = File.ReadAllText(settingsFile);
             var parsedSettings = JObject.Parse(settingsString);
+            // ReSharper disable once PossibleNullReferenceException
             var logFolderPath = parsedSettings["LogFolderPath"].ToString();
 
             Log.Logger = new LoggerConfiguration()
@@ -49,7 +51,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
                 .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.SiloHost_.txt"), rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
-            Log.Information($"Current directory: {currentLocation}.");
+            Log.Information("Current directory: {currentLocation}.", currentLocation);
 
             var configurationBuilder = new ConfigurationBuilder();
 
@@ -94,7 +96,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
             }
             catch (Exception ex)
             {
-                Log.Error(ex, ex.Message);
+                Log.Error("An error occured: {ex}.", ex);
             }
         }
     }

@@ -35,7 +35,6 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// </summary>
         /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMemberInSuper.Global
         Task CreateEventLogTable(bool forceDelete);
 
         /// <summary>
@@ -43,7 +42,6 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// </summary>
         /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMemberInSuper.Global
         Task CreatePublishMessageTable(bool forceDelete);
 
         /// <summary>
@@ -94,5 +92,11 @@ namespace NetCoreMQTTExampleCluster.Storage
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         Task CreateHyperTables();
+
+        /// <summary>
+        /// Creates a compound index for the publish message table on timestamp and client identifier.
+        /// </summary>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        Task CreateCompoundIndex();
     }
 }

@@ -21,7 +21,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     /// </summary>
     public static class ConfigFileUtils
     {
-        /// <summary>
+       /// <summary>
         /// Adds the configuration file to the 
         /// </summary>
         /// <param name="configurationBuilder">The configuration.</param>
@@ -39,7 +39,7 @@ namespace NetCoreMQTTExampleCluster.SiloHost
                 throw new FileNotFoundException($"Configuration file not found: {configFileName}.");
             }
 
-            Log.Information($"Using config file: {configFilePath}.");
+            Log.Information("Using config file: {configFilePath}.", configFilePath);
             configurationBuilder.SetBasePath(Directory.GetCurrentDirectory());
             configurationBuilder.AddJsonFile(configFilePath, false, true);
             return configurationBuilder;

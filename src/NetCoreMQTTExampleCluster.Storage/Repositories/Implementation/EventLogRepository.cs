@@ -15,6 +15,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
     using NetCoreMQTTExampleCluster.Storage.Data;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
     using NetCoreMQTTExampleCluster.Storage.Statements;
+    using System.Linq;
     using System.Threading.Tasks;
 
     using Dapper;
@@ -48,11 +49,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IEventLogRepository" />
-        public async Task<IEnumerable<EventLog>> GetEventLogs()
+        public async Task<List<EventLog>> GetEventLogs()
         {
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<EventLog>(SelectStatements.SelectAllEventLogs);
+            var eventLogs = await connection.QueryAsync<EventLog>(SelectStatements.SelectAllEventLogs);
+            return eventLogs?.ToList() ?? new List<EventLog>();
         }
 
         /// <inheritdoc cref="IEventLogRepository" />

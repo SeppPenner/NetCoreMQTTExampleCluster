@@ -37,8 +37,8 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Suppression is OK here.")]
         public static string InsertUser =
-            @"INSERT INTO mqttuser (id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit)
-            VALUES (@Id, @UserName, @PasswordHash, @ClientIdPrefix, @ClientId, @ValidateClientId, @ThrottleUser, @MonthlyByteLimit);";
+            @"INSERT INTO mqttuser (id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser)
+            VALUES (@Id, @UserName, @PasswordHash, @ClientIdPrefix, @ClientId, @ValidateClientId, @ThrottleUser, @MonthlyByteLimit, @IsSyncUser);";
 
         /// <summary>
         ///     A SQL query string to insert a database version.

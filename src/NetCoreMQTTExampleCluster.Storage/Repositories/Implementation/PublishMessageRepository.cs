@@ -11,6 +11,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using NetCoreMQTTExampleCluster.Storage.Data;
     using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
@@ -50,12 +51,13 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="IPublishMessageRepository" />
-        public async Task<IEnumerable<PublishMessage>> GetPublishMessages()
+        public async Task<List<PublishMessage>> GetPublishMessages()
         {
             SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
-            return await connection.QueryAsync<PublishMessage>(SelectStatements.SelectAllPublishMessages);
+            var publishMessages = await connection.QueryAsync<PublishMessage>(SelectStatements.SelectAllPublishMessages);
+            return publishMessages?.ToList() ?? new List<PublishMessage>();
         }
 
         /// <inheritdoc cref="IPublishMessageRepository" />

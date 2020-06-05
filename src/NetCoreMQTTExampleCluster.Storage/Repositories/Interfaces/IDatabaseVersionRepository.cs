@@ -25,7 +25,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         // ReSharper disable once UnusedMember.Global
-        Task<IEnumerable<DatabaseVersion>> GetDatabaseVersions();
+        Task<List<DatabaseVersion>> GetDatabaseVersions();
 
         /// <summary>
         ///     Gets a <see cref="DatabaseVersion" /> by its identifier.

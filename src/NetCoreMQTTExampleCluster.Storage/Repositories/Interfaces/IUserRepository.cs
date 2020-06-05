@@ -24,15 +24,13 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         ///     Gets a <see cref="List{T}" /> of all <see cref="User" />s.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
-        Task<IEnumerable<User>> GetUsers();
+        Task<List<User>> GetUsers();
 
         /// <summary>
         ///     Gets a <see cref="User" /> by their identifier.
         /// </summary>
         /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<User> GetUserById(Guid userId);
 
         /// <summary>
@@ -71,7 +69,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// <param name="userId">The user identifier to query for.</param>
         /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        Task<IEnumerable<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type);
+        Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type);
 
         /// <summary>
         ///     Gets the whitelist items for a <see cref="User" />.
@@ -79,12 +77,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// <param name="userId">The user identifier to query for.</param>
         /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        Task<IEnumerable<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type);
+        Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type);
 
         /// <summary>
         ///     Gets the client identifier prefixes for all <see cref="User" />s.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        Task<IEnumerable<string>> GetAllClientIdPrefixes();
+        Task<List<string>> GetAllClientIdPrefixes();
     }
 }
