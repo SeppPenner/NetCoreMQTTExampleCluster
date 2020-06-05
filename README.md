@@ -33,14 +33,18 @@ The user `mqtt-broker-sync` must be present and must not be used for anything el
 
 |Project|Description|
 |-|-|
-|`NetCoreMQTTExampleCluster.Models`|All data models are included here.|
-|`NetCoreMQTTExampleCluster.PasswordHashGenerator`|Contains a program for generating a new password hash for user passwords.|
 |`NetCoreMQTTExampleCluster.Cluster`|Contains an instance of a broker that connects to the SiloHost. "MQTT cluster client".|
 |`NetCoreMQTTExampleCluster.DatabaseSetup`|Contains a project to set up the database initially.|
 |`NetCoreMQTTExampleCluster.Grains`|Contains the implementations of the Orleans Grains.|
 |`NetCoreMQTTExampleCluster.Grains.Interfaces`|Contains the interfaces of the Orleans Grains.|
+|`NetCoreMQTTExampleCluster.Models`|Contains all data models.|
+|`NetCoreMQTTExampleCluster.PasswordHashGenerator`|Contains a program for generating a new password hash for user passwords.|
 |`NetCoreMQTTExampleCluster.SiloHost`|Contains the Orleans SiloHost.|
 |`NetCoreMQTTExampleCluster.Storage`|Contains the administration of the database access.|
+|`NetCoreMQTTExampleCluster.TopicCheck`|Contains the project to check whether MQTT topics are valid or not.|
+|`NetCoreMQTTExampleCluster.TopicCheck.Tests`|Contains the project to test the topic check project.|
+|`NetCoreMQTTExampleCluster.Validation`|Contains the project to validate the MQTT connections, subscriptions and publishings.|
+|`NetCoreMQTTExampleCluster.Validation.Tests`|Contains the project to test the validation project.|
 
 # Requirements
 
