@@ -17,13 +17,13 @@ namespace NetCoreMQTTExampleCluster.Grains
     using System.Threading;
     using System.Threading.Tasks;
 
-    using NetCoreMQTTExampleCluster.Grains.Interfaces;
-    using NetCoreMQTTExampleCluster.Storage.Data;
-    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
-
     using MQTTnet;
     using MQTTnet.Client.Options;
     using MQTTnet.Server;
+
+    using NetCoreMQTTExampleCluster.Grains.Interfaces;
+    using NetCoreMQTTExampleCluster.Storage.Data;
+    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
 
     using Orleans;
 
