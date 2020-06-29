@@ -26,6 +26,7 @@ namespace NetCoreMQTTExampleCluster.Grains
     using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
 
     using Orleans;
+    using Orleans.Concurrency;
 
     using Serilog;
 
@@ -34,6 +35,7 @@ namespace NetCoreMQTTExampleCluster.Grains
     ///     The grain for a repository to manage the brokers.
     /// </summary>
     /// <seealso cref="IMqttRepositoryGrain" />
+    [Reentrant]
     public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     {
         /// <summary>
