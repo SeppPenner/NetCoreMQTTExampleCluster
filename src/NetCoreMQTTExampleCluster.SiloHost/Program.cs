@@ -65,28 +65,11 @@ namespace NetCoreMQTTExampleCluster.SiloHost
 
             try
             {
-                IHost host = null;
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    host = Host
-                        .CreateDefaultBuilder()
-                        .UseSystemd()
-                        .Build();
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    host = Host
-                        .CreateDefaultBuilder()
-                        .UseWindowsService()
-                        .Build();
-                }
-
-                if (host == null)
-                {
-                    Log.Fatal("You are using a wrong operating system, only Windows and Linux are supported.");
-                    Environment.Exit(-1);
-                }
+                var host = Host
+                    .CreateDefaultBuilder()
+                    .UseWindowsService()
+                    .UseSystemd()
+                    .Build();
 
                 var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
                 var siloHostService = new SiloHostServiceMain(configuration, lifeTimeService);
