@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IBrokerConnectionSettings.cs" company="Haemmer Electronics">
+// <copyright file="IBrokerConnectionSettings.cs" company="Hämmer Electronics">
 //   Copyright (c) 2020 All rights reserved.
 // </copyright>
 // <summary>

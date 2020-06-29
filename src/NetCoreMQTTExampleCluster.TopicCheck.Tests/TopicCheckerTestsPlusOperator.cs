@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TopicCheckerTestsPlusOperator.cs" company="Haemmer Electronics">
+// <copyright file="TopicCheckerTestsPlusOperator.cs" company="Hämmer Electronics">
 //   Copyright (c) 2020 All rights reserved.
 // </copyright>
 // <summary>
