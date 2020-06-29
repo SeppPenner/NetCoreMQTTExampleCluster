@@ -13,7 +13,6 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Reflection;
-    using System.Runtime.InteropServices;
 
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;

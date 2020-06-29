@@ -12,7 +12,6 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     using System;
     using System.IO;
     using System.Reflection;
-    using System.Runtime.InteropServices;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
