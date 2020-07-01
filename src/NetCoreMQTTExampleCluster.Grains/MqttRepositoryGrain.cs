@@ -35,6 +35,7 @@ namespace NetCoreMQTTExampleCluster.Grains
     ///     The grain for a repository to manage the brokers.
     /// </summary>
     /// <seealso cref="IMqttRepositoryGrain" />
+    [StatelessWorker(1)]
     [Reentrant]
     public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     {
