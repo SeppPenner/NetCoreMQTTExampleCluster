@@ -10,7 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Validation
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
 
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Caching.Memory;
@@ -19,7 +18,6 @@ namespace NetCoreMQTTExampleCluster.Validation
 
     using NetCoreMQTTExampleCluster.Grains.Interfaces;
     using NetCoreMQTTExampleCluster.Storage.Data;
-    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
 
     /// <summary>
     /// A interface to validate the different MQTT contexts.
@@ -30,38 +28,46 @@ namespace NetCoreMQTTExampleCluster.Validation
         ///     Validates the connection.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
+        /// <param name="user">The user.</param>
         /// <param name="passwordHasher">The password hasher.</param>
         /// <returns>A value indicating whether the connection is accepted or not.</returns>
-        Task<bool> ValidateConnection(SimpleMqttConnectionValidatorContext context, IUserRepository userRepository, IDictionary<string, User> users, IPasswordHasher<User> passwordHasher);
+        bool ValidateConnection(
+            SimpleMqttConnectionValidatorContext context,
+            User user,
+            IPasswordHasher<User> passwordHasher);
 
         /// <summary>
         ///     Validates the message publication.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
+        /// <param name="blacklist">The blacklist.</param>
+        /// <param name="whitelist">The whitelist.</param>
+        /// <param name="user">The user.</param>
         /// <param name="dataLimitCacheMonth">The data limit cache for the month.</param>
+        /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
         /// <returns>A value indicating whether the published message is accepted or not.</returns>
-        Task<bool> ValidatePublish(MqttApplicationMessageInterceptorContext context, IUserRepository userRepository, IDictionary<string, User> users, IMemoryCache dataLimitCacheMonth);
+        bool ValidatePublish(
+            MqttApplicationMessageInterceptorContext context,
+            List<BlacklistWhitelist> blacklist,
+            List<BlacklistWhitelist> whitelist,
+            User user,
+            IMemoryCache dataLimitCacheMonth,
+            List<string> clientIdPrefixes);
 
         /// <summary>
         ///     Validates the subscription.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
+        /// <param name="blacklist">The blacklist.</param>
+        /// <param name="whitelist">The whitelist.</param>
+        /// <param name="user">The user.</param>
+        /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
         /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-        Task<bool> ValidateSubscription(MqttSubscriptionInterceptorContext context, IUserRepository userRepository, IDictionary<string, User> users);
-
-        /// <summary>
-        ///     Checks whether the user is a user used for synchronization.
-        /// </summary>
-        /// <param name="clientId">The client identifier.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
-        /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-        Task<bool> IsUserBrokerUser(string clientId, IUserRepository userRepository, IDictionary<string, User> users);
+        bool ValidateSubscription(
+            MqttSubscriptionInterceptorContext context,
+            List<BlacklistWhitelist> blacklist,
+            List<BlacklistWhitelist> whitelist,
+            User user,
+            List<string> clientIdPrefixes);
     }
 }

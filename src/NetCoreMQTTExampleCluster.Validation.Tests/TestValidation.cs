@@ -34,9 +34,14 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
     public class TestValidation
     {
         /// <summary>
-        /// The identifier for the Test user.
+        /// The identifier for user 1.
         /// </summary>
         private static readonly Guid User1Id = Guid.NewGuid();
+
+        /// <summary>
+        /// The client identifier prefixes.
+        /// </summary>
+        private static readonly List<string> ClientIdPrefixes = new List<string> { "Test" };
 
         /// <summary>
         /// The MQTT validator.
@@ -70,10 +75,11 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
                 UserName = "Test"
             };
 
-            var result = await this.mqttValidator.ValidateConnection(
+            var user = await this.userRepository.GetUserByName("Test");
+
+            var result = this.mqttValidator.ValidateConnection(
                 mqttConnectionValidatorContext,
-                this.userRepository,
-                new Dictionary<string, User>(), 
+                user,
                 this.passwordHasher);
 
             Assert.IsTrue(result);
@@ -113,11 +119,15 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
 
             var mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), mqttApplicationMessage);
 
-            var result = await this.mqttValidator.ValidatePublish(
-                             mqttConnectionValidatorContext,
-                             this.userRepository,
-                             users,
-                             dataLimitCacheMonth);
+            var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
+            var whitelist = await this.userRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
+            var result = this.mqttValidator.ValidatePublish(
+                mqttConnectionValidatorContext,
+                blacklist,
+                whitelist,
+                users["Test"],
+                dataLimitCacheMonth,
+                ClientIdPrefixes);
 
             Assert.IsTrue(result);
 
@@ -131,11 +141,13 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
 
             mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), mqttApplicationMessage);
 
-            result = await this.mqttValidator.ValidatePublish(
-                             mqttConnectionValidatorContext,
-                             this.userRepository,
-                             users,
-                             dataLimitCacheMonth);
+            result = this.mqttValidator.ValidatePublish(
+                mqttConnectionValidatorContext,
+                blacklist,
+                whitelist,
+                users["Test"],
+                dataLimitCacheMonth,
+                ClientIdPrefixes);
 
             Assert.IsTrue(result);
         }
@@ -170,10 +182,14 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
 
             var mqttConnectionValidatorContext = new MqttSubscriptionInterceptorContext("Test", mqttTopicFilter, new Dictionary<object, object>());
 
-            var result = await this.mqttValidator.ValidateSubscription(
-                             mqttConnectionValidatorContext,
-                             this.userRepository,
-                             users);
+            var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
+            var whitelist = await this.userRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
+            var result = this.mqttValidator.ValidateSubscription(
+                mqttConnectionValidatorContext,
+                blacklist,
+                whitelist,
+                users["Test"],
+                ClientIdPrefixes);
 
             Assert.IsTrue(result);
 
@@ -185,10 +201,12 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
 
             mqttConnectionValidatorContext = new MqttSubscriptionInterceptorContext("Test", mqttTopicFilter, new Dictionary<object, object>());
 
-            result = await this.mqttValidator.ValidateSubscription(
-                             mqttConnectionValidatorContext,
-                             this.userRepository,
-                             users);
+            result = this.mqttValidator.ValidateSubscription(
+                mqttConnectionValidatorContext,
+                blacklist,
+                whitelist,
+                users["Test"],
+                ClientIdPrefixes);
 
             Assert.IsTrue(result);
         }

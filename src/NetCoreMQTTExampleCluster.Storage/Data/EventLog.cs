@@ -3,7 +3,7 @@
 //   Copyright (c) 2020 All rights reserved.
 // </copyright>
 // <summary>
-//   The event log class. It contains information about events that occured on the other database tables.
+//   The event log class. It contains information about events that occurred on the other database tables.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 

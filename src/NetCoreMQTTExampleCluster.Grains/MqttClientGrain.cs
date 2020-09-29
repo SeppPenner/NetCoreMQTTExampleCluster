@@ -10,8 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Grains
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
 
@@ -57,9 +55,19 @@ namespace NetCoreMQTTExampleCluster.Grains
         private readonly IMqttValidator mqttValidator;
 
         /// <summary>
-        ///     The users.
+        /// The user.
         /// </summary>
-        private readonly IDictionary<string, User> users = new ConcurrentDictionary<string, User>();
+        private User user;
+
+        /// <summary>
+        /// The user data.
+        /// </summary>
+        private UserData userData = new UserData();
+
+        /// <summary>
+        /// A value indicating whether the caches are loaded or not.
+        /// </summary>
+        private bool cacheLoaded;
 
         /// <summary>
         ///     The client identifier.
@@ -112,11 +120,19 @@ namespace NetCoreMQTTExampleCluster.Grains
         {
             try
             {
-                return await this.mqttValidator.ValidateConnection(context, this.userRepository, this.users, PasswordHasher);
+                this.user = await this.userRepository.GetUserByName(context.UserName);
+
+                if (this.user == null)
+                {
+                    return false;
+                }
+
+                await this.RefreshCache(false);
+                return this.mqttValidator.ValidateConnection(context, this.user, PasswordHasher);
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                this.logger.Error("An error occurred: {@ex}.", ex);
                 return false;
             }
         }
@@ -128,16 +144,17 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="context">The context.</param>
         /// <returns>A value indicating whether the published message is accepted or not.</returns>
         /// <seealso cref="IMqttClientGrain" />
-        public async Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context)
+        public Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context)
         {
             try
             {
-                return await this.mqttValidator.ValidatePublish(context, this.userRepository, this.users, DataLimitCacheMonth);
+                var result = this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.user, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
+                return Task.FromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
-                return false;
+                this.logger.Error("An error occurred: {@ex}.", ex);
+                return Task.FromResult(false);
             }
         }
 
@@ -148,34 +165,17 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="context">The context.</param>
         /// <returns>A value indicating whether the subscription is accepted or not.</returns>
         /// <seealso cref="IMqttClientGrain" />
-        public async Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context)
+        public Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context)
         {
             try
             {
-                return await this.mqttValidator.ValidateSubscription(context, this.userRepository, this.users);
+                var result = this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.user, this.userData.ClientIdPrefixes);
+                return Task.FromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
-                return false;
-            }
-        }
-
-        /// <inheritdoc cref="IMqttClientGrain" />
-        /// <summary>
-        /// Proceeds the disconnection message for one client identifier.
-        /// </summary>
-        /// <param name="eventArgs">The event args.</param>
-        /// <seealso cref="IMqttClientGrain" />
-        public void ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
-        {
-            try
-            {
-                this.users.Remove(eventArgs.ClientId);
-            }
-            catch (Exception ex)
-            {
-                this.logger.Error("An error occured: {ex}.", ex);
+                this.logger.Error("An error occurred: {@ex}.", ex);
+                return Task.FromResult(false);
             }
         }
 
@@ -183,20 +183,41 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <summary>
         /// Checks whether the user is a user used for synchronization.
         /// </summary>
-        /// <param name="clientIdParameter">The client identifier.</param>
         /// <returns>A value indicating whether the user is a broker user or not.</returns>
         /// <seealso cref="IMqttClientGrain" />
-        public async Task<bool> IsUserBrokerUser(string clientIdParameter)
+        public Task<bool> IsUserBrokerUser()
         {
             try
             {
-                return await this.mqttValidator.IsUserBrokerUser(clientIdParameter, this.userRepository, this.users);
+                var result = this.user.IsSyncUser;
+                return Task.FromResult(result);
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
-                return false;
+                this.logger.Error("An error occurred: {@ex}.", ex);
+                return Task.FromResult(false);
             }
+        }
+
+        /// <inheritdoc cref="IMqttClientGrain" />
+        /// <summary>
+        /// Tells the grain to refresh its cache.
+        /// </summary>
+        /// <param name="force">Forces a cache update.</param>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        /// <seealso cref="IMqttClientGrain" />
+        public async Task RefreshCache(bool force)
+        {
+            if (!force)
+            {
+                if (this.cacheLoaded)
+                {
+                    return;
+                }
+            }
+
+            this.userData = await this.userRepository.GetUserData(this.user.Id);
+            this.cacheLoaded = true;
         }
     }
 }

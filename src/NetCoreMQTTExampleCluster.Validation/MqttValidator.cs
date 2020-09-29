@@ -12,7 +12,6 @@ namespace NetCoreMQTTExampleCluster.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
 
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Caching.Memory;
@@ -22,7 +21,6 @@ namespace NetCoreMQTTExampleCluster.Validation
     using NetCoreMQTTExampleCluster.Grains.Interfaces;
     using NetCoreMQTTExampleCluster.Models.Extensions;
     using NetCoreMQTTExampleCluster.Storage.Data;
-    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
     using NetCoreMQTTExampleCluster.TopicCheck;
 
     using Serilog;
@@ -44,61 +42,55 @@ namespace NetCoreMQTTExampleCluster.Validation
         ///     Validates the connection.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
+        /// <param name="user">The user.</param>
         /// <param name="passwordHasher">The password hasher.</param>
         /// <returns>A value indicating whether the connection is accepted or not.</returns>
         /// <seealso cref="IMqttValidator"/>
-        public async Task<bool> ValidateConnection(SimpleMqttConnectionValidatorContext context, IUserRepository userRepository, IDictionary<string, User> users, IPasswordHasher<User> passwordHasher)
+        public bool ValidateConnection(SimpleMqttConnectionValidatorContext context, User user, IPasswordHasher<User> passwordHasher)
         {
-            Logger.Information("Executed ValidateConnection with parameters: {context}, {users}", context, users);
+            Logger.Debug("Executed ValidateConnection with parameters: {@context}, {@user}.", context, user);
 
-            var currentUser = await userRepository.GetUserByName(context.UserName).ConfigureAwait(false);
+            Logger.Debug("Current user is {@currentUser}.", user);
 
-            Logger.Information("Current user is {currentUser}.", currentUser);
-
-            if (currentUser == null)
+            if (user == null)
             {
-                Logger.Information("Current user was null.");
+                Logger.Debug("Current user was null.");
                 return false;
             }
 
-            if (context.UserName != currentUser.UserName)
+            if (context.UserName != user.UserName)
             {
-                Logger.Information("User name in context doesn't match the current user.");
+                Logger.Debug("User name in context doesn't match the current user.");
                 return false;
             }
 
-            var hashingResult = passwordHasher.VerifyHashedPassword(currentUser, currentUser.PasswordHash, context.Password);
+            var hashingResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, context.Password);
 
             if (hashingResult == PasswordVerificationResult.Failed)
             {
-                Logger.Information("Password verification failed.");
+                Logger.Debug("Password verification failed.");
                 return false;
             }
 
-            if (!currentUser.ValidateClientId)
+            if (!user.ValidateClientId)
             {
-                users[context.ClientId] = currentUser;
-                Logger.Information("Connection valid for {clientId} and {user}.", context.ClientId, currentUser);
+                Logger.Debug("Connection valid for {@clientId} and {@user}.", context.ClientId, user);
                 return true;
             }
 
-            if (string.IsNullOrWhiteSpace(currentUser.ClientIdPrefix))
+            if (string.IsNullOrWhiteSpace(user.ClientIdPrefix))
             {
-                if (context.ClientId != currentUser.ClientId)
+                if (context.ClientId != user.ClientId)
                 {
-                    Logger.Information("Client id in context doesn't match the current user's client id.");
+                    Logger.Debug("Client id in context doesn't match the current user's client id.");
                     return false;
                 }
 
-                users[context.ClientId] = currentUser;
-                Logger.Information("Connection valid for {clientId} and {user} when client id prefix was null.", context.ClientId, currentUser);
+                Logger.Debug("Connection valid for {@clientId} and {@user} when client id prefix was null.", context.ClientId, user);
             }
             else
             {
-                users[currentUser.ClientIdPrefix] = currentUser;
-                Logger.Information("Connection valid for {clientIdPrefix} and {user}  when client id prefix was not null.", currentUser.ClientIdPrefix, currentUser);
+                Logger.Debug("Connection valid for {@clientIdPrefix} and {@user} when client id prefix was not null.", user.ClientIdPrefix, user);
             }
 
             return true;
@@ -109,94 +101,71 @@ namespace NetCoreMQTTExampleCluster.Validation
         ///     Validates the message publication.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
+        /// <param name="blacklist">The blacklist.</param>
+        /// <param name="whitelist">The whitelist.</param>
+        /// <param name="user">The user.</param>
         /// <param name="dataLimitCacheMonth">The data limit cache for the month.</param>
+        /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
         /// <returns>A value indicating whether the published message is accepted or not.</returns>
         /// <seealso cref="IMqttValidator"/>
-        public async Task<bool> ValidatePublish(MqttApplicationMessageInterceptorContext context, IUserRepository userRepository, IDictionary<string, User> users, IMemoryCache dataLimitCacheMonth)
+        public bool ValidatePublish(
+            MqttApplicationMessageInterceptorContext context,
+            List<BlacklistWhitelist> blacklist,
+            List<BlacklistWhitelist> whitelist,
+            User user,
+            IMemoryCache dataLimitCacheMonth,
+            List<string> clientIdPrefixes)
         {
-            Logger.Information("Executed ValidatePublish with parameters: {context}, {users}", context, users);
+            Logger.Debug("Executed ValidatePublish with parameters: {@context}, {@user}.", context, user);
 
-            var clientIdPrefix = await GetClientIdPrefix(context.ClientId, userRepository);
+            var clientIdPrefix = GetClientIdPrefix(context.ClientId, clientIdPrefixes);
 
-            Logger.Information("Client id prefix is {clientIdPrefix}.", clientIdPrefix);
+            Logger.Debug("Client id prefix is {@clientIdPrefix}.", clientIdPrefix);
 
-            User currentUser;
-            bool userFound;
-
-            if (string.IsNullOrWhiteSpace(clientIdPrefix))
+            if (user == null)
             {
-                userFound = users.TryGetValue(context.ClientId, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-
-                Logger.Information("User was found: {userFound}, Current user was {currentUser} when client id prefix was null.", userFound, currentUser);
-            }
-            else
-            {
-                userFound = users.TryGetValue(clientIdPrefix, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-
-                Logger.Information("User was found: {userFound}, Current user was {currentUser} when client id prefix was not null.", userFound, currentUser);
-            }
-
-            if (currentUser == null)
-            {
-                Logger.Information("Current user was null.");
-            }
-
-            if (!userFound || currentUser == null)
-            {
+                Logger.Debug("Current user was null.");
                 return false;
             }
 
             var topic = context.ApplicationMessage.Topic;
 
-            Logger.Information("Topic was {topic}.", topic);
+            Logger.Debug("Topic was {@topic}.", topic);
 
-            if (currentUser.ThrottleUser)
+            if (user.ThrottleUser)
             {
                 var payload = context.ApplicationMessage?.Payload;
 
                 if (payload != null)
                 {
-                    if (currentUser.MonthlyByteLimit != null)
+                    if (user.MonthlyByteLimit != null)
                     {
-                        if (IsUserThrottled(context.ClientId, payload.Length, currentUser.MonthlyByteLimit.Value, dataLimitCacheMonth))
+                        if (IsUserThrottled(
+                            context.ClientId,
+                            payload.Length,
+                            user.MonthlyByteLimit.Value,
+                            dataLimitCacheMonth))
                         {
-                            Logger.Information("User is throttled now.");
+                            Logger.Debug("User is throttled now.");
                             return false;
                         }
                     }
                 }
             }
 
-            // Get blacklist
-            var publishBlackList = await userRepository.GetBlacklistItemsForUser(currentUser.Id, BlacklistWhitelistType.Publish);
-            var blacklist = publishBlackList?.ToList() ?? new List<BlacklistWhitelist>();
-
-            Logger.Information("The blacklist was {blacklist}.", blacklist);
-
-            // Get whitelist
-            var publishWhitelist = await userRepository.GetWhitelistItemsForUser(currentUser.Id, BlacklistWhitelistType.Publish);
-            var whitelist = publishWhitelist?.ToList() ?? new List<BlacklistWhitelist>();
-
-            Logger.Information("The whitelist was {whitelist}.", whitelist);
+            Logger.Debug("The blacklist was {@blacklist}.", blacklist);
+            Logger.Debug("The whitelist was {@whitelist}.", whitelist);
 
             // Check matches
             if (blacklist.Any(b => b.Value == topic))
             {
-                Logger.Information("The blacklist matched a topic.");
+                Logger.Debug("The blacklist matched a topic.");
                 return false;
             }
 
             if (whitelist.Any(b => b.Value == topic))
             {
-                Logger.Information("The whitelist matched a topic.");
+                Logger.Debug("The whitelist matched a topic.");
                 return true;
             }
 
@@ -210,7 +179,7 @@ namespace NetCoreMQTTExampleCluster.Validation
                     continue;
                 }
 
-                Logger.Information("The blacklist matched a topic with regex.");
+                Logger.Debug("The blacklist matched a topic with regex.");
                 return false;
             }
 
@@ -224,11 +193,11 @@ namespace NetCoreMQTTExampleCluster.Validation
                     continue;
                 }
 
-                Logger.Information("The whitelist matched a topic with regex.");
+                Logger.Debug("The whitelist matched a topic with regex.");
                 return true;
             }
 
-            Logger.Information("We fell through everything else. This should never happen!");
+            Logger.Warning("We fell through everything else. This should never happen! Context was {@context}.", context);
             return false;
         }
 
@@ -237,76 +206,47 @@ namespace NetCoreMQTTExampleCluster.Validation
         ///     Validates the subscription.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
+        /// <param name="blacklist">The blacklist.</param>
+        /// <param name="whitelist">The whitelist.</param>
+        /// <param name="user">The user.</param>
+        /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
         /// <returns>A value indicating whether the subscription is accepted or not.</returns>
         /// <seealso cref="IMqttValidator"/>
-        public async Task<bool> ValidateSubscription(MqttSubscriptionInterceptorContext context, IUserRepository userRepository, IDictionary<string, User> users)
+        public bool ValidateSubscription(
+            MqttSubscriptionInterceptorContext context,
+            List<BlacklistWhitelist> blacklist,
+            List<BlacklistWhitelist> whitelist,
+            User user,
+            List<string> clientIdPrefixes)
         {
-            Logger.Information("Executed ValidateSubscription with parameters: {context}, {users}", context, users);
+            Logger.Debug("Executed ValidateSubscription with parameters: {@context}, {@user}.", context, user);
 
-            var clientIdPrefix = await GetClientIdPrefix(context.ClientId, userRepository);
+            var clientIdPrefix = GetClientIdPrefix(context.ClientId, clientIdPrefixes);
 
-            Logger.Information("Client id prefix is {clientIdPrefix}.", clientIdPrefix);
+            Logger.Debug("Client id prefix is {@clientIdPrefix}.", clientIdPrefix);
 
-            User currentUser;
-            bool userFound;
-
-            if (string.IsNullOrWhiteSpace(clientIdPrefix))
+            if (user == null)
             {
-                userFound = users.TryGetValue(context.ClientId, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-
-                Logger.Information("User was found: {userFound}, Current user was {currentUser} when client id prefix was null.", userFound, currentUser);
-            }
-            else
-            {
-                userFound = users.TryGetValue(clientIdPrefix, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-
-                Logger.Information("User was found: {userFound}, Current user was {currentUser} when client id prefix was not null.", userFound, currentUser);
-            }
-
-            if (currentUser == null)
-            {
-                Logger.Information("Current user was null.");
-            }
-
-            if (!userFound || currentUser == null)
-            {
+                Logger.Debug("Current user was null.");
                 return false;
             }
 
             var topic = context.TopicFilter.Topic;
 
-            Logger.Information("Topic was {topic}.", topic);
-
-            // Get blacklist
-            var subscriptionBlacklist = await userRepository.GetBlacklistItemsForUser(currentUser.Id, BlacklistWhitelistType.Subscribe);
-            var blacklist = subscriptionBlacklist?.ToList() ?? new List<BlacklistWhitelist>();
-
-            Logger.Information("The blacklist was {blacklist}.", blacklist);
-
-            // Get whitelist
-            var subscriptionWhitelist = await userRepository.GetWhitelistItemsForUser(currentUser.Id, BlacklistWhitelistType.Subscribe);
-            var whitelist = subscriptionWhitelist?.ToList() ?? new List<BlacklistWhitelist>();
-
-            Logger.Information("The whitelist was {whitelist}.", whitelist);
+            Logger.Debug("Topic was {@topic}.", topic);
+            Logger.Debug("The blacklist was {@blacklist}.", blacklist);
+            Logger.Debug("The whitelist was {@whitelist}.", whitelist);
 
             // Check matches
             if (blacklist.Any(b => b.Value == topic))
             {
-                Logger.Information("The blacklist matched a topic.");
+                Logger.Debug("The blacklist matched a topic.");
                 return false;
             }
 
             if (whitelist.Any(b => b.Value == topic))
             {
-                Logger.Information("The whitelist matched a topic.");
+                Logger.Debug("The whitelist matched a topic.");
                 return true;
             }
 
@@ -320,7 +260,7 @@ namespace NetCoreMQTTExampleCluster.Validation
                     continue;
                 }
 
-                Logger.Information("The blacklist matched a topic with regex.");
+                Logger.Debug("The blacklist matched a topic with regex.");
                 return false;
             }
 
@@ -334,81 +274,29 @@ namespace NetCoreMQTTExampleCluster.Validation
                     continue;
                 }
 
-                Logger.Information("The whitelist matched a topic with regex.");
+                Logger.Debug("The whitelist matched a topic with regex.");
                 return true;
             }
 
-            Logger.Information("We fell through everything else. This should never happen!");
+            Logger.Warning(
+                "We fell through everything else. This should never happen! Context was {@context}.",
+                context);
             return false;
-        }
-
-        /// <inheritdoc cref="IMqttValidator"/>
-        /// <summary>
-        ///     Checks whether the user is a user used for synchronization.
-        /// </summary>
-        /// <param name="clientId">The client identifier.</param>
-        /// <param name="userRepository">The user repository.</param>
-        /// <param name="users">The users.</param>
-        /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-        /// <seealso cref="IMqttValidator"/>
-        public async Task<bool> IsUserBrokerUser(string clientId, IUserRepository userRepository, IDictionary<string, User> users)
-        {
-            Logger.Information("Executed IsUserBrokerUser with parameters: {clientId}, {users}", clientId, users);
-
-            var clientIdPrefix = await GetClientIdPrefix(clientId, userRepository);
-
-            Logger.Information("Client id prefix is {clientIdPrefix}.", clientIdPrefix);
-
-            User currentUser;
-            bool userFound;
-
-            if (string.IsNullOrWhiteSpace(clientIdPrefix))
-            {
-                userFound = users.TryGetValue(clientId, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-
-                Logger.Information("User was found: {userFound}, Current user was {currentUser} when client id prefix was null.", userFound, currentUser);
-            }
-            else
-            {
-                userFound = users.TryGetValue(clientIdPrefix, out var currentUserObject);
-
-                // ReSharper disable once StyleCop.SA1126
-                currentUser = currentUserObject;
-
-                Logger.Information("User was found: {userFound}, Current user was {currentUser} when client id prefix was not null.", userFound, currentUser);
-            }
-
-            if (currentUser == null)
-            {
-                Logger.Information("Current user was null.");
-            }
-
-            if (!userFound || currentUser == null)
-            {
-                return false;
-            }
-
-            return currentUser.IsSyncUser;
         }
 
         /// <summary>
         ///     Gets the client identifier prefix for a client identifier if there is one or <c>null</c> else.
         /// </summary>
         /// <param name="clientIdentifierParam">The client identifier.</param>
-        /// <param name="userRepository">The user repository.</param>
+        /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
         /// <returns>The client identifier prefix for a client identifier if there is one or <c>null</c> else.</returns>
-        private static async Task<string> GetClientIdPrefix(string clientIdentifierParam, IUserRepository userRepository)
+        private static string GetClientIdPrefix(string clientIdentifierParam, List<string> clientIdPrefixes)
         {
-            Logger.Information("The client id parameter was {clientIdentifierParam}.", clientIdentifierParam);
-
-            var clientIdPrefixes = await userRepository.GetAllClientIdPrefixes();
-            Logger.Information("The client id prefixes were {clientIdPrefixes}.", clientIdPrefixes);
+            Logger.Debug("The client id parameter was {@clientIdentifierParam}.", clientIdentifierParam);
+            Logger.Debug("The client id prefixes were {@clientIdPrefixes}.", clientIdPrefixes);
 
             var firstOrDefaultClientIdPrefix = clientIdPrefixes.FirstOrDefault(clientIdentifierParam.StartsWith);
-            Logger.Information("The first or default client id prefix was {firstOrDefaultClientIdPrefix}.", firstOrDefaultClientIdPrefix);
+            Logger.Debug("The first or default client id prefix was {@firstOrDefaultClientIdPrefix}.", firstOrDefaultClientIdPrefix);
             return firstOrDefaultClientIdPrefix;
         }
 
@@ -434,7 +322,7 @@ namespace NetCoreMQTTExampleCluster.Validation
                     return false;
                 }
 
-                Logger.Information("The client with client identifier {clientId} is now locked until the end of this month because it already used its data limit.", clientId);
+                Logger.Information("The client with client identifier {@clientId} is now locked until the end of this month because it already used its data limit.", clientId);
                 return true;
             }
 
@@ -447,14 +335,14 @@ namespace NetCoreMQTTExampleCluster.Validation
 
                 if (currentValue >= monthlyByteLimit)
                 {
-                    Logger.Information("The client with client identifier {clientId} is now locked until the end of this month because it already used its data limit.", clientId);
+                    Logger.Information("The client with client identifier {@clientId} is now locked until the end of this month because it already used its data limit.", clientId);
                     return true;
                 }
             }
             catch (OverflowException)
             {
-                Logger.Information("OverflowException thrown.");
-                Logger.Information("The client with client identifier {clientId} is now locked until the end of this month because it already used its data limit.", clientId);
+                Logger.Warning("OverflowException thrown.");
+                Logger.Information("The client with client identifier {@clientId} is now locked until the end of this month because it already used its data limit.", clientId);
                 return true;
             }
 

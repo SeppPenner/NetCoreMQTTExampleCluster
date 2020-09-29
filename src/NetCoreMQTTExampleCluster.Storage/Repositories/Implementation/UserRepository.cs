@@ -172,5 +172,39 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
             var clientIdPrefixes = await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
             return clientIdPrefixes?.ToList() ?? new List<string>();
         }
+
+        /// <summary>
+        /// Gets a <see cref="User" />'s <see cref="UserData"/> by their identifier.
+        /// </summary>
+        /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        public async Task<UserData> GetUserData(Guid userId)
+        {
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await connection.OpenAsync();
+
+            var clientIdPrefixes = await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
+            var subscriptionWhitelist = await connection.QueryAsync<BlacklistWhitelist>(
+                                            SelectStatements.SelectWhitelistItemsForUser,
+                                            new { UserId = userId, Type = BlacklistWhitelistType.Subscribe });
+            var subscriptionBlacklist = await connection.QueryAsync<BlacklistWhitelist>(
+                                            SelectStatements.SelectBlacklistItemsForUser,
+                                            new { UserId = userId, Type = BlacklistWhitelistType.Subscribe });
+            var publishWhitelist = await connection.QueryAsync<BlacklistWhitelist>(
+                                       SelectStatements.SelectWhitelistItemsForUser,
+                                       new { UserId = userId, Type = BlacklistWhitelistType.Publish });
+            var publishBlacklist = await connection.QueryAsync<BlacklistWhitelist>(
+                                       SelectStatements.SelectBlacklistItemsForUser,
+                                       new { UserId = userId, Type = BlacklistWhitelistType.Publish });
+
+            return new UserData
+            {
+                ClientIdPrefixes = clientIdPrefixes.ToList(),
+                SubscriptionWhitelist = subscriptionWhitelist.ToList(),
+                SubscriptionBlacklist = subscriptionBlacklist.ToList(),
+                PublishWhitelist = publishWhitelist.ToList(),
+                PublishBlacklist = publishBlacklist.ToList()
+            };
+        }
     }
 }

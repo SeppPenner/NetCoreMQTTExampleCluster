@@ -13,13 +13,17 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Reflection;
+    using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
-    using Newtonsoft.Json.Linq;
+    using NetCoreMQTTExampleCluster.Cluster.Configuration;
 
     using Serilog;
+    using Serilog.Events;
+    using Serilog.Exceptions;
 
     /// <summary>
     ///     The main program.
@@ -27,52 +31,83 @@ namespace NetCoreMQTTExampleCluster.Cluster
     public class Program
     {
         /// <summary>
+        /// The service name.
+        /// </summary>
+        private static readonly AssemblyName ServiceName = Assembly.GetExecutingAssembly().GetName();
+
+        /// <summary>
         ///     The main method that starts the service using Topshelf.
         /// </summary>
+        /// <param name="args">Some arguments.</param>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
         [SuppressMessage(
             "StyleCop.CSharp.DocumentationRules",
             "SA1650:ElementDocumentationMustBeSpelledCorrectly",
             Justification = "Reviewed. Suppression is OK here.")]
-        public static void Main()
+        public static async Task Main(string[] args)
         {
-            var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-#if DEBUG
-            // ReSharper disable once AssignNullToNotNullAttribute
-            var settingsFile = Path.Combine(currentLocation, "appsettings.Development.json");
-#else
-            var settingsFile = Path.Combine(currentLocation, "appsettings.json");
-#endif
-            var settingsString = File.ReadAllText(settingsFile);
-            var parsedSettings = JObject.Parse(settingsString);
-            // ReSharper disable once PossibleNullReferenceException
-            var logFolderPath = parsedSettings["LogFolderPath"].ToString();
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddJsonFile("appsettings.json", false, true);
 
-            Log.Logger = new LoggerConfiguration()
+            if (environment != null)
+            {
+                configurationBuilder.AddJsonFile($"appsettings.{environment}.json", false, true);
+            }
+
+            var configuration = configurationBuilder.Build();
+
+            var clusterConfiguration = new ClusterConfiguration();
+            configuration.Bind(ServiceName.Name, clusterConfiguration);
+            var logFolderPath = clusterConfiguration.LogFolderPath;
+
+            var loggerConfiguration = new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
                 .MinimumLevel.Debug()
-                .WriteTo.Async(a => a.Console())
-                .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.Cluster_.txt"), rollingInterval: RollingInterval.Day))
-                .CreateLogger();
+                .Enrich.FromLogContext()
+                .Enrich.WithExceptionDetails()
+                .Enrich.WithMachineName();
 
-            Log.Information("Current directory: {currentLocation}.", currentLocation);
+            if (environment != "Development")
+            {
+                loggerConfiguration
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                    .MinimumLevel.Information()
+                    .WriteTo.File(Path.Combine(logFolderPath, $@"{ServiceName.Name}_.txt"), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
+            }
+            else
+            {
+                loggerConfiguration.WriteTo.Console();
+            }
+
+            Log.Logger = loggerConfiguration.CreateLogger();
 
             try
             {
+                Log.Information("Starting MQTT broker cluster instance...");
+
                 var host = Host
-                    .CreateDefaultBuilder()
+                    .CreateDefaultBuilder(args)
+                    .ConfigureServices(services =>
+                    {
+                        services.AddSingleton(clusterConfiguration);
+                        services.AddHostedService<MqttService>();
+                    })
+                    .UseSerilog()
                     .UseWindowsService()
                     .UseSystemd()
                     .Build();
 
-                var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
-                var mqttService = new MqttService(currentLocation, lifeTimeService);
-                lifeTimeService.ApplicationStopped.Register(() => { mqttService.Dispose(); });
-                 mqttService.Start();
-                host.Run();
+                await host.RunAsync();
             }
             catch (Exception ex)
             {
-                Log.Error("An error occured: {ex}.", ex);
+                Log.Fatal("An error occurred: {@ex}.", ex);
+            }
+            finally
+            {
+                Log.CloseAndFlush();
             }
         }
     }

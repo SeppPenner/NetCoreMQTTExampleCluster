@@ -223,5 +223,16 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests.Helper
             await Task.Delay(1);
             return this.users.Select(u => u.ClientIdPrefix ?? string.Empty).ToList();
         }
+
+        /// <summary>
+        /// Gets a <see cref="User" />'s <see cref="UserData"/> by their identifier.
+        /// </summary>
+        /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        public async Task<UserData> GetUserData(Guid userId)
+        {
+            await Task.Delay(1);
+            return new UserData();
+        }
     }
 }

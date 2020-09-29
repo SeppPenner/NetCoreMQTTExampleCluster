@@ -85,5 +85,20 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
             var result = await connection.ExecuteAsync(InsertStatements.InsertEventLog, eventLog);
             return result == 1;
         }
+
+        /// <inheritdoc cref="IEventLogRepository" />
+        /// <summary>
+        ///     Inserts a <see cref="List{T}"/> of <see cref="EventLog" />s to the database.
+        /// </summary>
+        /// <param name="eventLogs">The <see cref="List{T}"/> of<see cref="EventLog" />s to insert.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        /// <seealso cref="IEventLogRepository" />
+        public async Task<bool> InsertEventLogs(List<EventLog> eventLogs)
+        {
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await connection.OpenAsync();
+            var result = await connection.ExecuteAsync(InsertStatements.InsertEventLog, eventLogs);
+            return result == 1;
+        }
     }
 }

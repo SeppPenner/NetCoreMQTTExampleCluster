@@ -12,14 +12,26 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     using System;
     using System.IO;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
-    using Newtonsoft.Json.Linq;
+    using NetCoreMQTTExampleCluster.Grains;
+    using NetCoreMQTTExampleCluster.SiloHost.Configuration;
+    using NetCoreMQTTExampleCluster.SiloHost.Extensions;
+    using NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
+    using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;
+    using NetCoreMQTTExampleCluster.Validation;
+
+    using Orleans;
+    using Orleans.Configuration;
+    using Orleans.Hosting;
 
     using Serilog;
+    using Serilog.Events;
+    using Serilog.Exceptions;
 
     /// <summary>
     /// A class that contains the main program.
@@ -27,59 +39,161 @@ namespace NetCoreMQTTExampleCluster.SiloHost
     public class Program
     {
         /// <summary>
+        /// The invariant.
+        /// </summary>
+        private const string Invariant = "Npgsql";
+
+        /// <summary>
+        /// The service name.
+        /// </summary>
+        private static readonly AssemblyName ServiceName = Assembly.GetExecutingAssembly().GetName();
+
+        /// <summary>
         /// The main method.
         /// </summary>
-        public static void Main()
+        /// <param name="args">Some arguments.</param>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        public static async Task Main(string[] args)
         {
-            var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-#if DEBUG
-            // ReSharper disable once AssignNullToNotNullAttribute
-            var settingsFile = Path.Combine(currentLocation, "appsettings.Development.json");
-#else
-            var settingsFile = Path.Combine(currentLocation, "appsettings.json");
-#endif
-            var settingsString = File.ReadAllText(settingsFile);
-            var parsedSettings = JObject.Parse(settingsString);
-            // ReSharper disable once PossibleNullReferenceException
-            var logFolderPath = parsedSettings["LogFolderPath"].ToString();
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Async(a => a.Console())
-                .WriteTo.Async(a => a.File(Path.Combine(logFolderPath, @"NetCoreMQTTExampleCluster.SiloHost_.txt"), rollingInterval: RollingInterval.Day))
-                .CreateLogger();
-
-            Log.Information("Current directory: {currentLocation}.", currentLocation);
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddJsonFile("appsettings.json", false, true);
 
-#if DEBUG
-            configurationBuilder.AddMqttConfig("appsettings.Development.json");
-#else
-            configurationBuilder.AddMqttConfig("appsettings.json");
-#endif
+            if (environment != null)
+            {
+                configurationBuilder.AddJsonFile($"appsettings.{environment}.json", false, true);
+            }
 
             var configuration = configurationBuilder.Build();
 
+            var siloHostConfiguration = new SiloHostConfiguration();
+            configuration.Bind(ServiceName.Name, siloHostConfiguration);
+            var logFolderPath = siloHostConfiguration.LogFolderPath;
+
+            var loggerConfiguration = new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
+                .Enrich.WithExceptionDetails()
+                .Enrich.WithMachineName();
+
+            if (environment != "Development")
+            {
+                loggerConfiguration
+                    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                    .MinimumLevel.Information()
+                    .WriteTo.File(Path.Combine(logFolderPath, $@"{ServiceName.Name}_.txt"), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
+            }
+            else
+            {
+                loggerConfiguration.WriteTo.Console();
+            }
+
+            Log.Logger = loggerConfiguration.CreateLogger();
+
             try
             {
+                Log.Information($"{ServiceName.Name}, Version {ServiceName.Version}");
+                Log.Information("Starting MQTT broker silo host instance...");
+
                 var host = Host
-                    .CreateDefaultBuilder()
+                    .CreateDefaultBuilder(args)
+                    .UseOrleans(
+                        (context, builder) =>
+                        {
+                            ConfigureOrleans(builder, siloHostConfiguration);
+                        })
+                    .ConfigureServices(
+                        services =>
+                        {
+                            services.AddSingleton(siloHostConfiguration);
+                            services.AddHostedService<SiloHostService>();
+                        })
+                    .UseSerilog()
                     .UseWindowsService()
                     .UseSystemd()
                     .Build();
 
-                var lifeTimeService = host.Services.GetRequiredService<IHostApplicationLifetime>();
-                var siloHostService = new SiloHostServiceMain(configuration, lifeTimeService);
-                lifeTimeService.ApplicationStopped.Register(() => { siloHostService.Dispose(); });
-                siloHostService.Start();
-                host.Run();
+                await host.RunAsync();
             }
             catch (Exception ex)
             {
-                Log.Error("An error occured: {ex}.", ex);
+                Log.Fatal("An error occurred: {@ex}.", ex);
             }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+        }
+
+        /// <summary>
+        /// Configures the Orleans silo host startup.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="siloHostConfiguration">The silo host configuration.</param>
+        private static void ConfigureOrleans(ISiloBuilder builder, SiloHostConfiguration siloHostConfiguration)
+        {
+            var databaseSettings = siloHostConfiguration.DatabaseSettings;
+            var orleansConfiguration = siloHostConfiguration.OrleansConfiguration;
+            var clusterOptions = orleansConfiguration.ClusterOptions;
+
+            builder.ConfigureServices(
+                s =>
+                {
+                    s.AddSingleton<IEventLogRepository>(r => new EventLogRepository(databaseSettings));
+                    s.AddSingleton<IBlacklistRepository>(u => new BlacklistRepository(databaseSettings));
+                    s.AddSingleton<IDatabaseVersionRepository>(u => new DatabaseVersionRepository(databaseSettings));
+                    s.AddSingleton<IPublishMessageRepository>(a => new PublishMessageRepository(databaseSettings));
+                    s.AddSingleton<IUserRepository>(u => new UserRepository(databaseSettings));
+                    s.AddSingleton<IWhitelistRepository>(u => new WhitelistRepository(databaseSettings));
+                    s.AddSingleton<IMqttValidator>(new MqttValidator());
+                });
+
+            builder.UseAdoNetClustering(
+                options =>
+                {
+                    options.Invariant = Invariant;
+                    options.ConnectionString = databaseSettings.ToConnectionString();
+                });
+
+            builder.UseAdoNetReminderService(
+                options =>
+                {
+                    options.Invariant = Invariant;
+                    options.ConnectionString = databaseSettings.ToConnectionString();
+                });
+
+            builder.Configure<ClusterOptions>(
+                options =>
+                {
+                    options.ClusterId = clusterOptions.ClusterId;
+                    options.ServiceId = clusterOptions.ServiceId;
+                });
+
+            builder.Configure<EndpointOptions>(
+                options =>
+                {
+                    var endpointOptions = orleansConfiguration.EndpointOptions;
+                    endpointOptions.Bind(options);
+                });
+
+            builder.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(MqttRepositoryGrain).Assembly).WithReferences());
+
+            builder.ConfigureLogging(
+                logging =>
+                {
+                    logging.AddSerilog();
+                });
+
+            builder.UseDashboard(
+                options =>
+                {
+                    options.Bind(orleansConfiguration.DashboardOptions);
+                });
+
+            builder.AddSimpleMessageStreamProvider("SMSProvider");
+            builder.AddMemoryGrainStorage("PubSubStore");
         }
     }
 }

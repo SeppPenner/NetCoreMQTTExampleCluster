@@ -43,6 +43,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         public PublishMessageRepository(MqttDatabaseConnectionSettings connectionSettings)
         {
             this.connectionSettings = connectionSettings;
+            SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
         }
 
         /// <inheritdoc cref="IPublishMessageRepository" />
@@ -53,7 +54,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <seealso cref="IPublishMessageRepository" />
         public async Task<List<PublishMessage>> GetPublishMessages()
         {
-            SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             var publishMessages = await connection.QueryAsync<PublishMessage>(SelectStatements.SelectAllPublishMessages);
@@ -69,7 +69,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <seealso cref="IPublishMessageRepository" />
         public async Task<PublishMessage> GetPublishMessageById(Guid publishMessageId)
         {
-            SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             return await connection.QueryFirstOrDefaultAsync<PublishMessage>(SelectStatements.SelectPublishMessageById, new { Id = publishMessageId });
@@ -84,10 +83,24 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation
         /// <seealso cref="IPublishMessageRepository" />
         public async Task<bool> InsertPublishMessage(PublishMessage publishMessage)
         {
-            SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
             await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
             await connection.OpenAsync();
             var result = await connection.ExecuteAsync(InsertStatements.InsertPublishMessage, publishMessage);
+            return result == 1;
+        }
+
+        /// <inheritdoc cref="IPublishMessageRepository" />
+        /// <summary>
+        ///     Inserts a <see cref="List{T}"/> of <see cref="PublishMessage" />s to the database.
+        /// </summary>
+        /// <param name="publishMessages">The <see cref="List{T}"/> of <see cref="PublishMessage" />s to insert.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        /// <seealso cref="IPublishMessageRepository" />
+        public async Task<bool> InsertPublishMessages(List<PublishMessage> publishMessages)
+        {
+            await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+            await connection.OpenAsync();
+            var result = await connection.ExecuteAsync(InsertStatements.InsertPublishMessage, publishMessages);
             return result == 1;
         }
     }

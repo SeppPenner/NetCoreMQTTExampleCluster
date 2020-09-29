@@ -39,5 +39,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// <param name="eventLog">The <see cref="EventLog" /> to insert.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         Task<bool> InsertEventLog(EventLog eventLog);
+
+        /// <summary>
+        ///     Inserts a <see cref="List{T}"/> of <see cref="EventLog" />s to the database.
+        /// </summary>
+        /// <param name="eventLogs">The <see cref="List{T}"/> of<see cref="EventLog" />s to insert.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        Task<bool> InsertEventLogs(List<EventLog> eventLogs);
     }
 }

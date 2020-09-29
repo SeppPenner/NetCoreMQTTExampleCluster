@@ -106,6 +106,7 @@ namespace NetCoreMQTTExampleCluster.Storage.Statements
                 throttleuser                            BOOLEAN         DEFAULT false,
                 monthlybytelimit                        BIGINT          NULL,
                 issyncuser                              BOOL            DEFAULT false,
+                description                             TEXT            NULL,
                 createdat                               TIMESTAMPTZ     DEFAULT now() NOT NULL,
                 updatedat                               TIMESTAMPTZ     NULL,
                 deletedat                               TIMESTAMPTZ     NULL

@@ -84,5 +84,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         Task<List<string>> GetAllClientIdPrefixes();
+
+        /// <summary>
+        /// Gets a <see cref="User" />'s <see cref="UserData"/> by their identifier.
+        /// </summary>
+        /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        Task<UserData> GetUserData(Guid userId);
     }
 }

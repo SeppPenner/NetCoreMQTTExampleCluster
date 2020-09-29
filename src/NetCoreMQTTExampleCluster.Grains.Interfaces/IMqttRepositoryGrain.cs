@@ -27,13 +27,15 @@ namespace NetCoreMQTTExampleCluster.Grains.Interfaces
         /// </summary>
         /// <param name="brokerConnectionSettings">The broker connection settings.</param>
         /// <param name="brokerId">The broker identifier.</param>
-        void ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId);
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        Task ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId);
 
         /// <summary>
         /// Disconnects the broker from the grain.
         /// </summary>
         /// <param name="brokerId">The broker identifier.</param>
-        void DisconnectBroker(Guid brokerId);
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        Task DisconnectBroker(Guid brokerId);
 
         /// <summary>
         /// Proceeds the subscription.
@@ -53,12 +55,10 @@ namespace NetCoreMQTTExampleCluster.Grains.Interfaces
         /// <summary>
         /// Proceeds the unsubscription for one client identifier.
         /// </summary>
-        /// <param name="eventArgs">
-        /// The event args.
-        /// </param>
+        /// <param name="context">The context.</param>
         /// <returns>A <see cref="Task"/> returning any asynchronous operation.</returns>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
-        Task ProceedUnsubscription(MqttServerClientUnsubscribedTopicEventArgs eventArgs);
+        Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context);
 
         /// <summary>
         /// Proceeds the connection for one client identifier.

@@ -13,6 +13,7 @@ namespace NetCoreMQTTExampleCluster.Grains
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -35,7 +36,6 @@ namespace NetCoreMQTTExampleCluster.Grains
     ///     The grain for a repository to manage the brokers.
     /// </summary>
     /// <seealso cref="IMqttRepositoryGrain" />
-    [StatelessWorker(1)]
     [Reentrant]
     public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     {
@@ -50,14 +50,24 @@ namespace NetCoreMQTTExampleCluster.Grains
         private readonly IDictionary<Guid, IBrokerConnectionSettings> brokers = new ConcurrentDictionary<Guid, IBrokerConnectionSettings>();
 
         /// <summary>
-        ///     The logger.
+        /// The event log queue.
         /// </summary>
-        private readonly ILogger logger;
+        private readonly ConcurrentQueue<EventLog> eventLogQueue = new ConcurrentQueue<EventLog>();
+
+        /// <summary>
+        /// The publish message queue.
+        /// </summary>
+        private readonly ConcurrentQueue<PublishMessage> publishMessageQueue = new ConcurrentQueue<PublishMessage>();
 
         /// <summary>
         ///     The publish message repository.
         /// </summary>
         private readonly IPublishMessageRepository publishMessageRepository;
+
+        /// <summary>
+        ///     The logger.
+        /// </summary>
+        private ILogger logger;
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
@@ -74,33 +84,67 @@ namespace NetCoreMQTTExampleCluster.Grains
             this.publishMessageRepository = publishMessageRepository;
         }
 
+        /// <inheritdoc cref="Grain" />
+        /// <summary>
+        ///     This method is called at the end of the process of activating a grain.
+        ///     It is called before any messages have been dispatched to the grain.
+        ///     For grains with declared persistent state, this method is called after the State property has been populated.
+        /// </summary>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        /// <seealso cref="Grain" />
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
+        public override Task OnActivateAsync()
+        {
+            this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
+            this.RegisterTimer(this.OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
+            return base.OnActivateAsync();
+        }
+
+        /// <summary>
+        /// This method is called at the beginning of the process of deactivating a grain.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        public override async Task OnDeactivateAsync()
+        {
+            await this.OnTimer(null);
+            await base.OnDeactivateAsync();
+        }
+
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
         ///     Connects a broker to the grain.
         /// </summary>
         /// <param name="brokerConnectionSettings">The broker connection settings.</param>
         /// <param name="brokerId">The broker identifier.</param>
+        /// <exception cref="ArgumentNullException">Thrown when the broker connection settings or the broker identifier is <c>null</c>.</exception>
         /// <seealso cref="IMqttRepositoryGrain" />
-        public async void ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId)
+        public Task ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId)
         {
-            try
+            if (brokerConnectionSettings == null)
             {
-                // Save connect to the database
-                var eventLog = new EventLog
-                {
-                    EventType = EventType.BrokerConnect,
-                    EventDetails = $"New broker connected: BrokerId = {brokerId}."
-                };
-
-                await this.eventLogRepository.InsertEventLog(eventLog);
-
-                // Add to dictionary
-                this.brokers[brokerId] = brokerConnectionSettings;
+#pragma warning disable IDE0016 // throw-Ausdruck verwenden
+                throw new ArgumentNullException(nameof(brokerConnectionSettings));
+#pragma warning restore IDE0016 // throw-Ausdruck verwenden
             }
-            catch (Exception ex)
+
+            if (brokerId == null)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                throw new ArgumentNullException(nameof(brokerId));
             }
+
+            // Save connect to the database
+            var eventLog = new EventLog
+            {
+                EventType = EventType.BrokerConnect,
+                EventDetails = $"New broker connected: BrokerId = {brokerId}."
+            };
+
+            this.eventLogQueue.Enqueue(eventLog);
+
+            // Add to dictionary
+            this.brokers[brokerId] = brokerConnectionSettings;
+
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
@@ -110,26 +154,26 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="brokerId">The broker identifier.</param>
         /// <seealso cref="IMqttRepositoryGrain" />
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
-        public async void DisconnectBroker(Guid brokerId)
+        public Task DisconnectBroker(Guid brokerId)
         {
-            try
+            if (brokerId == null)
             {
-                // Save disconnect to the database
-                var eventLog = new EventLog
-                {
-                    EventType = EventType.BrokerDisconnect,
-                    EventDetails = $"Broker disconnected: BrokerId = {brokerId}."
-                };
-
-                await this.eventLogRepository.InsertEventLog(eventLog);
-
-                // Remove from broker list
-                this.brokers.Remove(brokerId);
+                throw new ArgumentNullException(nameof(brokerId));
             }
-            catch (Exception ex)
+
+            // Save disconnect to the database
+            var eventLog = new EventLog
             {
-                this.logger.Error("An error occured: {ex}.", ex);
-            }
+                EventType = EventType.BrokerDisconnect,
+                EventDetails = $"Broker disconnected: BrokerId = {brokerId}."
+            };
+
+            this.eventLogQueue.Enqueue(eventLog);
+
+            // Remove from broker list
+            this.brokers.Remove(brokerId);
+
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
@@ -159,12 +203,12 @@ namespace NetCoreMQTTExampleCluster.Grains
                     EventDetails = $"New connection: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}," + $" Username = {context.UserName}, Password = {context.Password}," + $" CleanSession = {context.CleanSession}."
                 };
 
-                await this.eventLogRepository.InsertEventLog(eventLog);
+                this.eventLogQueue.Enqueue(eventLog);
                 return true;
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                this.logger.Error("An error occurred: {@ex}.", ex);
                 return false;
             }
         }
@@ -176,32 +220,28 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="eventArgs">The event args.</param>
         /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
-        public async Task ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
+        public Task ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
         {
-            try
+            if (eventArgs == null)
             {
-                if (eventArgs == null)
-                {
-                    return;
-                }
-
-                // Save disconnect to the database
-                var eventLog = new EventLog
-                {
-                    EventType = EventType.Disconnect,
-                    EventDetails = $"Disconnected: ClientId = {eventArgs.ClientId}, DisconnectType = {eventArgs.DisconnectType}."
-                };
-
-                await this.eventLogRepository.InsertEventLog(eventLog);
-
-                // Handle disconnect in grain
-                var mqttClientGrain = this.GrainFactory.GetGrain<IMqttClientGrain>(eventArgs.ClientId);
-                mqttClientGrain.ProceedDisconnect(eventArgs);
+                throw new ArgumentNullException(nameof(eventArgs));
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrWhiteSpace(eventArgs.ClientId))
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                throw new ArgumentNullException(nameof(eventArgs.ClientId));
             }
+
+            // Save disconnect to the database
+            var eventLog = new EventLog
+            {
+                EventType = EventType.Disconnect,
+                EventDetails = $"Disconnected: ClientId = {eventArgs.ClientId}, DisconnectType = {eventArgs.DisconnectType}."
+            };
+
+            this.eventLogQueue.Enqueue(eventLog);
+
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
@@ -213,6 +253,7 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <returns>A value indicating whether the published message is accepted or not.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
+        [AlwaysInterleave]
         public async Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context, Guid brokerId)
         {
             try
@@ -238,22 +279,21 @@ namespace NetCoreMQTTExampleCluster.Grains
                     Retain = context.ApplicationMessage?.Retain
                 };
 
-                await this.publishMessageRepository.InsertPublishMessage(publishMessage);
+                this.publishMessageQueue.Enqueue(publishMessage);
 
                 // Publish messages to the broker if the publishing user is not the synchronization user
-                var isUserBrokerUser = await mqttClientGrain.IsUserBrokerUser(context.ClientId);
+                var isUserBrokerUser = await mqttClientGrain.IsUserBrokerUser();
 
                 if (!isUserBrokerUser)
                 {
-                    // ReSharper disable once AssignmentIsFullyDiscarded
-                    _ = this.PublishMessageToBrokers(context, brokerId);
+                    this.PublishMessageToBrokers(context, brokerId).Ignore();
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                this.logger.Error("An error occurred: {@ex}.", ex);
                 return false;
             }
         }
@@ -285,12 +325,12 @@ namespace NetCoreMQTTExampleCluster.Grains
                     EventDetails = $"New subscription: ClientId = {context.ClientId}, TopicFilter = {context.TopicFilter}."
                 };
 
-                await this.eventLogRepository.InsertEventLog(eventLog);
+                this.eventLogQueue.Enqueue(eventLog);
                 return true;
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                this.logger.Error("An error occurred: {@ex}.", ex);
                 return false;
             }
         }
@@ -299,34 +339,37 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <summary>
         ///     Proceeds the unsubscription for one client identifier.
         /// </summary>
-        /// <param name="eventArgs">
-        ///     The event args.
-        /// </param>
+        /// <param name="context">The context.</param>
         /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
-        public async Task ProceedUnsubscription(MqttServerClientUnsubscribedTopicEventArgs eventArgs)
+        public Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context)
         {
-            try
+            if (context == null)
             {
-                if (eventArgs == null)
-                {
-                    return;
-                }
-
-                // Save unsubscription to the database
-                var eventLog = new EventLog
-                {
-                    EventType = EventType.Unsubscription,
-                    EventDetails = $"Unsubscription: ClientId = {eventArgs.ClientId}, TopicFilter = {eventArgs.TopicFilter}."
-                };
-
-                await this.eventLogRepository.InsertEventLog(eventLog);
+                throw new ArgumentNullException(nameof(context));
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrWhiteSpace(context.ClientId))
             {
-                this.logger.Error("An error occured: {ex}.", ex);
+                throw new ArgumentNullException(nameof(context.ClientId));
             }
+
+            if (string.IsNullOrWhiteSpace(context.Topic))
+            {
+                throw new ArgumentNullException(nameof(context.Topic));
+            }
+
+            // Save unsubscription to the database
+            var eventLog = new EventLog
+            {
+                EventType = EventType.Unsubscription,
+                EventDetails = $"Unsubscription: ClientId = {context.ClientId}, Topic = {context.Topic}."
+            };
+
+            this.eventLogQueue.Enqueue(eventLog);
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -377,15 +420,68 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
         private async Task PublishMessageToBrokers(MqttApplicationMessageInterceptorContext context, Guid brokerId)
         {
-            foreach (var (key, settings) in this.brokers)
-            {
-                if (key == brokerId)
-                {
-                    continue;
-                }
+            var tasks = this.brokers
+                .Where(kvp => kvp.Key != brokerId)
+                .Select(b => PublishMessageToBroker(context, b.Value));
 
-                await PublishMessageToBroker(context, settings);
+            await Task.WhenAll(tasks);
+        }
+
+        /// <summary>
+        /// Runs the timer function and writes the data to the database.
+        /// </summary>
+        /// <param name="state">The state object.</param>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        private async Task OnTimer(object state)
+        {
+            try
+            {
+                this.logger.Information(
+                    "Periodic persisting started, publish message queue size is {@publishMessageQueueCount}, event log queue size is {@eventLogQueueCount}.",
+                    this.publishMessageQueue.Count,
+                    this.eventLogQueue.Count);
+                await this.StoreEventLogs();
+                await this.StorePublishMessages();
+                this.logger.Information("Periodic persisting finished.");
             }
+            catch (Exception ex)
+            {
+                this.logger.Error("An error occurred: {@ex}.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Stores the event logs from the queue to the database.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
+        private async Task StoreEventLogs()
+        {
+            var eventLogs = new List<EventLog>();
+
+            while (this.eventLogQueue.TryDequeue(out var eventLog))
+            {
+                eventLogs.Add(eventLog);
+            }
+
+            await this.eventLogRepository.InsertEventLogs(eventLogs);
+        }
+
+        /// <summary>
+        /// Stores the publish messages from the queue to the database.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
+        private async Task StorePublishMessages()
+        {
+            var publishMessages = new List<PublishMessage>();
+
+            while (this.publishMessageQueue.TryDequeue(out var publishMessage))
+            {
+                publishMessages.Add(publishMessage);
+            }
+
+            await this.publishMessageRepository.InsertPublishMessages(publishMessages);
         }
     }
 }

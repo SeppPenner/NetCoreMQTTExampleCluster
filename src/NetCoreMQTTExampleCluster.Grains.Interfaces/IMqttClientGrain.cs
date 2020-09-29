@@ -42,16 +42,16 @@ namespace NetCoreMQTTExampleCluster.Grains.Interfaces
         Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context);
 
         /// <summary>
-        /// Proceeds the disconnection message for one client identifier.
-        /// </summary>
-        /// <param name="eventArgs">The event args.</param>
-        void ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs);
-
-        /// <summary>
         /// Checks whether the user is a user used for synchronization.
         /// </summary>
-        /// <param name="clientId">The client identifier.</param>
         /// <returns>A value indicating whether the user is a broker user or not.</returns>
-        Task<bool> IsUserBrokerUser(string clientId);
+        Task<bool> IsUserBrokerUser();
+
+        /// <summary>
+        /// Tells the grain to refresh its cache.
+        /// </summary>
+        /// <param name="force">Forces a cache update.</param>
+        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        Task RefreshCache(bool force);
     }
 }

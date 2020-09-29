@@ -65,6 +65,11 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         public bool IsSyncUser { get; set; }
 
         /// <summary>
+        /// Gets or sets the description.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
         ///     Gets or sets the created at timestamp.
         /// </summary>
         public DateTimeOffset CreatedAt { get; set; }

@@ -39,5 +39,12 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// <param name="publishMessage">The <see cref="PublishMessage" /> to insert.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         Task<bool> InsertPublishMessage(PublishMessage publishMessage);
+
+        /// <summary>
+        ///     Inserts a <see cref="List{T}"/> of <see cref="PublishMessage" />s to the database.
+        /// </summary>
+        /// <param name="publishMessages">The <see cref="List{T}"/> of <see cref="PublishMessage" />s to insert.</param>
+        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+        Task<bool> InsertPublishMessages(List<PublishMessage> publishMessages);
     }
 }
