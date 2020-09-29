@@ -61,6 +61,7 @@ To do this, change the file `appsettings.json`.
 |`LogFolderPath`|The folder the service logs to.|No|
 |`Port`|The encrypted port of the MQTT cluster client.|No|
 |`UnencryptedPort`|The unencrypted port of the MQTT cluster client. (This should only be used locally).|Yes|
+|`HeartbeatIntervalInMilliseconds`|The heartbeat interval.|No|
 |`BrokerConnectionSettings`|The connection that the SiloHost establishes to the broker if a message is published by another MQTT cluster client.|No|
 |`BrokerConnectionSettings.ClientId`|The ClientId of the connection.|No|
 |`BrokerConnectionSettings.HostName`|The host name of the connection.|No|
@@ -144,27 +145,28 @@ To do this, change the file `appsettings.json`.
 |Setting|Description|Optional|
 |-|-|-|
 |`LogFolderPath`|The folder the service logs to.|No|
+|`HeartbeatIntervalInMilliseconds`|The heartbeat interval.|No|
 |`Database`|The database connection settings.|No|
 |`Database.Host`|The host of the database connection.|No|
 |`Database.Database`|The database of the database connection.|No|
 |`Database.Username`|The user name of the database connection.|No|
 |`Database.Password`|The password of the database connection.|No|
 |`Database.Port`|The port of the database connection.|No|
-|`Orleans`|The configuration of the Orleans SiloHost.|No|
-|`Orleans.ClusterOptions`|The cluster configuration of the Orleans-SiloHost.|No|
-|`Orleans.ClusterOptions.ClusterId`|The CluserId of the Orleans-SiloHost.|No|
-|`Orleans.ClusterOptions.ServiceId`|The ServiceId of the Orleans-SiloHost.|No|
-|`Orleans.DashboardOptions`|The configuration of the Orleans dashboard of the Orleans SiloHost.|No|
-|`Orleans.DashboardOptions.CounterUpdateIntervalMs`|The update interval of the Orleans dashboard.|No|
-|`Orleans.DashboardOptions.Port`|The port of the Orleans dashboard.|No|
-|`Orleans.EndpointOptions`|The endpoint configuration of the Orleans SiloHost.|No|
-|`Orleans.EndpointOptions.AdvertisedIPAddress`|The Orleans SiloHost IP address.|No|
-|`Orleans.EndpointOptions.SiloPort`|The Orleans SiloHost port.|No|
-|`Orleans.EndpointOptions.GatewayPort`|The port of the Orleans SiloHost gateway.|No|
-|`Orleans.EndpointOptions.SiloListeningEndpointAddress`|The Orleans SiloHost IP address.|No|
-|`Orleans.EndpointOptions.SiloListeningEndpointPort`|The Port des Orleans-SiloHost.|No|
-|`Orleans.EndpointOptions.GatewayListeningEndpointAddress`|The IP address of the Orleans SiloHost gateway.|No|
-|`Orleans.EndpointOptions.GatewayListeningEndpointPort`|The port of the Orleans SiloHost gateway.|No|
+|`OrleansConfiguration`|The configuration of the Orleans SiloHost.|No|
+|`OrleansConfiguration.ClusterOptions`|The cluster configuration of the Orleans-SiloHost.|No|
+|`OrleansConfiguration.ClusterOptions.ClusterId`|The CluserId of the Orleans-SiloHost.|No|
+|`OrleansConfiguration.ClusterOptions.ServiceId`|The ServiceId of the Orleans-SiloHost.|No|
+|`OrleansConfiguration.DashboardOptions`|The configuration of the Orleans dashboard of the Orleans SiloHost.|No|
+|`OrleansConfiguration.DashboardOptions.CounterUpdateIntervalMs`|The update interval of the Orleans dashboard.|No|
+|`OrleansConfiguration.DashboardOptions.Port`|The port of the Orleans dashboard.|No|
+|`OrleansConfiguration.EndpointOptions`|The endpoint configuration of the Orleans SiloHost.|No|
+|`OrleansConfiguration.EndpointOptions.AdvertisedIPAddress`|The Orleans SiloHost IP address.|No|
+|`OrleansConfiguration.EndpointOptions.SiloPort`|The Orleans SiloHost port.|No|
+|`OrleansConfiguration.EndpointOptions.GatewayPort`|The port of the Orleans SiloHost gateway.|No|
+|`OrleansConfiguration.EndpointOptions.SiloListeningEndpointAddress`|The Orleans SiloHost IP address.|No|
+|`OrleansConfiguration.EndpointOptions.SiloListeningEndpointPort`|The Port des Orleans-SiloHost.|No|
+|`OrleansConfiguration.EndpointOptions.GatewayListeningEndpointAddress`|The IP address of the Orleans SiloHost gateway.|No|
+|`OrleansConfiguration.EndpointOptions.GatewayListeningEndpointPort`|The port of the Orleans SiloHost gateway.|No|
 
 Example:
 
