@@ -257,7 +257,7 @@ The MQTT client passes the `MqttSubscriptionInterceptorContext` to the MQTT brok
 
 ![](images/client-unsubscribe.svg)
 
-The MQTT client passes the `MqttServerClientUnsubscribedTopicEventArgs` to the MQTT broker. The broker passes this on to the SiloHost. In this case, the SiloHost does not have to do anything else.
+The MQTT client passes the `MqttUnsubscriptionInterceptorContext` to the MQTT broker. The broker passes this on to the SiloHost. In this case, the SiloHost does not have to do anything else.
 
 ## Client publish
 

@@ -2,8 +2,8 @@
 
 skinparam componentStyle uml2
 
-file "Unsubscribe(MqttServerClientUnsubscribedTopicEventArgs)" as UnsubscribePackage
-file "MqttServerClientUnsubscribedTopicEventArgs" as UnsubscribePackage2
+file "Unsubscribe(MqttUnsubscriptionInterceptorContext)" as UnsubscribePackage
+file "MqttUnsubscriptionInterceptorContext" as UnsubscribePackage2
 
 frame SiloHost {
 }
