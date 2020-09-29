@@ -84,29 +84,32 @@ Example:
 
 ```json
 {
-  "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.Cluster",
-  "Port": 8883,
-  "UnencryptedPort": 1883,
-  "BrokerConnectionSettings": {
-    "ClientId": "mqtt-broker-sync-1",
-    "HostName": "localhost",
+  "NetCoreMQTTExampleCluster.Cluster": {
+    "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.Cluster",
+    "HeartbeatIntervalInMilliseconds": 30000,
     "Port": 8883,
-    "Password": "Test",
-    "UserName": "mqtt-broker-sync",
-    "UseTls": true,
-    "UseCleanSession": true
-  },
-  "DatabaseSettings": {
-    "Host": "localhost",
-    "Database": "mqtt",
-    "Username": "postgres",
-    "Password": "postgres",
-    "Port": 5432
-  },
-  "OrleansConfiguration": {
-    "ClusterOptions": {
-      "ClusterId": "mqtt001",
-      "ServiceId": "mqtt-silo-001-A"
+    "UnencryptedPort": 1883,
+    "BrokerConnectionSettings": {
+      "ClientId": "mqtt-broker-sync-1",
+      "HostName": "localhost",
+      "Port": 8883,
+      "Password": "Test",
+      "UserName": "mqtt-broker-sync",
+      "UseTls": true,
+      "UseCleanSession": true
+    },
+    "DatabaseSettings": {
+      "Host": "localhost",
+      "Database": "mqtt",
+      "Username": "postgres",
+      "Password": "postgres",
+      "Port": 5432
+    },
+    "OrleansConfiguration": {
+      "ClusterOptions": {
+        "ClusterId": "mqtt001",
+        "ServiceId": "mqtt-silo-001-A"
+      }
     }
   }
 }
@@ -172,31 +175,34 @@ Example:
 
 ```json
 {
-  "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.SiloHost",
-  "Database": {
-    "Host": "localhost",
-    "Database": "mqtt",
-    "Username": "postgres",
-    "Password": "postgres",
-    "Port": 5432
-  },
-  "Orleans": {
-    "ClusterOptions": {
-      "ClusterId": "mqtt001",
-      "ServiceId": "mqtt-silo-001-A"
+  "NetCoreMQTTExampleCluster.SiloHost": {
+    "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.SiloHost",
+    "HeartbeatIntervalInMilliseconds": 30000,
+    "DatabaseSettings": {
+      "Host": "localhost",
+      "Database": "mqtt",
+      "Username": "postgres",
+      "Password": "postgres",
+      "Port": 5432
     },
-    "DashboardOptions": {
-      "CounterUpdateIntervalMs": 1000,
-      "Port": 4321
-    },
-    "EndpointOptions": {
-      "AdvertisedIPAddress": "127.0.0.1",
-      "SiloPort": 7101,
-      "GatewayPort": 7102,
-      "SiloListeningEndpointAddress": "127.0.0.1",
-      "SiloListeningEndpointPort": 7101,
-      "GatewayListeningEndpointAddress": "127.0.0.1",
-      "GatewayListeningEndpointPort": 7102
+    "OrleansConfiguration": {
+      "ClusterOptions": {
+        "ClusterId": "mqtt001",
+        "ServiceId": "mqtt-silo-001-A"
+      },
+      "DashboardOptions": {
+        "CounterUpdateIntervalMs": 1000,
+        "Port": 4321
+      },
+      "EndpointOptions": {
+        "AdvertisedIPAddress": "127.0.0.1",
+        "SiloPort": 7101,
+        "GatewayPort": 7102,
+        "SiloListeningEndpointAddress": "127.0.0.1",
+        "SiloListeningEndpointPort": 7101,
+        "GatewayListeningEndpointAddress": "127.0.0.1",
+        "GatewayListeningEndpointPort": 7102
+      }
     }
   }
 }
