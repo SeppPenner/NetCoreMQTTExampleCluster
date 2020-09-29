@@ -211,8 +211,9 @@ namespace NetCoreMQTTExampleCluster.DatabaseSetup
                 ValidateClientId = true,
                 IsSyncUser = true
             };
-            user2.PasswordHash = passwordHasher.HashPassword(user2, "Test");
 
+            user2.PasswordHash = passwordHasher.HashPassword(user2, "Test");
+            await userRepository.InsertUser(user2);
             return (userId, user2Id);
         }
 
