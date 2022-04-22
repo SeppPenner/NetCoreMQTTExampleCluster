@@ -7,10 +7,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.Grains.Interfaces;
+namespace NetCoreMQTTExampleCluster.SiloHost.Configuration;
 
 /// <inheritdoc cref="IBrokerConnectionSettings"/>
-public class BrokerConnectionSettings : IBrokerConnectionSettings
+/// <inheritdoc cref="IConfigurationValid"/>
+public class BrokerConnectionSettings : IBrokerConnectionSettings, IConfigurationValid
 {
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
     public string ClientId { get; set; } = string.Empty;
@@ -32,4 +33,35 @@ public class BrokerConnectionSettings : IBrokerConnectionSettings
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
     public bool UseCleanSession { get; set; }
+
+    /// <inheritdoc cref="IConfigurationValid"/>
+    public bool IsValid()
+    {
+        if (string.IsNullOrWhiteSpace(this.ClientId))
+        {
+            throw new ConfigurationException("The client identifier is empty.");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.HostName))
+        {
+            throw new ConfigurationException("The host name is empty.");
+        }
+
+        if (!this.Port.IsPortValid())
+        {
+            throw new ConfigurationException("The port is invalid.");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.UserName))
+        {
+            throw new ConfigurationException("The user name is empty.");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.Password))
+        {
+            throw new ConfigurationException("The password is empty.");
+        }
+
+        return true;
+    }
 }
