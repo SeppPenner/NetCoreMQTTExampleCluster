@@ -164,7 +164,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occurred: {@ex}.", ex);
+                this.logger.Error("An error occurred: {Exception}.", ex);
                 return false;
             }
         }
@@ -235,7 +235,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occurred: {@ex}.", ex);
+                this.logger.Error("An error occurred: {Exception}.", ex);
                 return false;
             }
         }
@@ -266,7 +266,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occurred: {@ex}.", ex);
+                this.logger.Error("An error occurred: {Exception}.", ex);
                 return false;
             }
         }
@@ -366,7 +366,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             try
             {
                 this.logger.Information(
-                    "Periodic persisting started, publish message queue size is {@publishMessageQueueCount}, event log queue size is {@eventLogQueueCount}.",
+                    "Periodic persisting started, publish message queue size is {PublishMessageQueueCount}, event log queue size is {EventLogQueueCount}.",
                     this.publishMessageQueue.Count,
                     this.eventLogQueue.Count);
                 await this.StoreEventLogs();
@@ -375,7 +375,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             }
             catch (Exception ex)
             {
-                this.logger.Error("An error occurred: {@ex}.", ex);
+                this.logger.Error("An error occurred: {Exception}.", ex);
             }
         }
 

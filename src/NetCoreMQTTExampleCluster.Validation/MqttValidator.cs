@@ -20,9 +20,9 @@ public class MqttValidator : IMqttValidator
     /// <inheritdoc cref="IMqttValidator"/>
     public bool ValidateConnection(SimpleMqttConnectionValidatorContext context, User user, IPasswordHasher<User> passwordHasher)
     {
-        Logger.Debug("Executed ValidateConnection with parameters: {@context}, {@user}.", context, user);
+        Logger.Debug("Executed ValidateConnection with parameters: {@Context}, {@User}.", context, user);
 
-        Logger.Debug("Current user is {@currentUser}.", user);
+        Logger.Debug("Current user is {@CurrentUser}.", user);
 
         if (user is null)
         {
@@ -46,7 +46,7 @@ public class MqttValidator : IMqttValidator
 
         if (!user.ValidateClientId)
         {
-            Logger.Debug("Connection valid for {@clientId} and {@user}.", context.ClientId, user);
+            Logger.Debug("Connection valid for {ClientId} and {@User}.", context.ClientId, user);
             return true;
         }
 
@@ -58,11 +58,11 @@ public class MqttValidator : IMqttValidator
                 return false;
             }
 
-            Logger.Debug("Connection valid for {@clientId} and {@user} when client id prefix was null.", context.ClientId, user);
+            Logger.Debug("Connection valid for {ClientId} and {@User} when client id prefix was null.", context.ClientId, user);
         }
         else
         {
-            Logger.Debug("Connection valid for {@clientIdPrefix} and {@user} when client id prefix was not null.", user.ClientIdPrefix, user);
+            Logger.Debug("Connection valid for {ClientIdPrefix} and {@User} when client id prefix was not null.", user.ClientIdPrefix, user);
         }
 
         return true;
@@ -77,11 +77,11 @@ public class MqttValidator : IMqttValidator
         IMemoryCache dataLimitCacheMonth,
         List<string> clientIdPrefixes)
     {
-        Logger.Debug("Executed ValidatePublish with parameters: {@context}, {@user}.", context, user);
+        Logger.Debug("Executed ValidatePublish with parameters: {@Context}, {@User}.", context, user);
 
         var clientIdPrefix = GetClientIdPrefix(context.ClientId, clientIdPrefixes);
 
-        Logger.Debug("Client id prefix is {@clientIdPrefix}.", clientIdPrefix);
+        Logger.Debug("Client id prefix is {ClientIdPrefix}.", clientIdPrefix);
 
         if (user is null)
         {
@@ -91,7 +91,7 @@ public class MqttValidator : IMqttValidator
 
         var topic = context.ApplicationMessage.Topic;
 
-        Logger.Debug("Topic was {@topic}.", topic);
+        Logger.Debug("Topic was {Topic}.", topic);
 
         if (user.ThrottleUser)
         {
@@ -114,8 +114,8 @@ public class MqttValidator : IMqttValidator
             }
         }
 
-        Logger.Debug("The blacklist was {@blacklist}.", blacklist);
-        Logger.Debug("The whitelist was {@whitelist}.", whitelist);
+        Logger.Debug("The blacklist was {@Blacklist}.", blacklist);
+        Logger.Debug("The whitelist was {@Whitelist}.", whitelist);
 
         // Check matches
         if (blacklist.Any(b => b.Value == topic))
@@ -156,7 +156,7 @@ public class MqttValidator : IMqttValidator
             return true;
         }
 
-        Logger.Warning("We fell through everything else. This should never happen! Context was {@context}.", context);
+        Logger.Warning("We fell through everything else. This should never happen! Context was {@Context}.", context);
         return false;
     }
 
@@ -168,11 +168,11 @@ public class MqttValidator : IMqttValidator
         User user,
         List<string> clientIdPrefixes)
     {
-        Logger.Debug("Executed ValidateSubscription with parameters: {@context}, {@user}.", context, user);
+        Logger.Debug("Executed ValidateSubscription with parameters: {@Context}, {@User}.", context, user);
 
         var clientIdPrefix = GetClientIdPrefix(context.ClientId, clientIdPrefixes);
 
-        Logger.Debug("Client id prefix is {@clientIdPrefix}.", clientIdPrefix);
+        Logger.Debug("Client id prefix is {ClientIdPrefix}.", clientIdPrefix);
 
         if (user is null)
         {
@@ -182,9 +182,9 @@ public class MqttValidator : IMqttValidator
 
         var topic = context.TopicFilter.Topic;
 
-        Logger.Debug("Topic was {@topic}.", topic);
-        Logger.Debug("The blacklist was {@blacklist}.", blacklist);
-        Logger.Debug("The whitelist was {@whitelist}.", whitelist);
+        Logger.Debug("Topic was {Topic}.", topic);
+        Logger.Debug("The blacklist was {@Blacklist}.", blacklist);
+        Logger.Debug("The whitelist was {@Whitelist}.", whitelist);
 
         // Check matches
         if (blacklist.Any(b => b.Value == topic))
@@ -226,7 +226,7 @@ public class MqttValidator : IMqttValidator
         }
 
         Logger.Warning(
-            "We fell through everything else. This should never happen! Context was {@context}.",
+            "We fell through everything else. This should never happen! Context was {@Context}.",
             context);
         return false;
     }
@@ -239,11 +239,11 @@ public class MqttValidator : IMqttValidator
     /// <returns>The client identifier prefix for a client identifier if there is one or <c>null</c> else.</returns>
     private static string? GetClientIdPrefix(string clientIdentifierParam, List<string> clientIdPrefixes)
     {
-        Logger.Debug("The client id parameter was {@clientIdentifierParam}.", clientIdentifierParam);
-        Logger.Debug("The client id prefixes were {@clientIdPrefixes}.", clientIdPrefixes);
+        Logger.Debug("The client id parameter was {ClientIdentifierParam}.", clientIdentifierParam);
+        Logger.Debug("The client id prefixes were {@ClientIdPrefixes}.", clientIdPrefixes);
 
         var firstOrDefaultClientIdPrefix = clientIdPrefixes.FirstOrDefault(clientIdentifierParam.StartsWith);
-        Logger.Debug("The first or default client id prefix was {@firstOrDefaultClientIdPrefix}.", firstOrDefaultClientIdPrefix);
+        Logger.Debug("The first or default client id prefix was {@FirstOrDefaultClientIdPrefix}.", firstOrDefaultClientIdPrefix);
         return firstOrDefaultClientIdPrefix;
     }
 
@@ -268,7 +268,7 @@ public class MqttValidator : IMqttValidator
                 return false;
             }
 
-            Logger.Information("The client with client identifier {@clientId} is now locked until the end of this month because it already used its data limit.", clientId);
+            Logger.Information("The client with client identifier {ClientId} is now locked until the end of this month because it already used its data limit.", clientId);
             return true;
         }
 
@@ -281,14 +281,14 @@ public class MqttValidator : IMqttValidator
 
             if (currentValue >= monthlyByteLimit)
             {
-                Logger.Information("The client with client identifier {@clientId} is now locked until the end of this month because it already used its data limit.", clientId);
+                Logger.Information("The client with client identifier {ClientId} is now locked until the end of this month because it already used its data limit.", clientId);
                 return true;
             }
         }
         catch (OverflowException)
         {
             Logger.Warning("OverflowException thrown.");
-            Logger.Information("The client with client identifier {@clientId} is now locked until the end of this month because it already used its data limit.", clientId);
+            Logger.Information("The client with client identifier {ClientId} is now locked until the end of this month because it already used its data limit.", clientId);
             return true;
         }
 

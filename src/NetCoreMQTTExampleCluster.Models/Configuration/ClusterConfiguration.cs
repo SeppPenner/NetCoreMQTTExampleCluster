@@ -38,17 +38,17 @@ public class ClusterConfiguration : IConfigurationValid
     /// <summary>
     /// Gets or sets the broker connection settings.
     /// </summary>
-    public BrokerConnectionSettings BrokerConnectionSettings { get; set; }
+    public BrokerConnectionSettings? BrokerConnectionSettings { get; set; }
 
     /// <summary>
     /// Gets or sets the Orleans configuration.
     /// </summary>
-    public OrleansConfiguration OrleansConfiguration { get; set; }
+    public OrleansConfiguration? OrleansConfiguration { get; set; }
 
     /// <summary>
     /// Gets or sets the database settings.
     /// </summary>
-    public MqttDatabaseConnectionSettings DatabaseSettings { get; set; }
+    public MqttDatabaseConnectionSettings? DatabaseSettings { get; set; }
 
     /// <inheritdoc cref="IConfigurationValid"/>
     public bool IsValid()
@@ -61,6 +61,26 @@ public class ClusterConfiguration : IConfigurationValid
         if (!this.Port.IsValid())
         {
             throw new ConfigurationException("The port is empty.");
+        }
+
+        if (this.HeartbeatIntervalInMilliseconds <= 0)
+        {
+            throw new ConfigurationException("The heartbeat interval is set to 0 or less.");
+        }
+
+        if (this.BrokerConnectionSettings is null || !this.BrokerConnectionSettings.IsValid())
+        {
+            throw new ConfigurationException("The broker connection is invalid.");
+        }
+
+        if (this.OrleansConfiguration is null || !this.OrleansConfiguration.IsValid())
+        {
+            throw new ConfigurationException("The Orleans configuration is invalid.");
+        }
+
+        if (this.DatabaseSettings is null || !this.DatabaseSettings.IsValid())
+        {
+            throw new ConfigurationException("The database settings are invalid.");
         }
 
         return true;

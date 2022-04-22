@@ -90,7 +90,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
             return false;
         }
     }
@@ -105,7 +105,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
             return Task.FromResult(false);
         }
     }
@@ -120,7 +120,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
             return Task.FromResult(false);
         }
     }
@@ -135,7 +135,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
             return Task.FromResult(false);
         }
     }

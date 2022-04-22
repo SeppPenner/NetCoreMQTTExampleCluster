@@ -101,7 +101,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         catch (Exception ex)
         {
             Environment.ExitCode = 1;
-            this.logger.Fatal("An error occurred: {@ex}.", ex);
+            this.logger.Fatal("An error occurred: {Exception}.", ex);
         }
 
         await base.StartAsync(cancellationToken);
@@ -122,7 +122,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         catch (Exception ex)
         {
             Environment.ExitCode = 1;
-            this.logger.Fatal("An error occurred: {@ex}.", ex);
+            this.logger.Fatal("An error occurred: {Exception}.", ex);
         }
     }
 
@@ -150,7 +150,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
         }
     }
 
@@ -169,7 +169,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
         }
     }
 
@@ -188,7 +188,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
         }
     }
 
@@ -207,7 +207,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
         }
     }
 
@@ -225,7 +225,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         }
         catch (Exception ex)
         {
-            this.logger.Error("An error occurred: {@ex}.", ex);
+            this.logger.Error("An error occurred: {Exception}.", ex);
         }
     }
 

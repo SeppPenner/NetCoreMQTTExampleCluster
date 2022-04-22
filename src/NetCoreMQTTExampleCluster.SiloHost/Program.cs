@@ -95,7 +95,7 @@ public class Program
         }
         catch (Exception ex)
         {
-            Log.Fatal("An error occurred: {@ex}.", ex);
+            Log.Fatal("An error occurred: {Exception}.", ex);
         }
         finally
         {
