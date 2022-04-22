@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.SiloHost.Configuration;
+namespace NetCoreMQTTExampleCluster.Models.Configuration;
 
 /// <inheritdoc cref="IBrokerConnectionSettings"/>
 /// <inheritdoc cref="IConfigurationValid"/>
