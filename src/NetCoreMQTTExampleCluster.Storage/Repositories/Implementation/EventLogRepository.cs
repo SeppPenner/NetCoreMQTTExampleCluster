@@ -10,27 +10,20 @@
 namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 
 /// <inheritdoc cref="IEventLogRepository" />
-public class EventLogRepository : IEventLogRepository
+public class EventLogRepository : BaseRepository, IEventLogRepository
 {
-    /// <summary>
-    /// The connection settings to use.
-    /// </summary>
-    private readonly MqttDatabaseConnectionSettings connectionSettings;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="EventLogRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public EventLogRepository(MqttDatabaseConnectionSettings connectionSettings)
+    public EventLogRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
-        this.connectionSettings = connectionSettings;
     }
 
     /// <inheritdoc cref="IEventLogRepository" />
     public async Task<List<EventLog>> GetEventLogs()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var eventLogs = await connection.QueryAsync<EventLog>(SelectStatements.SelectAllEventLogs);
         return eventLogs?.ToList() ?? new List<EventLog>();
     }
@@ -38,16 +31,14 @@ public class EventLogRepository : IEventLogRepository
     /// <inheritdoc cref="IEventLogRepository" />
     public async Task<EventLog> GetEventLogById(Guid eventLogId)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<EventLog>(SelectStatements.SelectEventLogById, new { Id = eventLogId });
     }
 
     /// <inheritdoc cref="IEventLogRepository" />
     public async Task<bool> InsertEventLog(EventLog eventLog)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var result = await connection.ExecuteAsync(InsertStatements.InsertEventLog, eventLog);
         return result == 1;
     }
@@ -55,8 +46,7 @@ public class EventLogRepository : IEventLogRepository
     /// <inheritdoc cref="IEventLogRepository" />
     public async Task<bool> InsertEventLogs(List<EventLog> eventLogs)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var result = await connection.ExecuteAsync(InsertStatements.InsertEventLog, eventLogs);
         return result == 1;
     }

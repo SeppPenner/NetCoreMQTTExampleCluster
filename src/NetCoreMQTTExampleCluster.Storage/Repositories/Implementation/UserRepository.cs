@@ -13,27 +13,20 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 /// <summary>
 /// An implementation supporting the repository pattern to work with <see cref="User" />s.
 /// </summary>
-public class UserRepository : IUserRepository
+public class UserRepository: BaseRepository, IUserRepository
 {
-    /// <summary>
-    /// The connection settings to use.
-    /// </summary>
-    private readonly MqttDatabaseConnectionSettings connectionSettings;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="UserRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public UserRepository(MqttDatabaseConnectionSettings connectionSettings)
+    public UserRepository(MqttDatabaseConnectionSettings connectionSettings): base(connectionSettings)
     {
-        this.connectionSettings = connectionSettings;
     }
 
     /// <inheritdoc cref="IUserRepository" />
     public async Task<List<User>> GetUsers()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var users = await connection.QueryAsync<User>(SelectStatements.SelectAllUsers);
         return users?.ToList() ?? new List<User>();
     }
@@ -41,40 +34,35 @@ public class UserRepository : IUserRepository
     /// <inheritdoc cref="IUserRepository" />
     public async Task<User> GetUserById(Guid userId)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<User>(SelectStatements.SelectUserById, new {Id = userId});
     }
 
     /// <inheritdoc cref="IUserRepository" />
     public async Task<User> GetUserByName(string userName)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<User>(SelectStatements.SelectUserByUserName, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IUserRepository" />
     public async Task<(string, Guid)> GetUserNameAndUserIdByName(string userName)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<(string, Guid)>(SelectStatements.SelectUserNameAndIdByUserName, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IUserRepository" />
     public async Task<bool> UserNameExists(string userName)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<bool>(ExistsStatements.UserNameExists, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IUserRepository" />
     public async Task<bool> InsertUser(User user)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var result = await connection.ExecuteAsync(InsertStatements.InsertUser, user);
         return result == 1;
     }
@@ -82,8 +70,7 @@ public class UserRepository : IUserRepository
     /// <inheritdoc cref="IUserRepository" />
     public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var blacklistItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemsForUser, new { UserId = userId, Type = type });
         return blacklistItems?.ToList() ?? new List<BlacklistWhitelist>();
     }
@@ -91,8 +78,7 @@ public class UserRepository : IUserRepository
     /// <inheritdoc cref="IUserRepository" />
     public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var whiteListItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemsForUser, new { UserId = userId, Type = type });
         return whiteListItems?.ToList() ?? new List<BlacklistWhitelist>();
     }
@@ -100,8 +86,7 @@ public class UserRepository : IUserRepository
     /// <inheritdoc cref="IUserRepository" />
     public async Task<List<string>> GetAllClientIdPrefixes()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var clientIdPrefixes = await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
         return clientIdPrefixes?.ToList() ?? new List<string>();
     }
@@ -109,8 +94,7 @@ public class UserRepository : IUserRepository
     /// <inheritdoc cref="IUserRepository" />
     public async Task<UserData> GetUserData(Guid userId)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         var clientIdPrefixes = await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
         var subscriptionWhitelist = await connection.QueryAsync<BlacklistWhitelist>(

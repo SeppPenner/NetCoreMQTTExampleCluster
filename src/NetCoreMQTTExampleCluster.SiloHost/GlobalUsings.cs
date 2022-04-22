@@ -3,6 +3,7 @@ global using System.Net;
 global using System.Reflection;
 
 global using Microsoft.Extensions.Configuration;
+global using NetCoreMQTTExampleCluster.Models.Constants;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 

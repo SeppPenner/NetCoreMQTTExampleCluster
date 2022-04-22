@@ -60,7 +60,7 @@ public class ClusterConfiguration : IConfigurationValid
 
         if (!this.Port.IsPortValid())
         {
-            throw new ConfigurationException("The port is empty.");
+            throw new ConfigurationException("The port is invalid.");
         }
 
         if (this.HeartbeatIntervalInMilliseconds <= 0)

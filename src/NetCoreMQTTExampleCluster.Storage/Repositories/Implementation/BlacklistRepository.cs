@@ -10,27 +10,20 @@
 namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 
 /// <inheritdoc cref="IBlacklistRepository" />
-public class BlacklistRepository : IBlacklistRepository
+public class BlacklistRepository : BaseRepository, IBlacklistRepository
 {
-    /// <summary>
-    /// The connection settings to use.
-    /// </summary>
-    private readonly MqttDatabaseConnectionSettings connectionSettings;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="BlacklistRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public BlacklistRepository(MqttDatabaseConnectionSettings connectionSettings)
+    public BlacklistRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
-        this.connectionSettings = connectionSettings;
     }
 
     /// <inheritdoc cref="IBlacklistRepository" />
     public async Task<List<BlacklistWhitelist>> GetAllBlacklistItems()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var blacklistItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectAllBlacklistItems);
         return blacklistItems?.ToList() ?? new List<BlacklistWhitelist>();
     }
@@ -38,32 +31,28 @@ public class BlacklistRepository : IBlacklistRepository
     /// <inheritdoc cref="IBlacklistRepository" />
     public async Task<BlacklistWhitelist> GetBlacklistItemById(Guid blacklistItemId)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemById, new {Id = blacklistItemId});
     }
 
     /// <inheritdoc cref="IBlacklistRepository" />
     public async Task<BlacklistWhitelist> GetBlacklistItemByIdAndType(Guid blacklistItemId, BlacklistWhitelistType blacklistItemType)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemByIdAndType, new {Id = blacklistItemId, Type = blacklistItemType});
     }
 
     /// <inheritdoc cref="IBlacklistRepository" />
     public async Task<BlacklistWhitelist> GetBlacklistItemByType(BlacklistWhitelistType blacklistItemType)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemByType, new {Type = blacklistItemType});
     }
 
     /// <inheritdoc cref="IBlacklistRepository" />
     public async Task<bool> InsertBlacklistItem(BlacklistWhitelist blacklistItem)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var result = await connection.ExecuteAsync(InsertStatements.InsertBlacklistItem, blacklistItem);
         return result == 1;
     }

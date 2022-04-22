@@ -15,11 +15,6 @@ namespace NetCoreMQTTExampleCluster.SiloHost;
 public class Program
 {
     /// <summary>
-    /// The invariant.
-    /// </summary>
-    private const string Invariant = "Npgsql";
-
-    /// <summary>
     /// The service name.
     /// </summary>
     private static readonly AssemblyName ServiceName = Assembly.GetExecutingAssembly().GetName();
@@ -129,14 +124,14 @@ public class Program
         builder.UseAdoNetClustering(
             options =>
             {
-                options.Invariant = Invariant;
+                options.Invariant = GlobalConstants.Invariant;
                 options.ConnectionString = databaseSettings.ToConnectionString();
             });
 
         builder.UseAdoNetReminderService(
             options =>
             {
-                options.Invariant = Invariant;
+                options.Invariant = GlobalConstants.Invariant;
                 options.ConnectionString = databaseSettings.ToConnectionString();
             });
 
@@ -168,7 +163,7 @@ public class Program
                 options.Bind(orleansConfiguration.DashboardOptions);
             });
 
-        builder.AddSimpleMessageStreamProvider("SMSProvider");
+        builder.AddSimpleMessageStreamProvider(GlobalConstants.SimpleMessageStreamProvider);
         builder.AddMemoryGrainStorage("PubSubStore");
     }
 }
