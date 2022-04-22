@@ -45,7 +45,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="userName">The <see cref="User" />'s name to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<(string, Guid)> GetUserNameAndUserIdByName(string userName);
 
         /// <summary>
@@ -53,7 +52,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="userName">The user name to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<bool> UserNameExists(string userName);
 
         /// <summary>

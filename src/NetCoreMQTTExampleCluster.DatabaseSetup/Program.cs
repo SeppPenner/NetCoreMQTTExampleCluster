@@ -101,7 +101,6 @@ namespace NetCoreMQTTExampleCluster.DatabaseSetup
         private static async Task<MqttDatabaseConnectionSettings> ReadSettingsFile()
         {
             var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // ReSharper disable once AssignNullToNotNullAttribute
             var settingsFile = Path.Combine(currentLocation, "appsettings.json");
             var settingsString = await File.ReadAllTextAsync(settingsFile);
             return JsonConvert.DeserializeObject<MqttDatabaseConnectionSettings>(settingsString);
@@ -124,7 +123,6 @@ namespace NetCoreMQTTExampleCluster.DatabaseSetup
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static async Task AddWhiteAndBlackListsForFirstUser(Guid userId)
         {
             await whitelistRepository.InsertWhitelistItem(new BlacklistWhitelist
@@ -161,7 +159,6 @@ namespace NetCoreMQTTExampleCluster.DatabaseSetup
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private static async Task AddWhiteAndBlackListsForSecondUser(Guid userId)
         {
             await whitelistRepository.InsertWhitelistItem(new BlacklistWhitelist

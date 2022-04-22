@@ -40,10 +40,6 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// </summary>
         /// <param name="args">Some arguments.</param>
         /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-        [SuppressMessage(
-            "StyleCop.CSharp.DocumentationRules",
-            "SA1650:ElementDocumentationMustBeSpelledCorrectly",
-            Justification = "Reviewed. Suppression is OK here.")]
         public static async Task Main(string[] args)
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");

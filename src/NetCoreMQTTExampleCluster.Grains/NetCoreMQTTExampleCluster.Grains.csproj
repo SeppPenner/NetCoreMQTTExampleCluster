@@ -11,22 +11,22 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="GitVersion.MsBuild" Version="5.6.3">
+        <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.8" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
-        <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="3.3.0">
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="3.4.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.3.0" />
+        <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.4.1" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="Npgsql.Json.NET" Version="5.0.1.1" />
-        <PackageReference Include="MQTTnet" Version="3.0.13" />
+        <PackageReference Include="Npgsql.Json.NET" Version="5.0.3" />
+        <PackageReference Include="MQTTnet" Version="3.0.15" />
     </ItemGroup>
 
     <ItemGroup>

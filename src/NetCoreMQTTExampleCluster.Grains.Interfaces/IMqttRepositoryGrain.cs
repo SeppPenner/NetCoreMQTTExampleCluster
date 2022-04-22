@@ -10,7 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Grains.Interfaces
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
 
     using MQTTnet.Server;
@@ -57,7 +56,6 @@ namespace NetCoreMQTTExampleCluster.Grains.Interfaces
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>A <see cref="Task"/> returning any asynchronous operation.</returns>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context);
 
         /// <summary>

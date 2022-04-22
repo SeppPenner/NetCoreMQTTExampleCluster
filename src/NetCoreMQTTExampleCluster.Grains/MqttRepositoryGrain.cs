@@ -12,7 +12,6 @@ namespace NetCoreMQTTExampleCluster.Grains
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Text;
     using System.Threading;
@@ -76,7 +75,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="eventLogRepository">The event log repository.</param>
         /// <param name="publishMessageRepository">The publish message repository.</param>
         /// <seealso cref="IMqttRepositoryGrain" />
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public MqttRepositoryGrain(IEventLogRepository eventLogRepository, IPublishMessageRepository publishMessageRepository)
         {
             this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
@@ -92,7 +90,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="Grain" />
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public override Task OnActivateAsync()
         {
             this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
@@ -153,7 +150,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// </summary>
         /// <param name="brokerId">The broker identifier.</param>
         /// <seealso cref="IMqttRepositoryGrain" />
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public Task DisconnectBroker(Guid brokerId)
         {
             if (brokerId == null)
@@ -252,7 +248,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="brokerId">The broker identifier.</param>
         /// <returns>A value indicating whether the published message is accepted or not.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         [AlwaysInterleave]
         public async Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context, Guid brokerId)
         {
@@ -342,7 +337,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="context">The context.</param>
         /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context)
         {
             if (context == null)
@@ -454,7 +448,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// Stores the event logs from the queue to the database.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private async Task StoreEventLogs()
         {
             var eventLogs = new List<EventLog>();
@@ -471,7 +464,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// Stores the publish messages from the queue to the database.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private async Task StorePublishMessages()
         {
             var publishMessages = new List<PublishMessage>();

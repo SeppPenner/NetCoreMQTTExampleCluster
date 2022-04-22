@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MqttService.cs" company="Hämmer Electronics">
 //   Copyright (c) 2020 All rights reserved.
 // </copyright>
@@ -9,7 +9,6 @@
 namespace NetCoreMQTTExampleCluster.Cluster
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Reflection;
     using System.Security.Authentication;
@@ -107,7 +106,6 @@ namespace NetCoreMQTTExampleCluster.Cluster
                 var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
                 var certificate = new X509Certificate2(
-                    // ReSharper disable once AssignNullToNotNullAttribute
                     Path.Combine(currentLocation, "certificate.pfx"),
                     "test",
                     X509KeyStorageFlags.Exportable);
@@ -179,7 +177,6 @@ namespace NetCoreMQTTExampleCluster.Cluster
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public async Task InterceptUnsubscriptionAsync(MqttUnsubscriptionInterceptorContext context)
         {
             try

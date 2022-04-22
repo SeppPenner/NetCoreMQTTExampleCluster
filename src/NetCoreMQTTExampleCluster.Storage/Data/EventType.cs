@@ -9,8 +9,6 @@
 
 namespace NetCoreMQTTExampleCluster.Storage.Data
 {
-    using System.Diagnostics.CodeAnalysis;
-
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -28,7 +26,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// <summary>
         /// The unsubscription event type.
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         Unsubscription,
 
         /// <summary>

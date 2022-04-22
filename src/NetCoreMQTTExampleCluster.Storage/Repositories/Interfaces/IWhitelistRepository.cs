@@ -38,7 +38,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces
         /// </summary>
         /// <param name="whitelistItemType">The <see cref="BlacklistWhitelistType" /> to query for.</param>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        // ReSharper disable once UnusedMember.Global
         Task<BlacklistWhitelist> GetWhitelistItemByType(BlacklistWhitelistType whitelistItemType);
 
         /// <summary>

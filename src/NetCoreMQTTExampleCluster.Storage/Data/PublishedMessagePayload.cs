@@ -20,7 +20,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Data
         /// Initializes a new instance of the <see cref="PublishedMessagePayload"/> class.
         /// This constructor is needed for JSON (de-)serialization.
         /// </summary>
-        // ReSharper disable once UnusedMember.Global
         public PublishedMessagePayload()
         {
         }

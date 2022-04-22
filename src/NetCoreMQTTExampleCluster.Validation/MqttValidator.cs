@@ -169,7 +169,6 @@ namespace NetCoreMQTTExampleCluster.Validation
                 return true;
             }
 
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
             foreach (var forbiddenTopic in blacklist)
             {
                 var doesTopicMatch = TopicChecker.Regex(forbiddenTopic.Value, topic);
@@ -183,7 +182,6 @@ namespace NetCoreMQTTExampleCluster.Validation
                 return false;
             }
 
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
             foreach (var allowedTopic in whitelist)
             {
                 var doesTopicMatch = TopicChecker.Regex(allowedTopic.Value, topic);
@@ -250,7 +248,6 @@ namespace NetCoreMQTTExampleCluster.Validation
                 return true;
             }
 
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
             foreach (var forbiddenTopic in blacklist)
             {
                 var doesTopicMatch = TopicChecker.Regex(forbiddenTopic.Value, topic);
@@ -264,7 +261,6 @@ namespace NetCoreMQTTExampleCluster.Validation
                 return false;
             }
 
-            // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
             foreach (var allowedTopic in whitelist)
             {
                 var doesTopicMatch = TopicChecker.Regex(allowedTopic.Value, topic);
@@ -312,7 +308,6 @@ namespace NetCoreMQTTExampleCluster.Validation
         {
             dataLimitCacheMonth.TryGetValue(clientId, out var foundByteLimit);
 
-            // ReSharper disable once StyleCop.SA1126
             if (foundByteLimit == null)
             {
                 dataLimitCacheMonth.Set(clientId, sizeInBytes, DateTimeOffset.Now.EndOfMonth());

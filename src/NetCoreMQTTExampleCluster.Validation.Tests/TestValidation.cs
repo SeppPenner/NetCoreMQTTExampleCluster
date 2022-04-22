@@ -117,7 +117,10 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
                 QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
             };
 
-            var mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), mqttApplicationMessage);
+            var mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), null)
+            {
+                ApplicationMessage = mqttApplicationMessage
+            };
 
             var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
             var whitelist = await this.userRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
@@ -139,7 +142,10 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests
                 QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
             };
 
-            mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), mqttApplicationMessage);
+            mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), null)
+            {
+                ApplicationMessage = mqttApplicationMessage
+            };
 
             result = this.mqttValidator.ValidatePublish(
                 mqttConnectionValidatorContext,

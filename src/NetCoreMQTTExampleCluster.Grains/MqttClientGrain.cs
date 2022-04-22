@@ -86,7 +86,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <param name="userRepository">The user repository.</param>
         /// <param name="mqttValidator">The MQTT validator.</param>
         /// <seealso cref="IMqttClientGrain" />
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public MqttClientGrain(IUserRepository userRepository, IMqttValidator mqttValidator)
         {
             this.userRepository = userRepository;
