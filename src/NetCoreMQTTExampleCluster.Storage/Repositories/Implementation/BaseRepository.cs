@@ -17,7 +17,7 @@ public class BaseRepository
     /// <summary>
     /// The connection settings to use.
     /// </summary>
-    private readonly MqttDatabaseConnectionSettings connectionSettings;
+    protected readonly MqttDatabaseConnectionSettings ConnectionSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseRepository" /> class.
@@ -25,18 +25,17 @@ public class BaseRepository
     /// <param name="connectionSettings">The connection settings to use.</param>
     public BaseRepository(MqttDatabaseConnectionSettings connectionSettings)
     {
-        this.connectionSettings = connectionSettings;
+        this.ConnectionSettings = connectionSettings;
         SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
     }
 
     /// <summary>
     /// Gets a database connection.
     /// </summary>
-    /// <param name="caller">The caller.</param>
     /// <returns>A <see cref="NpgsqlConnection"/>.</returns>
-    public async Task<NpgsqlConnection> GetDatabaseConnection([CallerMemberName] string caller = "")
+    public async Task<NpgsqlConnection> GetDatabaseConnection()
     {
-        var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
+        var connection = new NpgsqlConnection(this.ConnectionSettings.ToConnectionString());
         await connection.OpenAsync().ConfigureAwait(false);
         return connection;
     }

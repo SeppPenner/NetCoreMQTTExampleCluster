@@ -10,7 +10,7 @@
 namespace NetCoreMQTTExampleCluster.Storage;
 
 /// <inheritdoc cref="IDatabaseHelper" />
-public class DatabaseHelper : IDatabaseHelper
+public class DatabaseHelper : BaseRepository, IDatabaseHelper
 {
     /// <summary>
     /// The logger.
@@ -18,25 +18,18 @@ public class DatabaseHelper : IDatabaseHelper
     private readonly ILogger logger = Log.ForContext<DatabaseHelper>();
 
     /// <summary>
-    /// The connection settings to use.
-    /// </summary>
-    private readonly MqttDatabaseConnectionSettings connectionSettings;
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="DatabaseHelper" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public DatabaseHelper(MqttDatabaseConnectionSettings connectionSettings)
+    public DatabaseHelper(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
-        this.connectionSettings = connectionSettings;
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateDatabase(string database)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
-        await connection.OpenAsync();
-        var checkDatabaseExists = await connection.ExecuteScalarAsync(ExistsStatements.CheckDatabaseExists, new { this.connectionSettings.Database });
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
+        var checkDatabaseExists = await connection.ExecuteScalarAsync(ExistsStatements.CheckDatabaseExists, new { this.ConnectionSettings.Database });
 
         if (Convert.ToBoolean(checkDatabaseExists) == false)
         {
@@ -50,8 +43,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task DeleteDatabase(string database)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
         var sql = DropStatements.DropDatabase.Replace("@Database", database);
         await connection.ExecuteAsync(sql);
     }
@@ -70,8 +62,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateEventLogTable(bool forceDelete)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
@@ -96,8 +87,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreatePublishMessageTable(bool forceDelete)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
@@ -122,8 +112,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateDatabaseVersionTable(bool forceDelete)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
@@ -149,8 +138,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateWhitelistTable(bool forceDelete)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
@@ -176,8 +164,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateBlacklistTable(bool forceDelete)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
@@ -203,8 +190,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateUserTable(bool forceDelete)
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
@@ -230,8 +216,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task EnableTimeScaleDbExtension()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         this.logger.Information("Enabling TimeScaleDB extension.");
         await connection.ExecuteAsync(CreateStatements.EnableTimeScaleDbExtension);
@@ -241,8 +226,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateHyperTables()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         this.logger.Information("Creating hyper tables.");
         await connection.ExecuteAsync(CreateStatements.CreateEventLogHyperTable);
@@ -253,8 +237,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateOrleansTables()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         this.logger.Information("Creating Orleans tables.");
 
@@ -288,8 +271,7 @@ public class DatabaseHelper : IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateCompoundIndex()
     {
-        await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
-        await connection.OpenAsync();
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         Log.Information("Creating compound index.");
         await connection.ExecuteAsync(CreateStatements.CreatePublishMessageCompoundIndex);
