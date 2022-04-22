@@ -1,57 +1,54 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>NetCoreMQTTExampleCluster.Cluster</RootNamespace>
-    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.4.1" />
-    <PackageReference Include="Microsoft.Orleans.Reminders.AdoNet" Version="3.4.1" />
-    <PackageReference Include="MQTTnet" Version="3.0.15" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Polly" Version="7.2.1" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.1.3" />
-    <PackageReference Include="Serilog.Exceptions" Version="6.0.0" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
-    <PackageReference Include="System.Runtime.Caching" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
-    <PackageReference Include="Microsoft.Orleans.Client" Version="3.4.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="GitVersion.MsBuild" Version="5.6.6">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.4.1" />
+        <PackageReference Include="Microsoft.Orleans.Reminders.AdoNet" Version="3.4.1" />
+        <PackageReference Include="MQTTnet" Version="3.0.15" />
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+        <PackageReference Include="Polly" Version="7.2.1" />
+        <PackageReference Include="Serilog" Version="2.10.0" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="2.1.3" />
+        <PackageReference Include="Serilog.Exceptions" Version="6.0.0" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+        <PackageReference Include="System.Runtime.Caching" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="5.0.1" />
+        <PackageReference Include="Microsoft.Orleans.Client" Version="3.4.1" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="certificate.pfx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="appsettings.Development.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="certificate.pfx">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="appsettings.Development.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\NetCoreMQTTExampleCluster.Models\NetCoreMQTTExampleCluster.Models.csproj" />
-    <ProjectReference Include="..\NetCoreMQTTExampleCluster.TopicCheck\NetCoreMQTTExampleCluster.TopicCheck.csproj" />
-    <ProjectReference Include="..\NetCoreMQTTExampleCluster.Grains.Interfaces\NetCoreMQTTExampleCluster.Grains.Interfaces.csproj" />
-    <ProjectReference Include="..\NetCoreMQTTExampleCluster.Storage\NetCoreMQTTExampleCluster.Storage.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Models\NetCoreMQTTExampleCluster.Models.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.TopicCheck\NetCoreMQTTExampleCluster.TopicCheck.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Grains.Interfaces\NetCoreMQTTExampleCluster.Grains.Interfaces.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Storage\NetCoreMQTTExampleCluster.Storage.csproj" />
+    </ItemGroup>
 
 </Project>

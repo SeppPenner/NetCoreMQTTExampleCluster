@@ -1,43 +1,40 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="UserData.cs" company="Hämmer Electronics">
-//   Copyright (c) 2020 All rights reserved.
+//   Copyright (c) All rights reserved.
 // </copyright>
 // <summary>
 //   The user data class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace NetCoreMQTTExampleCluster.Storage.Data
+namespace NetCoreMQTTExampleCluster.Storage.Data;
+
+/// <summary>
+/// The user data class.
+/// </summary>
+public class UserData
 {
-    using System.Collections.Generic;
+    /// <summary>
+    /// Gets or sets the subscription whitelist.
+    /// </summary>
+    public List<BlacklistWhitelist> SubscriptionWhitelist { get; set; } = new();
 
     /// <summary>
-    /// The user data class.
+    /// Gets or sets the publish whitelist.
     /// </summary>
-    public class UserData
-    {
-        /// <summary>
-        /// Gets or sets the subscription whitelist.
-        /// </summary>
-        public List<BlacklistWhitelist> SubscriptionWhitelist { get; set; }
+    public List<BlacklistWhitelist> PublishWhitelist { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the publish whitelist.
-        /// </summary>
-        public List<BlacklistWhitelist> PublishWhitelist { get; set; }
+    /// <summary>
+    /// Gets or sets the subscription blacklist.
+    /// </summary>
+    public List<BlacklistWhitelist> SubscriptionBlacklist { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the subscription blacklist.
-        /// </summary>
-        public List<BlacklistWhitelist> SubscriptionBlacklist { get; set; }
+    /// <summary>
+    /// Gets or sets the publish blacklist.
+    /// </summary>
+    public List<BlacklistWhitelist> PublishBlacklist { get; set; } = new();
 
-        /// <summary>
-        /// Gets or sets the publish blacklist.
-        /// </summary>
-        public List<BlacklistWhitelist> PublishBlacklist { get; set; }
-
-        /// <summary>
-        /// Gets or sets the client identifier prefixes.
-        /// </summary>
-        public List<string> ClientIdPrefixes { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the client identifier prefixes.
+    /// </summary>
+    public List<string> ClientIdPrefixes { get; set; } = new();
 }

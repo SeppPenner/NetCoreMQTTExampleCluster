@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Program.cs" company="Hämmer Electronics">
-//   Copyright (c) 2020 All rights reserved.
+//   Copyright (c) All rights reserved.
 // </copyright>
 // <summary>
 //   The main program.
@@ -26,7 +26,7 @@ namespace NetCoreMQTTExampleCluster.Cluster
     using Serilog.Exceptions;
 
     /// <summary>
-    ///     The main program.
+    /// The main program.
     /// </summary>
     public class Program
     {
@@ -36,7 +36,7 @@ namespace NetCoreMQTTExampleCluster.Cluster
         private static readonly AssemblyName ServiceName = Assembly.GetExecutingAssembly().GetName();
 
         /// <summary>
-        ///     The main method that starts the service using Topshelf.
+        /// The main method that starts the service using Topshelf.
         /// </summary>
         /// <param name="args">Some arguments.</param>
         /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
@@ -47,7 +47,7 @@ namespace NetCoreMQTTExampleCluster.Cluster
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddJsonFile("appsettings.json", false, true);
 
-            if (environment != null)
+            if (environment is not null)
             {
                 configurationBuilder.AddJsonFile($"appsettings.{environment}.json", false, true);
             }

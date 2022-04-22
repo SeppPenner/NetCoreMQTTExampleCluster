@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MqttRepositoryGrain.cs" company="Hämmer Electronics">
-//   Copyright (c) 2020 All rights reserved.
+//   Copyright (c) All rights reserved.
 // </copyright>
 // <summary>
 //   The grain for a repository to manage the brokers.
@@ -32,19 +32,19 @@ namespace NetCoreMQTTExampleCluster.Grains
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
     /// <summary>
-    ///     The grain for a repository to manage the brokers.
+    /// The grain for a repository to manage the brokers.
     /// </summary>
     /// <seealso cref="IMqttRepositoryGrain" />
     [Reentrant]
     public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     {
         /// <summary>
-        ///     The event log repository.
+        /// The event log repository.
         /// </summary>
         private readonly IEventLogRepository eventLogRepository;
 
         /// <summary>
-        ///     The brokers.
+        /// The brokers.
         /// </summary>
         private readonly IDictionary<Guid, IBrokerConnectionSettings> brokers = new ConcurrentDictionary<Guid, IBrokerConnectionSettings>();
 
@@ -59,18 +59,18 @@ namespace NetCoreMQTTExampleCluster.Grains
         private readonly ConcurrentQueue<PublishMessage> publishMessageQueue = new ConcurrentQueue<PublishMessage>();
 
         /// <summary>
-        ///     The publish message repository.
+        /// The publish message repository.
         /// </summary>
         private readonly IPublishMessageRepository publishMessageRepository;
 
         /// <summary>
-        ///     The logger.
+        /// The logger.
         /// </summary>
         private ILogger logger;
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Initializes a new instance of the <see cref="MqttRepositoryGrain" /> class.
+        /// Initializes a new instance of the <see cref="MqttRepositoryGrain" /> class.
         /// </summary>
         /// <param name="eventLogRepository">The event log repository.</param>
         /// <param name="publishMessageRepository">The publish message repository.</param>
@@ -84,9 +84,9 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="Grain" />
         /// <summary>
-        ///     This method is called at the end of the process of activating a grain.
-        ///     It is called before any messages have been dispatched to the grain.
-        ///     For grains with declared persistent state, this method is called after the State property has been populated.
+        /// This method is called at the end of the process of activating a grain.
+        /// It is called before any messages have been dispatched to the grain.
+        /// For grains with declared persistent state, this method is called after the State property has been populated.
         /// </summary>
         /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
         /// <seealso cref="Grain" />
@@ -109,7 +109,7 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Connects a broker to the grain.
+        /// Connects a broker to the grain.
         /// </summary>
         /// <param name="brokerConnectionSettings">The broker connection settings.</param>
         /// <param name="brokerId">The broker identifier.</param>
@@ -117,14 +117,12 @@ namespace NetCoreMQTTExampleCluster.Grains
         /// <seealso cref="IMqttRepositoryGrain" />
         public Task ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId)
         {
-            if (brokerConnectionSettings == null)
+            if (brokerConnectionSettings is null)
             {
-#pragma warning disable IDE0016 // throw-Ausdruck verwenden
                 throw new ArgumentNullException(nameof(brokerConnectionSettings));
-#pragma warning restore IDE0016 // throw-Ausdruck verwenden
             }
 
-            if (brokerId == null)
+            if (brokerId == default)
             {
                 throw new ArgumentNullException(nameof(brokerId));
             }
@@ -146,13 +144,13 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Disconnects the broker from the grain.
+        /// Disconnects the broker from the grain.
         /// </summary>
         /// <param name="brokerId">The broker identifier.</param>
         /// <seealso cref="IMqttRepositoryGrain" />
         public Task DisconnectBroker(Guid brokerId)
         {
-            if (brokerId == null)
+            if (brokerId == default)
             {
                 throw new ArgumentNullException(nameof(brokerId));
             }
@@ -174,7 +172,7 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Proceeds the connection for one client identifier.
+        /// Proceeds the connection for one client identifier.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>A value indicating whether the connection is accepted or not.</returns>
@@ -211,14 +209,14 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Proceeds the disconnection for one client identifier.
+        /// Proceeds the disconnection for one client identifier.
         /// </summary>
         /// <param name="eventArgs">The event args.</param>
         /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
         public Task ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
         {
-            if (eventArgs == null)
+            if (eventArgs is null)
             {
                 throw new ArgumentNullException(nameof(eventArgs));
             }
@@ -242,7 +240,7 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Proceeds the published message.
+        /// Proceeds the published message.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="brokerId">The broker identifier.</param>
@@ -263,7 +261,7 @@ namespace NetCoreMQTTExampleCluster.Grains
                 }
 
                 // Save published message to the database
-                var payloadString = context.ApplicationMessage?.Payload == null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
+                var payloadString = context.ApplicationMessage?.Payload is null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
 
                 var publishMessage = new PublishMessage
                 {
@@ -295,7 +293,7 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Proceeds the subscription.
+        /// Proceeds the subscription.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>A value indicating whether the subscription is accepted or not.</returns>
@@ -332,14 +330,14 @@ namespace NetCoreMQTTExampleCluster.Grains
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
         /// <summary>
-        ///     Proceeds the unsubscription for one client identifier.
+        /// Proceeds the unsubscription for one client identifier.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
         /// <seealso cref="IMqttRepositoryGrain" />
         public Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context)
         {
-            if (context == null)
+            if (context is null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
@@ -367,14 +365,14 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <summary>
-        ///     Publishes a message to a remote broker that hasn't initially sent the message to the cluster.
+        /// Publishes a message to a remote broker that hasn't initially sent the message to the cluster.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="brokerConnectionSettings">The broker connection settings.</param>
         /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
         private static async Task PublishMessageToBroker(MqttApplicationMessageInterceptorContext context, IBrokerConnectionSettings brokerConnectionSettings)
         {
-            if (context.ApplicationMessage == null)
+            if (context.ApplicationMessage is null)
             {
                 return;
             }
@@ -393,7 +391,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             var options = optionsBuilder.Build();
 
             // Deserialize payload
-            var payloadString = context.ApplicationMessage?.Payload == null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
+            var payloadString = context.ApplicationMessage?.Payload is null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
 
             // Connect the MQTT client
             await mqttClient.ConnectAsync(options, CancellationToken.None);
@@ -407,7 +405,7 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <summary>
-        ///     Publishes a message to all remote brokers that haven't initially sent the message to the cluster.
+        /// Publishes a message to all remote brokers that haven't initially sent the message to the cluster.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="brokerId">The broker identifier.</param>
