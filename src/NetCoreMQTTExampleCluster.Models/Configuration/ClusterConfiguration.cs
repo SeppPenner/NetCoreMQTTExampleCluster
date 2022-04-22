@@ -58,7 +58,7 @@ public class ClusterConfiguration : IConfigurationValid
             throw new ConfigurationException("The log folder path is empty.");
         }
 
-        if (!this.Port.IsValid())
+        if (!this.Port.IsPortValid())
         {
             throw new ConfigurationException("The port is empty.");
         }
