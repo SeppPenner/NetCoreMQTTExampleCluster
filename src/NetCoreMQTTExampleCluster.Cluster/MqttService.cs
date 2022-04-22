@@ -17,12 +17,6 @@ namespace NetCoreMQTTExampleCluster.Cluster;
 /// <summary>
 /// The main class that runs the MQTT service.
 /// </summary>
-/// <seealso cref="BackgroundService"/>
-/// <seealso cref="IMqttServerSubscriptionInterceptor"/>
-/// <seealso cref="IMqttServerUnsubscriptionInterceptor"/>
-/// <seealso cref="IMqttServerApplicationMessageInterceptor"/>
-/// <seealso cref="IMqttServerConnectionValidator"/>
-/// <seealso cref="IMqttServerClientDisconnectedHandler"/>
 public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor, IMqttServerUnsubscriptionInterceptor, IMqttServerApplicationMessageInterceptor, IMqttServerConnectionValidator, IMqttServerClientDisconnectedHandler
 {
     /// <summary>
@@ -63,12 +57,6 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     }
 
     /// <inheritdoc cref="BackgroundService"/>
-    /// <summary>
-    /// Triggered when the application host is ready to start the service.
-    /// </summary>
-    /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
-    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    /// <seealso cref="BackgroundService"/>
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
         this.logger.Information("Starting MQTT server...");
@@ -120,12 +108,6 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     }
 
     /// <inheritdoc cref="BackgroundService"/>
-    /// <summary>
-    /// Triggered when the application host is performing a graceful shutdown.
-    /// </summary>
-    /// <param name="cancellationToken">Indicates that the shutdown process should no longer be graceful.</param>
-    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    /// <seealso cref="BackgroundService"/>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         this.logger.Information("Stopping MQTT server...");
@@ -141,6 +123,16 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         {
             Environment.ExitCode = 1;
             this.logger.Fatal("An error occurred: {@ex}.", ex);
+        }
+    }
+
+    /// <inheritdoc cref="BackgroundService"/>
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            this.logger.Information("Heartbeat.");
+            await Task.Delay(this.clusterConfiguration.HeartbeatIntervalInMilliseconds, stoppingToken);
         }
     }
 
@@ -234,23 +226,6 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         catch (Exception ex)
         {
             this.logger.Error("An error occurred: {@ex}.", ex);
-        }
-    }
-
-    /// <inheritdoc cref="BackgroundService"/>
-    /// <summary>
-    /// This method is called when the <see cref="BackgroundService"/> starts. The implementation should return a task that represents
-    /// the lifetime of the long running operation(s) being performed.
-    /// </summary>
-    /// <param name="stoppingToken">Triggered when <see cref="BackgroundService.StopAsync(CancellationToken)"/> is called.</param>
-    /// <returns>A <see cref="Task"/> that represents the long running operations.</returns>
-    /// <seealso cref="BackgroundService"/>
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            this.logger.Information("Heartbeat.");
-            await Task.Delay(this.clusterConfiguration.HeartbeatIntervalInMilliseconds, stoppingToken);
         }
     }
 

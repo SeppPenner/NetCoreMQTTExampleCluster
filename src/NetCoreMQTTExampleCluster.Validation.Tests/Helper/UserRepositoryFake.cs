@@ -10,10 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Validation.Tests.Helper;
 
 /// <inheritdoc cref="IUserRepository" />
-/// <summary>
-///  A fake implementation supporting the repository pattern to work with <see cref="User" />s.
-/// </summary>
-/// <seealso cref="IUserRepository" />
 public class UserRepositoryFake : IUserRepository
 {
     /// <summary>
@@ -98,11 +94,6 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets a <see cref="List{T}" /> of all <see cref="User" />s.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<List<User>> GetUsers()
     {
         await Task.Delay(1);
@@ -110,12 +101,6 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets a <see cref="User" /> by their identifier.
-    /// </summary>
-    /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<User> GetUserById(Guid userId)
     {
         await Task.Delay(1);
@@ -123,23 +108,13 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets a <see cref="User" /> by their user name.
-    /// </summary>
-    /// <param name="userName">The <see cref="User" />'s name to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<User> GetUserByName(string userName)
     {
         await Task.Delay(1);
         return this.users.FirstOrDefault(u => u.UserName == userName);
     }
 
-    /// <summary>
-    /// Gets a <see cref="User" />'s name and identifier by their user name.
-    /// </summary>
-    /// <param name="userName">The <see cref="User" />'s name to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+    /// <inheritdoc cref="IUserRepository" />
     public async Task<(string, Guid)> GetUserNameAndUserIdByName(string userName)
     {
         await Task.Delay(1);
@@ -148,12 +123,6 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets a <see cref="bool" /> value indicating whether the user name already exists or not.
-    /// </summary>
-    /// <param name="userName">The user name to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<bool> UserNameExists(string userName)
     {
         await Task.Delay(1);
@@ -161,12 +130,6 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Inserts a <see cref="User" /> to the database.
-    /// </summary>
-    /// <param name="user">The <see cref="User" /> to insert.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<bool> InsertUser(User user)
     {
         await Task.Delay(1);
@@ -175,13 +138,6 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets the blacklist items for a <see cref="User" />.
-    /// </summary>
-    /// <param name="userId">The user identifier to query for.</param>
-    /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type)
     {
         await Task.Delay(1);
@@ -189,13 +145,6 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets the whitelist items for a <see cref="User" />.
-    /// </summary>
-    /// <param name="userId">The user identifier to query for.</param>
-    /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type)
     {
         await Task.Delay(1);
@@ -203,22 +152,13 @@ public class UserRepositoryFake : IUserRepository
     }
 
     /// <inheritdoc cref="IUserRepository" />
-    /// <summary>
-    /// Gets the client identifier prefixes for all <see cref="User" />s.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IUserRepository" />
     public async Task<List<string>> GetAllClientIdPrefixes()
     {
         await Task.Delay(1);
         return this.users.Select(u => u.ClientIdPrefix ?? string.Empty).ToList();
     }
 
-    /// <summary>
-    /// Gets a <see cref="User" />'s <see cref="UserData"/> by their identifier.
-    /// </summary>
-    /// <param name="userId">The <see cref="User" />'s identifier to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+    /// <inheritdoc cref="IUserRepository" />
     public async Task<UserData> GetUserData(Guid userId)
     {
         await Task.Delay(1);

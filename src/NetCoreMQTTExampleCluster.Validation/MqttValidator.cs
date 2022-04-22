@@ -10,10 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Validation;
 
 /// <inheritdoc cref="IMqttValidator"/>
-/// <summary>
-/// A class to validate the different MQTT contexts.
-/// </summary>
-/// <seealso cref="IMqttValidator"/>
 public class MqttValidator : IMqttValidator
 {
     /// <summary>
@@ -22,14 +18,6 @@ public class MqttValidator : IMqttValidator
     private static readonly ILogger Logger = Log.ForContext<MqttValidator>();
 
     /// <inheritdoc cref="IMqttValidator"/>
-    /// <summary>
-    /// Validates the connection.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="user">The user.</param>
-    /// <param name="passwordHasher">The password hasher.</param>
-    /// <returns>A value indicating whether the connection is accepted or not.</returns>
-    /// <seealso cref="IMqttValidator"/>
     public bool ValidateConnection(SimpleMqttConnectionValidatorContext context, User user, IPasswordHasher<User> passwordHasher)
     {
         Logger.Debug("Executed ValidateConnection with parameters: {@context}, {@user}.", context, user);
@@ -81,17 +69,6 @@ public class MqttValidator : IMqttValidator
     }
 
     /// <inheritdoc cref="IMqttValidator"/>
-    /// <summary>
-    /// Validates the message publication.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="blacklist">The blacklist.</param>
-    /// <param name="whitelist">The whitelist.</param>
-    /// <param name="user">The user.</param>
-    /// <param name="dataLimitCacheMonth">The data limit cache for the month.</param>
-    /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
-    /// <returns>A value indicating whether the published message is accepted or not.</returns>
-    /// <seealso cref="IMqttValidator"/>
     public bool ValidatePublish(
         MqttApplicationMessageInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
@@ -184,16 +161,6 @@ public class MqttValidator : IMqttValidator
     }
 
     /// <inheritdoc cref="IMqttValidator"/>
-    /// <summary>
-    /// Validates the subscription.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="blacklist">The blacklist.</param>
-    /// <param name="whitelist">The whitelist.</param>
-    /// <param name="user">The user.</param>
-    /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
-    /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-    /// <seealso cref="IMqttValidator"/>
     public bool ValidateSubscription(
         MqttSubscriptionInterceptorContext context,
         List<BlacklistWhitelist> blacklist,

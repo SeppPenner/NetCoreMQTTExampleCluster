@@ -10,10 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Grains;
 
 /// <inheritdoc cref="IMqttClientGrain" />
-/// <summary>
-/// The grain for one client identifier.
-/// </summary>
-/// <seealso cref="IMqttClientGrain" />
 public class MqttClientGrain : Grain, IMqttClientGrain
 {
     /// <summary>
@@ -62,12 +58,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     private ILogger logger;
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MqttClientGrain" /> class.
-    /// </summary>
-    /// <param name="userRepository">The user repository.</param>
-    /// <param name="mqttValidator">The MQTT validator.</param>
-    /// <seealso cref="IMqttClientGrain" />
     public MqttClientGrain(IUserRepository userRepository, IMqttValidator mqttValidator)
     {
         this.userRepository = userRepository;
@@ -76,13 +66,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="Grain" />
-    /// <summary>
-    /// This method is called at the end of the process of activating a grain.
-    /// It is called before any messages have been dispatched to the grain.
-    /// For grains with declared persistent state, this method is called after the State property has been populated.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="Grain" />
     public override Task OnActivateAsync()
     {
         this.clientId = this.GetPrimaryKeyString();
@@ -91,12 +74,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    /// <summary>
-    /// Proceeds the connection for one client identifier.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns>A value indicating whether the connection is accepted or not.</returns>
-    /// <seealso cref="IMqttClientGrain" />
     public async Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context)
     {
         try
@@ -119,12 +96,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    /// <summary>
-    /// Proceeds the published message for one client identifier.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns>A value indicating whether the published message is accepted or not.</returns>
-    /// <seealso cref="IMqttClientGrain" />
     public Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context)
     {
         try
@@ -140,12 +111,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    /// <summary>
-    /// Proceeds the subscription for one client identifier.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-    /// <seealso cref="IMqttClientGrain" />
     public Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context)
     {
         try
@@ -161,11 +126,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    /// <summary>
-    /// Checks whether the user is a user used for synchronization.
-    /// </summary>
-    /// <returns>A value indicating whether the user is a broker user or not.</returns>
-    /// <seealso cref="IMqttClientGrain" />
     public Task<bool> IsUserBrokerUser()
     {
         try
@@ -181,12 +141,6 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    /// <summary>
-    /// Tells the grain to refresh its cache.
-    /// </summary>
-    /// <param name="force">Forces a cache update.</param>
-    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    /// <seealso cref="IMqttClientGrain" />
     public async Task RefreshCache(bool force)
     {
         if (!force)

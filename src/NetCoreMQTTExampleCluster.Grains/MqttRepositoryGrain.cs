@@ -31,10 +31,6 @@ namespace NetCoreMQTTExampleCluster.Grains
     using Serilog;
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    /// <summary>
-    /// The grain for a repository to manage the brokers.
-    /// </summary>
-    /// <seealso cref="IMqttRepositoryGrain" />
     [Reentrant]
     public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     {
@@ -69,12 +65,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         private ILogger logger;
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MqttRepositoryGrain" /> class.
-        /// </summary>
-        /// <param name="eventLogRepository">The event log repository.</param>
-        /// <param name="publishMessageRepository">The publish message repository.</param>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public MqttRepositoryGrain(IEventLogRepository eventLogRepository, IPublishMessageRepository publishMessageRepository)
         {
             this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
@@ -83,13 +73,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="Grain" />
-        /// <summary>
-        /// This method is called at the end of the process of activating a grain.
-        /// It is called before any messages have been dispatched to the grain.
-        /// For grains with declared persistent state, this method is called after the State property has been populated.
-        /// </summary>
-        /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-        /// <seealso cref="Grain" />
         public override Task OnActivateAsync()
         {
             this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
@@ -97,10 +80,7 @@ namespace NetCoreMQTTExampleCluster.Grains
             return base.OnActivateAsync();
         }
 
-        /// <summary>
-        /// This method is called at the beginning of the process of deactivating a grain.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+        /// <inheritdoc cref="Grain" />
         public override async Task OnDeactivateAsync()
         {
             await this.OnTimer(null);
@@ -108,13 +88,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Connects a broker to the grain.
-        /// </summary>
-        /// <param name="brokerConnectionSettings">The broker connection settings.</param>
-        /// <param name="brokerId">The broker identifier.</param>
-        /// <exception cref="ArgumentNullException">Thrown when the broker connection settings or the broker identifier is <c>null</c>.</exception>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public Task ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId)
         {
             if (brokerConnectionSettings is null)
@@ -143,11 +116,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Disconnects the broker from the grain.
-        /// </summary>
-        /// <param name="brokerId">The broker identifier.</param>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public Task DisconnectBroker(Guid brokerId)
         {
             if (brokerId == default)
@@ -171,12 +139,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Proceeds the connection for one client identifier.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>A value indicating whether the connection is accepted or not.</returns>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public async Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context)
         {
             try
@@ -208,12 +170,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Proceeds the disconnection for one client identifier.
-        /// </summary>
-        /// <param name="eventArgs">The event args.</param>
-        /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public Task ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
         {
             if (eventArgs is null)
@@ -239,13 +195,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Proceeds the published message.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="brokerId">The broker identifier.</param>
-        /// <returns>A value indicating whether the published message is accepted or not.</returns>
-        /// <seealso cref="IMqttRepositoryGrain" />
         [AlwaysInterleave]
         public async Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context, Guid brokerId)
         {
@@ -292,12 +241,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Proceeds the subscription.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public async Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context)
         {
             try
@@ -329,12 +272,6 @@ namespace NetCoreMQTTExampleCluster.Grains
         }
 
         /// <inheritdoc cref="IMqttRepositoryGrain" />
-        /// <summary>
-        /// Proceeds the unsubscription for one client identifier.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns>A <see cref="Task" /> returning any asynchronous operation.</returns>
-        /// <seealso cref="IMqttRepositoryGrain" />
         public Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context)
         {
             if (context is null)

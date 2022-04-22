@@ -10,10 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 
 /// <inheritdoc cref="IDatabaseVersionRepository" />
-/// <summary>
-/// An implementation supporting the repository pattern to work with <see cref="DatabaseVersion" />s.
-/// </summary>
-/// <seealso cref="IDatabaseVersionRepository" />
 public class DatabaseVersionRepository : IDatabaseVersionRepository
 {
     /// <summary>
@@ -31,11 +27,6 @@ public class DatabaseVersionRepository : IDatabaseVersionRepository
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />
-    /// <summary>
-    /// Gets a <see cref="List{T}" /> of all <see cref="DatabaseVersion" />s.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseVersionRepository" />
     public async Task<List<DatabaseVersion>> GetDatabaseVersions()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -45,12 +36,6 @@ public class DatabaseVersionRepository : IDatabaseVersionRepository
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />
-    /// <summary>
-    /// Gets a <see cref="DatabaseVersion" /> by its identifier.
-    /// </summary>
-    /// <param name="databaseVersionId">The <see cref="DatabaseVersion" />'s identifier.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseVersionRepository" />
     public async Task<DatabaseVersion> GetDatabaseVersionById(Guid databaseVersionId)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -59,12 +44,6 @@ public class DatabaseVersionRepository : IDatabaseVersionRepository
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />
-    /// <summary>
-    /// Gets a <see cref="DatabaseVersion" /> by its name.
-    /// </summary>
-    /// <param name="databaseVersionName">The <see cref="DatabaseVersion" />'s name to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseVersionRepository" />
     public async Task<DatabaseVersion> GetDatabaseVersionByName(string databaseVersionName)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -73,12 +52,6 @@ public class DatabaseVersionRepository : IDatabaseVersionRepository
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />
-    /// <summary>
-    /// Inserts a <see cref="DatabaseVersion" /> to the database.
-    /// </summary>
-    /// <param name="package">The <see cref="DatabaseVersion" /> to insert.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseVersionRepository" />
     public async Task<bool> InsertDatabaseVersion(DatabaseVersion package)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());

@@ -7,12 +7,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.Cluster.Configuration;
+namespace NetCoreMQTTExampleCluster.Models.Configuration;
 
+/// <inheritdoc cref="IConfigurationValid"/>
 /// <summary>
 /// A class that contains the <see cref="ClusterConfiguration" /> read from the JSON settings file.
 /// </summary>
-public class ClusterConfiguration
+public class ClusterConfiguration : IConfigurationValid
 {
     /// <summary>
     /// Gets or sets the log folder path.
@@ -48,4 +49,20 @@ public class ClusterConfiguration
     /// Gets or sets the database settings.
     /// </summary>
     public MqttDatabaseConnectionSettings DatabaseSettings { get; set; }
+
+    /// <inheritdoc cref="IConfigurationValid"/>
+    public bool IsValid()
+    {
+        if (string.IsNullOrWhiteSpace(this.LogFolderPath))
+        {
+            throw new ConfigurationException("The log folder path is empty.");
+        }
+
+        if (!this.Port.IsValid())
+        {
+            throw new ConfigurationException("The port is empty.");
+        }
+
+        return true;
+    }
 }

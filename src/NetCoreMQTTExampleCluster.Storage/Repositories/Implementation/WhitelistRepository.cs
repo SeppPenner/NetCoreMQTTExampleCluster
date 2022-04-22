@@ -10,10 +10,6 @@
 namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 
 /// <inheritdoc cref="IWhitelistRepository" />
-/// <summary>
-/// An implementation supporting the repository pattern to work with <see cref="BlacklistWhitelist" />s.
-/// </summary>
-/// <seealso cref="IWhitelistRepository" />
 public class WhitelistRepository : IWhitelistRepository
 {
     /// <summary>
@@ -31,11 +27,6 @@ public class WhitelistRepository : IWhitelistRepository
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />
-    /// <summary>
-    /// Gets a <see cref="List{T}" /> of all <see cref="BlacklistWhitelist" /> items.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IWhitelistRepository" />
     public async Task<List<BlacklistWhitelist>> GetAllWhitelistItems()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -45,12 +36,6 @@ public class WhitelistRepository : IWhitelistRepository
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />
-    /// <summary>
-    /// Gets a <see cref="BlacklistWhitelist" /> item by its identifier.
-    /// </summary>
-    /// <param name="whitelistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IWhitelistRepository" />
     public async Task<BlacklistWhitelist> GetWhitelistItemById(Guid whitelistItemId)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -59,13 +44,6 @@ public class WhitelistRepository : IWhitelistRepository
     }
 
     /// <inheritdoc cref="IBlacklistRepository" />
-    /// <summary>
-    /// Gets a <see cref="BlacklistWhitelist" /> item by its type.
-    /// </summary>
-    /// <param name="whitelistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
-    /// <param name="whitelistItemType">The <see cref="BlacklistWhitelistType" /> to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IBlacklistRepository" />
     public async Task<BlacklistWhitelist> GetWhitelistItemByIdAndType(Guid whitelistItemId, BlacklistWhitelistType whitelistItemType)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -74,12 +52,6 @@ public class WhitelistRepository : IWhitelistRepository
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />
-    /// <summary>
-    /// Gets a <see cref="BlacklistWhitelist" /> item by its type.
-    /// </summary>
-    /// <param name="whitelistItemType">The <see cref="BlacklistWhitelist" />'s type to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IWhitelistRepository" />
     public async Task<BlacklistWhitelist> GetWhitelistItemByType(BlacklistWhitelistType whitelistItemType)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -88,12 +60,6 @@ public class WhitelistRepository : IWhitelistRepository
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />
-    /// <summary>
-    /// Inserts a <see cref="BlacklistWhitelist" /> item to the database.
-    /// </summary>
-    /// <param name="whitelistItem">The <see cref="BlacklistWhitelist" /> item to insert.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IWhitelistRepository" />
     public async Task<bool> InsertWhitelistItem(BlacklistWhitelist whitelistItem)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());

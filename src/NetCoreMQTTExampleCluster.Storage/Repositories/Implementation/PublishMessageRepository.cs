@@ -13,7 +13,6 @@ namespace NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 /// <summary>
 /// An implementation supporting the repository pattern to work with <see cref="PublishMessage" />s.
 /// </summary>
-/// <seealso cref="IPublishMessageRepository" />
 public class PublishMessageRepository : IPublishMessageRepository
 {
     /// <summary>
@@ -32,11 +31,6 @@ public class PublishMessageRepository : IPublishMessageRepository
     }
 
     /// <inheritdoc cref="IPublishMessageRepository" />
-    /// <summary>
-    /// Gets a <see cref="List{T}"/> of all <see cref="PublishMessage"/>s.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IPublishMessageRepository" />
     public async Task<List<PublishMessage>> GetPublishMessages()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -46,12 +40,6 @@ public class PublishMessageRepository : IPublishMessageRepository
     }
 
     /// <inheritdoc cref="IPublishMessageRepository" />
-    /// <summary>
-    /// Gets a <see cref="PublishMessage" /> by its identifier.
-    /// </summary>
-    /// <param name="publishMessageId">The <see cref="PublishMessage"/>'s identifier to query for.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IPublishMessageRepository" />
     public async Task<PublishMessage> GetPublishMessageById(Guid publishMessageId)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -60,12 +48,6 @@ public class PublishMessageRepository : IPublishMessageRepository
     }
 
     /// <inheritdoc cref="IPublishMessageRepository" />
-    /// <summary>
-    /// Inserts a <see cref="PublishMessage" /> to the database.
-    /// </summary>
-    /// <param name="publishMessage">The <see cref="PublishMessage" /> to insert.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IPublishMessageRepository" />
     public async Task<bool> InsertPublishMessage(PublishMessage publishMessage)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -75,12 +57,6 @@ public class PublishMessageRepository : IPublishMessageRepository
     }
 
     /// <inheritdoc cref="IPublishMessageRepository" />
-    /// <summary>
-    /// Inserts a <see cref="List{T}"/> of <see cref="PublishMessage" />s to the database.
-    /// </summary>
-    /// <param name="publishMessages">The <see cref="List{T}"/> of <see cref="PublishMessage" />s to insert.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IPublishMessageRepository" />
     public async Task<bool> InsertPublishMessages(List<PublishMessage> publishMessages)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());

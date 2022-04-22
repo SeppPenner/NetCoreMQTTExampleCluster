@@ -9,9 +9,7 @@
 
 namespace NetCoreMQTTExampleCluster.Storage;
 
-/// <summary>
-/// An implementation to work with the database.
-/// </summary>
+/// <inheritdoc cref="IDatabaseHelper" />
 public class DatabaseHelper : IDatabaseHelper
 {
     /// <summary>
@@ -34,12 +32,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the database.
-    /// </summary>
-    /// <param name="database">The database to create.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the number of affected rows.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateDatabase(string database)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
@@ -56,12 +48,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Deletes the database.
-    /// </summary>
-    /// <param name="database">The database to delete.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the number of affected rows.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task DeleteDatabase(string database)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToAdminConnectionString());
@@ -71,12 +57,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates all tables.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the number of affected rows.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateAllTables(bool forceDelete)
     {
         await this.CreateEventLogTable(forceDelete);
@@ -88,12 +68,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the event log table.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateEventLogTable(bool forceDelete)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -120,12 +94,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the publish message table.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreatePublishMessageTable(bool forceDelete)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -152,12 +120,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the database version table.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool" /> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateDatabaseVersionTable(bool forceDelete)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -185,12 +147,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the whitelist table.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool" /> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateWhitelistTable(bool forceDelete)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -218,12 +174,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the blacklist table.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool" /> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateBlacklistTable(bool forceDelete)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -251,12 +201,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates the user table.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool" /> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateUserTable(bool forceDelete)
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -284,11 +228,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Enables the TimeScaleDB extension.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task EnableTimeScaleDbExtension()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -300,11 +239,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Enables the TimeScaleDB extension.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateHyperTables()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -317,11 +251,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Created the Orleans tables.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateOrleansTables()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
@@ -357,11 +286,6 @@ public class DatabaseHelper : IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    /// <summary>
-    /// Creates a compound index for the publish message table on timestamp and client identifier.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    /// <seealso cref="IDatabaseHelper" />
     public async Task CreateCompoundIndex()
     {
         await using var connection = new NpgsqlConnection(this.connectionSettings.ToConnectionString());
