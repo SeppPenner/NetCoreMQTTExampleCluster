@@ -23,7 +23,7 @@ public class TestValidation
     /// <summary>
     /// The client identifier prefixes.
     /// </summary>
-    private static readonly List<string> ClientIdPrefixes = new List<string> { "Test" };
+    private static readonly List<string> ClientIdPrefixes = new() { "Test" };
 
     /// <summary>
     /// The MQTT validator.

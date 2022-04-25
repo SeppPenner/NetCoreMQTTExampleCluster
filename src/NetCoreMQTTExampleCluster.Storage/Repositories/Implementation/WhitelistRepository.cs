@@ -16,7 +16,7 @@ public class WhitelistRepository: BaseRepository, IWhitelistRepository
     /// Initializes a new instance of the <see cref="WhitelistRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public WhitelistRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
+    public WhitelistRepository(IMqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
     }
 

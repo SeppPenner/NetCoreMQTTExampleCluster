@@ -7,6 +7,7 @@ global using Dapper;
 global using MQTTnet.Protocol;
 
 global using NetCoreMQTTExampleCluster.Storage.Data;
+global using NetCoreMQTTExampleCluster.Storage.Interfaces;
 global using NetCoreMQTTExampleCluster.Storage.Mappers;
 global using NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;
 global using NetCoreMQTTExampleCluster.Storage.Repositories.Interfaces;

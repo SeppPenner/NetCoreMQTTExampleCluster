@@ -16,7 +16,7 @@ public class BlacklistRepository : BaseRepository, IBlacklistRepository
     /// Initializes a new instance of the <see cref="BlacklistRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public BlacklistRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
+    public BlacklistRepository(IMqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
     }
 

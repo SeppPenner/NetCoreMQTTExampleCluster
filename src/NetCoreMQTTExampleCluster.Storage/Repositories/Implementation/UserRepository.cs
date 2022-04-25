@@ -19,7 +19,7 @@ public class UserRepository: BaseRepository, IUserRepository
     /// Initializes a new instance of the <see cref="UserRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public UserRepository(MqttDatabaseConnectionSettings connectionSettings): base(connectionSettings)
+    public UserRepository(IMqttDatabaseConnectionSettings connectionSettings): base(connectionSettings)
     {
     }
 

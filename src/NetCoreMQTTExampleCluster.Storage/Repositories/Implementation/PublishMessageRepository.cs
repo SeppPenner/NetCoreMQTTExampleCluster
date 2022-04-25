@@ -19,7 +19,7 @@ public class PublishMessageRepository : BaseRepository, IPublishMessageRepositor
     /// Initializes a new instance of the <see cref="PublishMessageRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public PublishMessageRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
+    public PublishMessageRepository(IMqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
     }
 

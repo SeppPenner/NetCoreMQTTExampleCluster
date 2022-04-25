@@ -21,7 +21,7 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
     /// Initializes a new instance of the <see cref="DatabaseHelper" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public DatabaseHelper(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
+    public DatabaseHelper(IMqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
     }
 

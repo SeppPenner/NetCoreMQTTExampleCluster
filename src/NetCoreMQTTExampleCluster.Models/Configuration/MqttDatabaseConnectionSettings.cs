@@ -9,12 +9,13 @@
 
 namespace NetCoreMQTTExampleCluster.Models;
 
+/// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
 /// <inheritdoc cref="IConfigurationValid"/>
 /// <summary>
 /// A class for the database connection settings.
 /// </summary>
 [Serializable]
-public class MqttDatabaseConnectionSettings : IConfigurationValid
+public class MqttDatabaseConnectionSettings : IMqttDatabaseConnectionSettings, IConfigurationValid
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttDatabaseConnectionSettings"/> class.
@@ -38,54 +39,34 @@ public class MqttDatabaseConnectionSettings : IConfigurationValid
         this.Timezone = other.Timezone;
     }
 
-    /// <summary>
-    /// Gets or sets the host of the database.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string Host { get; set; } = "localhost";
 
-    /// <summary>
-    /// Gets or sets the database name.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string Database { get; set; } = "mqtt";
 
-    /// <summary>
-    /// Gets or sets the user name.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string Username { get; set; } = "postgres";
 
-    /// <summary>
-    /// Gets or sets the password.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string Password { get; set; } = "postgres";
 
-    /// <summary>
-    /// Gets or sets the port.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public int Port { get; set; } = 5432;
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the pooling is enabled or not.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public bool Pooling { get; set; }
 
-    /// <summary>
-    /// Gets or sets the time zone.
-    /// </summary>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string Timezone { get; set; } = "Europe/Berlin";
 
-    /// <summary>
-    /// Gets the connection string.
-    /// </summary>
-    /// <returns>The connection string from the connection settings.</returns>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string ToConnectionString()
     {
         return $"Host={this.Host};Port={this.Port};Username={this.Username};Password={this.Password};Database={this.Database};Pooling={this.Pooling};Timezone={this.Timezone};Enlist=false;Maximum Pool Size=400;ConvertInfinityDateTime=true";
     }
 
-    /// <summary>
-    /// Gets the administrator connection string.
-    /// </summary>
-    /// <returns>The administrator connection string from the connection settings.</returns>
+    /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string ToAdminConnectionString()
     {
         return $"Host={this.Host};Port={this.Port};Username={this.Username};Password={this.Password};Database=postgres;Pooling={this.Pooling};Timezone={this.Timezone};Enlist=false;Maximum Pool Size=400;ConvertInfinityDateTime=true";

@@ -16,7 +16,7 @@ public class DatabaseVersionRepository : BaseRepository, IDatabaseVersionReposit
     /// Initializes a new instance of the <see cref="DatabaseVersionRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public DatabaseVersionRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
+    public DatabaseVersionRepository(IMqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
     }
 

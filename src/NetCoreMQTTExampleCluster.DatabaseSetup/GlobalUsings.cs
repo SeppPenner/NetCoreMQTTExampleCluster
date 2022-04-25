@@ -3,6 +3,7 @@ global using System.Reflection;
 
 global using Microsoft.AspNetCore.Identity;
 
+global using NetCoreMQTTExampleCluster.Models;
 global using NetCoreMQTTExampleCluster.Storage;
 global using NetCoreMQTTExampleCluster.Storage.Data;
 global using NetCoreMQTTExampleCluster.Storage.Repositories.Implementation;

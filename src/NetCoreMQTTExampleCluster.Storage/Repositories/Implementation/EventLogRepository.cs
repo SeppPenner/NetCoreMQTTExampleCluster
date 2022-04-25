@@ -16,7 +16,7 @@ public class EventLogRepository : BaseRepository, IEventLogRepository
     /// Initializes a new instance of the <see cref="EventLogRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public EventLogRepository(MqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
+    public EventLogRepository(IMqttDatabaseConnectionSettings connectionSettings) : base(connectionSettings)
     {
     }
 

@@ -17,13 +17,13 @@ public class BaseRepository
     /// <summary>
     /// The connection settings to use.
     /// </summary>
-    protected readonly MqttDatabaseConnectionSettings ConnectionSettings;
+    protected readonly IMqttDatabaseConnectionSettings ConnectionSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseRepository" /> class.
     /// </summary>
     /// <param name="connectionSettings">The connection settings to use.</param>
-    public BaseRepository(MqttDatabaseConnectionSettings connectionSettings)
+    public BaseRepository(IMqttDatabaseConnectionSettings connectionSettings)
     {
         this.ConnectionSettings = connectionSettings;
         SqlMapper.AddTypeHandler(typeof(PublishedMessagePayload), new JsonMapper<PublishedMessagePayload>());
