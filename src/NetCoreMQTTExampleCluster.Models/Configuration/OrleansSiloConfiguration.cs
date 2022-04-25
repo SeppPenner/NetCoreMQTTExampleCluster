@@ -7,18 +7,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.SiloHost.Configuration;
+namespace NetCoreMQTTExampleCluster.Models.Configuration;
 
 /// <summary>
-///  A class that contains the <see cref="OrleansConfiguration" /> read from the JSON settings file.
+///  A class that contains the <see cref="OrleansSiloConfiguration" /> read from the JSON settings file.
 /// </summary>
-public class OrleansConfiguration
+public class OrleansSiloConfiguration : OrleansConfiguration
 {
-    /// <summary>
-    /// Gets or sets the cluster options.
-    /// </summary>
-    public ClusterOptions ClusterOptions { get; set; }
-
     /// <summary>
     /// Gets or sets the dashboard options.
     /// </summary>

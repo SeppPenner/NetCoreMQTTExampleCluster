@@ -23,4 +23,9 @@ public class GlobalConstants
     /// The simple message stream provider name.
     /// </summary>
     public const string SimpleMessageStreamProvider = "SMSProvider";
+
+    /// <summary>
+    /// The repository grain identifier.
+    /// </summary>
+    public const int RepositoryGrainId = 0;
 }

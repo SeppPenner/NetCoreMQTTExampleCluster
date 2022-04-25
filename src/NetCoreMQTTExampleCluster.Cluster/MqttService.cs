@@ -93,7 +93,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
             await this.mqttServer.StartAsync(optionsBuilder.Build());
 
             await this.ConnectOrleansClient();
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             await repositoryGrain.ConnectBroker(this.clusterConfiguration.BrokerConnectionSettings, this.brokerId);
 
             this.logger.Information("Started MQTT server.");
@@ -115,7 +115,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         try
         {
             await this.mqttServer.StopAsync();
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             await repositoryGrain.DisconnectBroker(this.brokerId);
             GC.SuppressFinalize(this);
         }
@@ -145,7 +145,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     {
         try
         {
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             await repositoryGrain.ProceedUnsubscription(context);
         }
         catch (Exception ex)
@@ -163,7 +163,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     {
         try
         {
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             var connectionValid = await repositoryGrain.ProceedConnect(new SimpleMqttConnectionValidatorContext(context));
             context.ReasonCode = connectionValid ? MqttConnectReasonCode.Success : MqttConnectReasonCode.BadUserNameOrPassword;
         }
@@ -182,7 +182,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     {
         try
         {
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             var subscriptionValid = await repositoryGrain.ProceedSubscription(context);
             context.AcceptSubscription = subscriptionValid;
         }
@@ -201,7 +201,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     {
         try
         {
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             var publishValid = await repositoryGrain.ProceedPublish(context, this.brokerId);
             context.AcceptPublish = publishValid;
         }
@@ -220,7 +220,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
     {
         try
         {
-            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(0);
+            var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             await repositoryGrain.ProceedDisconnect(eventArgs);
         }
         catch (Exception ex)
@@ -253,7 +253,6 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
             }).ExecuteAsync(
             async () =>
             {
-                // TODO: check if db connection is needed here or static clustering is the better approach to connect to silo host
                 clusterClient = new ClientBuilder().Configure<ClusterOptions>(
                     options =>
                     {
@@ -263,9 +262,9 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
                     }).UseAdoNetClustering(
                     options =>
                     {
-                        options.Invariant = "Npgsql";
+                        options.Invariant = GlobalConstants.Invariant;
                         options.ConnectionString = this.clusterConfiguration.DatabaseSettings.ToConnectionString();
-                    }).AddSimpleMessageStreamProvider("SMSProvider").ConfigureLogging(
+                    }).AddSimpleMessageStreamProvider(GlobalConstants.SimpleMessageStreamProvider).ConfigureLogging(
                     logging =>
                     {
                         logging.AddSerilog();

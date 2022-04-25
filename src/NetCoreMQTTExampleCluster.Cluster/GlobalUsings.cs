@@ -12,6 +12,7 @@ global using MQTTnet.Protocol;
 global using MQTTnet.Server;
 
 global using NetCoreMQTTExampleCluster.Models.Configuration;
+global using NetCoreMQTTExampleCluster.Models.Constants;
 global using NetCoreMQTTExampleCluster.Grains.Interfaces;
 
 global using Orleans;

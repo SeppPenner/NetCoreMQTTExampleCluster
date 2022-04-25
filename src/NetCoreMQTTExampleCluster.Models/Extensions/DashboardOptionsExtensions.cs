@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.SiloHost.Extensions;
+namespace NetCoreMQTTExampleCluster.Models.Extensions;
 
 /// <summary>
 /// A class that contains extension methods for the <see cref="DashboardOptions"/> class.

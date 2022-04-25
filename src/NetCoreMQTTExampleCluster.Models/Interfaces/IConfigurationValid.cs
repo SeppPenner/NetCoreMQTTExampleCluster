@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.Models.Configuration;
+namespace NetCoreMQTTExampleCluster.Storage.Interfaces;
 
 /// <summary>
 /// An interface to validate all configurations.

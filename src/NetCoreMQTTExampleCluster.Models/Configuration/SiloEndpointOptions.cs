@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.SiloHost.Configuration;
+namespace NetCoreMQTTExampleCluster.Models.Configuration;
 
 /// <summary>
 /// A class that contains the Orleans silo endpoint options.
