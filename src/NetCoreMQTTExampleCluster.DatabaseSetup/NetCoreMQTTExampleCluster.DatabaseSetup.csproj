@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Storage\NetCoreMQTTExampleCluster.Storage.csproj" />
+      <ProjectReference Include="..\NetCoreMQTTExampleCluster.Models\NetCoreMQTTExampleCluster.Models.csproj" />
     </ItemGroup>
 
     <ItemGroup>

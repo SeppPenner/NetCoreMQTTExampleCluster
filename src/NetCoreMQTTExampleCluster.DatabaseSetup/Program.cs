@@ -22,7 +22,7 @@ public static class Program
     /// <summary>
     /// The whitelist repository.
     /// </summary>
-    private static WhitelistRepository whitelistRepository;
+    private static IWhitelistRepository whitelistRepository;
 
     /// <summary>
     /// The user repository.

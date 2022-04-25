@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Grains.Interfaces\NetCoreMQTTExampleCluster.Grains.Interfaces.csproj" />
+        <ProjectReference Include="..\NetCoreMQTTExampleCluster.Storage\NetCoreMQTTExampleCluster.Storage.csproj" />
     </ItemGroup>
 
 </Project>

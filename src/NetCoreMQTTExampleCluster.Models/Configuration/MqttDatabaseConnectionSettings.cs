@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NetCoreMQTTExampleCluster.Storage;
+namespace NetCoreMQTTExampleCluster.Models;
 
 /// <inheritdoc cref="IConfigurationValid"/>
 /// <summary>
@@ -114,31 +114,14 @@ public class MqttDatabaseConnectionSettings : IConfigurationValid
             throw new ConfigurationException("The password is empty.");
         }
 
-
-
         if (!this.Port.IsPortValid())
         {
             throw new ConfigurationException("The port is invalid.");
         }
 
-        if (this.HeartbeatIntervalInMilliseconds <= 0)
+        if (string.IsNullOrWhiteSpace(this.Timezone))
         {
-            throw new ConfigurationException("The heartbeat interval is set to 0 or less.");
-        }
-
-        if (this.BrokerConnectionSettings is null || !this.BrokerConnectionSettings.IsValid())
-        {
-            throw new ConfigurationException("The broker connection is invalid.");
-        }
-
-        if (this.OrleansConfiguration is null || !this.OrleansConfiguration.IsValid())
-        {
-            throw new ConfigurationException("The Orleans configuration is invalid.");
-        }
-
-        if (this.DatabaseSettings is null || !this.DatabaseSettings.IsValid())
-        {
-            throw new ConfigurationException("The database settings are invalid.");
+            throw new ConfigurationException("The time zone is empty.");
         }
 
         return true;
