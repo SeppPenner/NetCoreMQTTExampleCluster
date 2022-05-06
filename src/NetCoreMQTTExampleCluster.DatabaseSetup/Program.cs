@@ -17,22 +17,26 @@ public static class Program
     /// <summary>
     /// The database version repository.
     /// </summary>
-    private static IDatabaseVersionRepository databaseVersionRepository;
+    [NotNull]
+    private static IDatabaseVersionRepository? databaseVersionRepository = null;
 
     /// <summary>
     /// The whitelist repository.
     /// </summary>
-    private static IWhitelistRepository whitelistRepository;
+    [NotNull]
+    private static IWhitelistRepository? whitelistRepository = null;
 
     /// <summary>
     /// The user repository.
     /// </summary>
-    private static IUserRepository userRepository;
+    [NotNull]
+    private static IUserRepository? userRepository = null;
 
     /// <summary>
     /// The database helper.
     /// </summary>
-    private static IDatabaseHelper databaseHelper;
+    [NotNull]
+    private static IDatabaseHelper? databaseHelper = null;
 
     /// <summary>
     /// The main method of the program.

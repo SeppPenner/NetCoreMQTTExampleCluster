@@ -183,7 +183,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         try
         {
             var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var subscriptionValid = await repositoryGrain.ProceedSubscription(context);
+            var subscriptionValid = await repositoryGrain.ProceedSubscription(new SimpleMqttSubscriptionInterceptorContext(context));
             context.AcceptSubscription = subscriptionValid;
         }
         catch (Exception ex)
@@ -202,7 +202,7 @@ public class MqttService : BackgroundService, IMqttServerSubscriptionInterceptor
         try
         {
             var repositoryGrain = clusterClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var publishValid = await repositoryGrain.ProceedPublish(context, this.brokerId);
+            var publishValid = await repositoryGrain.ProceedPublish(new SimpleMqttApplicationMessageInterceptorContext(context), this.brokerId);
             context.AcceptPublish = publishValid;
         }
         catch (Exception ex)

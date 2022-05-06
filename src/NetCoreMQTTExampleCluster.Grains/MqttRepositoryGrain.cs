@@ -62,7 +62,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <inheritdoc cref="Grain" />
     public override async Task OnDeactivateAsync()
     {
-        await this.OnTimer(null);
+        await this.OnTimer(null!);
         await base.OnDeactivateAsync();
     }
 
@@ -175,7 +175,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
     [AlwaysInterleave]
-    public async Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context, Guid brokerId)
+    public async Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context, Guid brokerId)
     {
         try
         {
@@ -220,7 +220,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public async Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context)
+    public async Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context)
     {
         try
         {
@@ -286,7 +286,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <param name="context">The context.</param>
     /// <param name="brokerConnectionSettings">The broker connection settings.</param>
     /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-    private static async Task PublishMessageToBroker(MqttApplicationMessageInterceptorContext context, IBrokerConnectionSettings brokerConnectionSettings)
+    private static async Task PublishMessageToBroker(SimpleMqttApplicationMessageInterceptorContext context, IBrokerConnectionSettings brokerConnectionSettings)
     {
         if (context.ApplicationMessage is null)
         {
@@ -326,7 +326,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <param name="context">The context.</param>
     /// <param name="brokerId">The broker identifier.</param>
     /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-    private async Task PublishMessageToBrokers(MqttApplicationMessageInterceptorContext context, Guid brokerId)
+    private async Task PublishMessageToBrokers(SimpleMqttApplicationMessageInterceptorContext context, Guid brokerId)
     {
         var tasks = this.brokers
             .Where(kvp => kvp.Key != brokerId)
@@ -338,9 +338,8 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <summary>
     /// Runs the timer function and writes the data to the database.
     /// </summary>
-    /// <param name="state">The state object.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    private async Task OnTimer(object state)
+    private async Task OnTimer(object _)
     {
         try
         {

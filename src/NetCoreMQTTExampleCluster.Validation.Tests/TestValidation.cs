@@ -99,9 +99,10 @@ public class TestValidation
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        var mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), null)
+        var mqttConnectionValidatorContext = new SimpleMqttApplicationMessageInterceptorContext()
         {
-            ApplicationMessage = mqttApplicationMessage
+            ApplicationMessage = mqttApplicationMessage,
+            ClientId = "Test"
         };
 
         var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
@@ -124,9 +125,10 @@ public class TestValidation
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        mqttConnectionValidatorContext = new MqttApplicationMessageInterceptorContext("Test", new Dictionary<object, object>(), null)
+        mqttConnectionValidatorContext = new SimpleMqttApplicationMessageInterceptorContext()
         {
-            ApplicationMessage = mqttApplicationMessage
+            ApplicationMessage = mqttApplicationMessage,
+            ClientId = "Test"
         };
 
         result = this.mqttValidator.ValidatePublish(
@@ -168,7 +170,11 @@ public class TestValidation
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        var mqttConnectionValidatorContext = new MqttSubscriptionInterceptorContext("Test", mqttTopicFilter, new Dictionary<object, object>());
+        var mqttConnectionValidatorContext = new SimpleMqttSubscriptionInterceptorContext()
+        {
+            ClientId = "Test",
+            TopicFilter = mqttTopicFilter
+        };
 
         var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
         var whitelist = await this.userRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
@@ -187,7 +193,11 @@ public class TestValidation
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        mqttConnectionValidatorContext = new MqttSubscriptionInterceptorContext("Test", mqttTopicFilter, new Dictionary<object, object>());
+        mqttConnectionValidatorContext = new SimpleMqttSubscriptionInterceptorContext()
+        {
+            ClientId = "Test",
+            TopicFilter = mqttTopicFilter
+        };
 
         result = this.mqttValidator.ValidateSubscription(
             mqttConnectionValidatorContext,

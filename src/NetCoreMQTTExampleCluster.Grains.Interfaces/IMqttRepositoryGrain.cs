@@ -34,7 +34,7 @@ public interface IMqttRepositoryGrain : IGrainWithIntegerKey
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-    Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context);
+    Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context);
 
     /// <summary>
     /// Proceeds the published message.
@@ -42,7 +42,7 @@ public interface IMqttRepositoryGrain : IGrainWithIntegerKey
     /// <param name="context">The context.</param>
     /// <param name="brokerId">The broker identifier.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
-    Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context, Guid brokerId);
+    Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context, Guid brokerId);
 
     /// <summary>
     /// Proceeds the unsubscription for one client identifier.

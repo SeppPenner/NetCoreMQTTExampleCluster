@@ -70,7 +70,7 @@ public class MqttValidator : IMqttValidator
 
     /// <inheritdoc cref="IMqttValidator"/>
     public bool ValidatePublish(
-        MqttApplicationMessageInterceptorContext context,
+        SimpleMqttApplicationMessageInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         User user,
@@ -162,7 +162,7 @@ public class MqttValidator : IMqttValidator
 
     /// <inheritdoc cref="IMqttValidator"/>
     public bool ValidateSubscription(
-        MqttSubscriptionInterceptorContext context,
+        SimpleMqttSubscriptionInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         User user,

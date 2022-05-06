@@ -19,14 +19,14 @@ public interface IMqttClientGrain : IGrainWithStringKey
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-    Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context);
+    Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context);
 
     /// <summary>
     /// Proceeds the published message for one client identifier.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
-    Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context);
+    Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context);
 
     /// <summary>
     /// Proceeds the connection for one client identifier.

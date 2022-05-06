@@ -96,7 +96,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public Task<bool> ProceedPublish(MqttApplicationMessageInterceptorContext context)
+    public Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context)
     {
         try
         {
@@ -111,7 +111,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public Task<bool> ProceedSubscription(MqttSubscriptionInterceptorContext context)
+    public Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context)
     {
         try
         {

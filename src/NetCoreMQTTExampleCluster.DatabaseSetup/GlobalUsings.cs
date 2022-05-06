@@ -1,4 +1,5 @@
 #pragma warning disable IDE0065 // Die using-Anweisung wurde falsch platziert.
+global using System.Diagnostics.CodeAnalysis;
 global using System.Reflection;
 
 global using Microsoft.AspNetCore.Identity;

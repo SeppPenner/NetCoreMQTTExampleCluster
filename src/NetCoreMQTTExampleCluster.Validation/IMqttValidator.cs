@@ -37,7 +37,7 @@ public interface IMqttValidator
     /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
     bool ValidatePublish(
-        MqttApplicationMessageInterceptorContext context,
+        SimpleMqttApplicationMessageInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         User user,
@@ -54,7 +54,7 @@ public interface IMqttValidator
     /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
     bool ValidateSubscription(
-        MqttSubscriptionInterceptorContext context,
+        SimpleMqttSubscriptionInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         User user,
