@@ -25,7 +25,7 @@ public class Program
     public static readonly string EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
     /// <summary>
-    /// Gets or sets the scada configuration.
+    /// Gets or sets the silo host configuration.
     /// </summary>
     public static SiloHostConfiguration Configuration { get; set; } = new();
 

@@ -27,7 +27,7 @@ public class EventLog
     /// <summary>
     /// Gets or sets the event details.
     /// </summary>
-    public string EventDetails { get; set; }
+    public string EventDetails { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the created at timestamp.

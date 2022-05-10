@@ -15,7 +15,7 @@ namespace NetCoreMQTTExampleCluster.Cluster;
 public class Startup
 {
     /// <summary>
-    /// The SCADA configuration.
+    /// The MQTT service configuration.
     /// </summary>
     private readonly ClusterConfiguration mqttConfiguration = new();
 
