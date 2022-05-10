@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="OrleansQueries\PostgreSQL-Persistence.sql" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Dapper" Version="2.0.123" />
         <PackageReference Include="GitVersion.MsBuild" Version="5.10.1">
             <PrivateAssets>all</PrivateAssets>
@@ -23,6 +27,7 @@
     <ItemGroup>
         <EmbeddedResource Include="OrleansQueries\PostgreSQL-Clustering.sql" />
         <EmbeddedResource Include="OrleansQueries\PostgreSQL-Main.sql" />
+        <EmbeddedResource Include="OrleansQueries\PostgreSQL-Persistence.sql" />
         <EmbeddedResource Include="OrleansQueries\PostgreSQL-Reminders.sql" />
     </ItemGroup>
 

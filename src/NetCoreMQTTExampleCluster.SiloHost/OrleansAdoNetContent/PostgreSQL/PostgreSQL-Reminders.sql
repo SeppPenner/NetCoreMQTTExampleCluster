@@ -1,11 +1,11 @@
--- Orleans Reminders table - https://dotnet.github.io/orleans/Documentation/Core-Features/Timers-and-Reminders.html
+-- Orleans Reminders table - https://docs.microsoft.com/dotnet/orleans/grains/timers-and-reminders
 CREATE TABLE OrleansRemindersTable
 (
     ServiceId varchar(150) NOT NULL,
     GrainId varchar(150) NOT NULL,
     ReminderName varchar(150) NOT NULL,
-    StartTime timestamp(3) NOT NULL,
-    Period integer NOT NULL,
+    StartTime timestamptz(3) NOT NULL,
+    Period bigint NOT NULL,
     GrainHash integer NOT NULL,
     Version integer NOT NULL,
 
