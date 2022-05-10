@@ -17,101 +17,102 @@ public class Program
     /// <summary>
     /// The service name.
     /// </summary>
-    private static readonly AssemblyName ServiceName = Assembly.GetExecutingAssembly().GetName();
+    public static readonly AssemblyName ServiceName = Assembly.GetExecutingAssembly().GetName();
+
+    /// <summary>
+    /// The environment name.
+    /// </summary>
+    public static readonly string EnvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+
+    /// <summary>
+    /// Gets or sets the scada configuration.
+    /// </summary>
+    public static SiloHostConfiguration Configuration { get; set; } = new();
 
     /// <summary>
     /// The main method.
     /// </summary>
     /// <param name="args">Some arguments.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    public static async Task Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
-        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-        var configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.AddJsonFile("appsettings.json", false, true);
-
-        if (environment is not null)
-        {
-            configurationBuilder.AddJsonFile($"appsettings.{environment}.json", false, true);
-        }
-
-        var configuration = configurationBuilder.Build();
-
-        var siloHostConfiguration = new SiloHostConfiguration();
-        configuration.Bind(ServiceName.Name, siloHostConfiguration);
-        var logFolderPath = siloHostConfiguration.LogFolderPath;
-
-        var loggerConfiguration = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
-            .MinimumLevel.Debug()
-            .Enrich.FromLogContext()
-            .Enrich.WithExceptionDetails()
-            .Enrich.WithMachineName();
-
-        if (environment != "Development")
-        {
-            loggerConfiguration
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .MinimumLevel.Information()
-                .WriteTo.File(Path.Combine(logFolderPath, $@"{ServiceName.Name}_.txt"), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
-        }
-        else
-        {
-            loggerConfiguration.WriteTo.Console();
-        }
-
-        Log.Logger = loggerConfiguration.CreateLogger();
+        ReadConfiguration();
+        SetupLogging();
 
         try
         {
-            Log.Information($"{ServiceName.Name}, Version {ServiceName.Version}");
-            Log.Information("Starting MQTT broker silo host instance...");
-
-            var host = Host
-                .CreateDefaultBuilder(args)
-                .UseOrleans(
-                    (context, builder) =>
-                    {
-                        ConfigureOrleans(builder, siloHostConfiguration);
-                    })
-                .ConfigureServices(
-                    services =>
-                    {
-                        services.AddSingleton(siloHostConfiguration);
-                        services.AddHostedService<SiloHostService>();
-                    })
-                .UseSerilog()
-                .UseWindowsService()
-                .UseSystemd()
-                .Build();
-
-            await host.RunAsync();
+            Log.Information("Starting {ServiceName}, Version {Version}", ServiceName.Name, ServiceName.Version);
+            Log.Information("Running on {Ports}", GetPorts());
+            var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+            await CreateHostBuilder(args, currentLocation).Build().RunAsync();
         }
         catch (Exception ex)
         {
-            Log.Fatal("An error occurred: {Exception}.", ex);
+            Log.Fatal(ex, "Host terminated unexpectedly.");
+            return 1;
         }
         finally
         {
             Log.CloseAndFlush();
         }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Gets the ports of the service.
+    /// </summary>
+    /// <returns>The ports of the service.</returns>
+    private static List<int> GetPorts()
+    {
+        return new List<int>
+        {
+            Configuration.OrleansConfiguration!.EndpointOptions!.SiloPort,
+            Configuration.OrleansConfiguration!.EndpointOptions!.SiloListeningEndpointPort,
+            Configuration.OrleansConfiguration!.EndpointOptions!.GatewayPort,
+            Configuration.OrleansConfiguration!.EndpointOptions!.GatewayListeningEndpointPort
+        };
+    }
+
+    /// <summary>
+    /// Creates the host builder.
+    /// </summary>
+    /// <param name="args">The arguments.</param>
+    /// <param name="currentLocation">The current assembly location.</param>
+    /// <returns>A new <see cref="IHostBuilder"/>.</returns>
+    private static IHostBuilder CreateHostBuilder(string[] args, string currentLocation)
+    {
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(
+                webBuilder =>
+                {
+                    webBuilder.UseContentRoot(currentLocation);
+                    webBuilder.UseStartup<Startup>();
+                })
+            .UseOrleans(
+               (_, builder) =>
+               {
+                   ConfigureOrleans(builder);
+               })
+            .UseSerilog()
+            .UseWindowsService()
+            .UseSystemd();
     }
 
     /// <summary>
     /// Configures the Orleans silo host startup.
     /// </summary>
     /// <param name="builder">The builder.</param>
-    /// <param name="siloHostConfiguration">The silo host configuration.</param>
-    private static void ConfigureOrleans(ISiloBuilder builder, SiloHostConfiguration siloHostConfiguration)
+    private static void ConfigureOrleans(ISiloBuilder builder)
     {
-        var databaseSettings = siloHostConfiguration.DatabaseSettings;
-        var orleansConfiguration = siloHostConfiguration.OrleansConfiguration;
-        var clusterOptions = orleansConfiguration.ClusterOptions;
+        var databaseSettings = Configuration.DatabaseSettings!;
+        var orleansConfiguration = Configuration.OrleansConfiguration!;
+        var clusterOptions = orleansConfiguration.ClusterOptions!;
 
         builder.ConfigureServices(
             s =>
             {
+                s.AddOptions();
                 s.AddSingleton<IEventLogRepository>(r => new EventLogRepository(databaseSettings));
                 s.AddSingleton<IBlacklistRepository>(u => new BlacklistRepository(databaseSettings));
                 s.AddSingleton<IDatabaseVersionRepository>(u => new DatabaseVersionRepository(databaseSettings));
@@ -145,7 +146,7 @@ public class Program
         builder.Configure<EndpointOptions>(
             options =>
             {
-                var endpointOptions = orleansConfiguration.EndpointOptions;
+                var endpointOptions = orleansConfiguration.EndpointOptions!;
                 endpointOptions.Bind(options);
             });
 
@@ -160,10 +161,61 @@ public class Program
         builder.UseDashboard(
             options =>
             {
-                options.Bind(orleansConfiguration.DashboardOptions);
+                options.Bind(orleansConfiguration.DashboardOptions!);
             });
 
         builder.AddSimpleMessageStreamProvider(GlobalConstants.SimpleMessageStreamProvider);
-        builder.AddMemoryGrainStorage("PubSubStore");
+        builder.AddMemoryGrainStorage(GlobalConstants.PubSubStore);
+    }
+
+    /// <summary>
+    /// Reads the configuration.
+    /// </summary>
+    private static void ReadConfiguration()
+    {
+        var configurationBuilder = new ConfigurationBuilder();
+        configurationBuilder.AddJsonFile("appsettings.json", false, true);
+
+        if (!string.IsNullOrWhiteSpace(EnvironmentName))
+        {
+            var appsettingsFileName = $"appsettings.{EnvironmentName}.json";
+
+            if (File.Exists(appsettingsFileName))
+            {
+                configurationBuilder.AddJsonFile(appsettingsFileName, false, true);
+            }
+        }
+
+        var configuration = configurationBuilder.Build();
+        configuration.Bind(ServiceName.Name, Configuration);
+
+        if (!Configuration.IsValid())
+        {
+            throw new InvalidOperationException("The configuration is invalid!");
+        }
+    }
+
+    /// <summary>
+    /// Setup the logging.
+    /// </summary>
+    private static void SetupLogging()
+    {
+        var loggerConfiguration = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+            .MinimumLevel.Debug()
+            .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
+            .Enrich.WithMachineName();
+
+        if (EnvironmentName != "Development")
+        {
+            loggerConfiguration
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .MinimumLevel.Information()
+                .WriteTo.File(Path.Combine(Configuration.LogFolderPath, $@"{ServiceName.Name}_.txt"), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true);
+        }
+
+        loggerConfiguration.WriteTo.Console();
+        Log.Logger = loggerConfiguration.CreateLogger();
     }
 }

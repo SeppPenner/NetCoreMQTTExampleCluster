@@ -23,4 +23,15 @@ public static class DateTimeExtensions
     {
         return TimeZoneInfo.Local.IsDaylightSavingTime(date) ? TimeSpan.FromHours(2) : TimeSpan.FromHours(1);
     }
+
+    /// <summary>
+    /// Checks for an expired date.
+    /// </summary>
+    /// <param name="timestamp">The timestamp.</param>
+    /// <param name="duration">The duration.</param>
+    /// <returns>True when expired otherwise false.</returns>
+    public static bool IsExpired(this DateTime timestamp, TimeSpan duration)
+    {
+        return timestamp.Add(duration) < DateTimeOffset.Now;
+    }
 }

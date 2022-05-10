@@ -21,7 +21,7 @@ public class OrleansConfiguration : IConfigurationValid
     public ClusterOptions? ClusterOptions { get; set; }
 
     /// <inheritdoc cref="IConfigurationValid"/>
-    public bool IsValid()
+    public virtual bool IsValid()
     {
         if (this.ClusterOptions is null)
         {

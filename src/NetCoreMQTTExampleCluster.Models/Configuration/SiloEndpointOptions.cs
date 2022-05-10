@@ -9,10 +9,11 @@
 
 namespace NetCoreMQTTExampleCluster.Models.Configuration;
 
+/// <inheritdoc cref="IConfigurationValid"/>
 /// <summary>
 /// A class that contains the Orleans silo endpoint options.
 /// </summary>
-public class SiloEndpointOptions
+public class SiloEndpointOptions : IConfigurationValid
 {
     /// <summary>
     /// Gets or sets the advertised IP address.
@@ -48,6 +49,47 @@ public class SiloEndpointOptions
     /// Gets or sets the gateway listening endpoint port.
     /// </summary>
     public int GatewayListeningEndpointPort { get; set; } = 7104;
+
+    /// <inheritdoc cref="IConfigurationValid"/>
+    public bool IsValid()
+    {
+        if (string.IsNullOrWhiteSpace(this.AdvertisedIpAddress))
+        {
+            throw new ConfigurationException("The advertised IP address is empty.");
+        }
+
+        if (!this.SiloPort.IsPortValid())
+        {
+            throw new ConfigurationException("The silo port is invalid.");
+        }
+
+        if (!this.GatewayPort.IsPortValid())
+        {
+            throw new ConfigurationException("The gateway port is invalid.");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.SiloListeningEndpointAddress))
+        {
+            throw new ConfigurationException("The silo listening endpoint IP address is empty.");
+        }
+
+        if (!this.SiloListeningEndpointPort.IsPortValid())
+        {
+            throw new ConfigurationException("The silo listening endpoint port is invalid.");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.GatewayListeningEndpointAddress))
+        {
+            throw new ConfigurationException("The gateway listening endpoint IP address is empty.");
+        }
+
+        if (!this.GatewayListeningEndpointPort.IsPortValid())
+        {
+            throw new ConfigurationException("The gateway listening endpoint port is invalid.");
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Binds the options to the object.

@@ -26,4 +26,15 @@ public static class DateTimeOffsetExtensions
         var timeZoneOffset = newDate.GetTimeZoneOffset();
         return new DateTimeOffset(newDate, timeZoneOffset);
     }
+
+    /// <summary>
+    /// Checks for an expired date.
+    /// </summary>
+    /// <param name="timestamp">The timestamp.</param>
+    /// <param name="duration">The duration.</param>
+    /// <returns>True when expired otherwise false.</returns>
+    public static bool IsExpired(this DateTimeOffset timestamp, TimeSpan duration)
+    {
+        return timestamp.Add(duration) < DateTimeOffset.Now;
+    }
 }

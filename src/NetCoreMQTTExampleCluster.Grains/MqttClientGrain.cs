@@ -35,7 +35,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     /// <summary>
     /// The user.
     /// </summary>
-    private User user;
+    private User? user;
 
     /// <summary>
     /// The user data.
@@ -100,7 +100,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            var result = this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.user, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
+            var result = this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.user!, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
             return Task.FromResult(result);
         }
         catch (Exception ex)
@@ -115,7 +115,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            var result = this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.user, this.userData.ClientIdPrefixes);
+            var result = this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.user!, this.userData.ClientIdPrefixes);
             return Task.FromResult(result);
         }
         catch (Exception ex)
@@ -130,7 +130,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            var result = this.user.IsSyncUser;
+            var result = this.user!.IsSyncUser;
             return Task.FromResult(result);
         }
         catch (Exception ex)
@@ -151,7 +151,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
             }
         }
 
-        this.userData = await this.userRepository.GetUserData(this.user.Id);
+        this.userData = await this.userRepository.GetUserData(this.user!.Id);
         this.cacheLoaded = true;
     }
 }

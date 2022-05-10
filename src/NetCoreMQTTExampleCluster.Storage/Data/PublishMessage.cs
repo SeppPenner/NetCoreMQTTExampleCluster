@@ -32,7 +32,7 @@ public class PublishMessage
     /// <summary>
     /// Gets or sets the payload.
     /// </summary>
-    public PublishedMessagePayload Payload { get; set; }
+    public PublishedMessagePayload Payload { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the quality of service level.

@@ -33,7 +33,12 @@ public class ClusterConfiguration : IConfigurationValid
     /// <summary>
     /// Gets or sets the heartbeat interval in milliseconds.
     /// </summary>
-    public int HeartbeatIntervalInMilliseconds { get; set; }
+    public int HeartbeatIntervalInMilliSeconds { get; set; }
+
+    /// <summary>
+    /// Gets or sets the service delay in milliseconds.
+    /// </summary>
+    public int ServiceDelayInMilliSeconds { get; set; }
 
     /// <summary>
     /// Gets or sets the broker connection settings.
@@ -63,9 +68,14 @@ public class ClusterConfiguration : IConfigurationValid
             throw new ConfigurationException("The port is invalid.");
         }
 
-        if (this.HeartbeatIntervalInMilliseconds <= 0)
+        if (this.HeartbeatIntervalInMilliSeconds <= 0)
         {
             throw new ConfigurationException("The heartbeat interval is set to 0 or less.");
+        }
+
+        if (this.ServiceDelayInMilliSeconds <= 0)
+        {
+            throw new ConfigurationException("The service delay interval is set to 0 or less.");
         }
 
         if (this.BrokerConnectionSettings is null || !this.BrokerConnectionSettings.IsValid())

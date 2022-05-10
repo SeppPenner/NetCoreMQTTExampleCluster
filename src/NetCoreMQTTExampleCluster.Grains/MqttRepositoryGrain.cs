@@ -26,12 +26,12 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <summary>
     /// The event log queue.
     /// </summary>
-    private readonly ConcurrentQueue<EventLog> eventLogQueue = new ConcurrentQueue<EventLog>();
+    private readonly ConcurrentQueue<EventLog> eventLogQueue = new();
 
     /// <summary>
     /// The publish message queue.
     /// </summary>
-    private readonly ConcurrentQueue<PublishMessage> publishMessageQueue = new ConcurrentQueue<PublishMessage>();
+    private readonly ConcurrentQueue<PublishMessage> publishMessageQueue = new();
 
     /// <summary>
     /// The publish message repository.
