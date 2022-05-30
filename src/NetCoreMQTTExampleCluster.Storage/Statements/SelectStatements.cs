@@ -62,7 +62,7 @@ public class SelectStatements
             WHERE clientidprefix IS NOT NULL;";
 
     /// <summary>
-    /// A SQL query string to select the user by their identifier.
+    /// A SQL query string to select the MQTT user by their identifier.
     /// </summary>
     public const string SelectUserById =
         @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description, createdat, updatedat, deletedat
@@ -71,7 +71,7 @@ public class SelectStatements
 			AND deletedat IS NULL;";
 
     /// <summary>
-    /// A SQL query string to select the user by their user name.
+    /// A SQL query string to select the MQTT user by their user name.
     /// </summary>
     public const string SelectUserByUserName =
         @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description, createdat, updatedat, deletedat
@@ -80,7 +80,7 @@ public class SelectStatements
 			AND deletedat IS NULL;";
 
     /// <summary>
-    /// A SQL query string to select the user's name and identifier by their user name.
+    /// A SQL query string to select the MQTT user's name and identifier by their user name.
     /// </summary>
     public const string SelectUserNameAndIdByUserName =
         @"SELECT username, id
@@ -183,7 +183,7 @@ public class SelectStatements
 			AND deletedat IS NULL;";
 
     /// <summary>
-    /// A SQL query string to select all blacklist items for a user.
+    /// A SQL query string to select all blacklist items for a MQTT user.
     /// </summary>
     public const string SelectBlacklistItemsForUser =
         @"SELECT id, userid, type, value, createdat, updatedat, deletedat
@@ -192,7 +192,7 @@ public class SelectStatements
 			AND deletedat IS NULL;";
 
     /// <summary>
-    /// A SQL query string to select all whitelist items for a user.
+    /// A SQL query string to select all whitelist items for a MQTT user.
     /// </summary>
     public const string SelectWhitelistItemsForUser =
         @"SELECT id, userid, type, value, createdat, updatedat, deletedat

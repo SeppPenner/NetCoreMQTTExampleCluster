@@ -27,10 +27,10 @@ public static class Program
     private static IWhitelistRepository? whitelistRepository = null;
 
     /// <summary>
-    /// The user repository.
+    /// The MQTT user repository.
     /// </summary>
     [NotNull]
-    private static IUserRepository? userRepository = null;
+    private static IMqttUserRepository? mqttUserRepository = null;
 
     /// <summary>
     /// The database helper.
@@ -46,7 +46,7 @@ public static class Program
     {
         var connectionSettings = await ReadSettingsFile();
 
-        userRepository = new UserRepository(connectionSettings);
+        mqttUserRepository = new MqttUserRepository(connectionSettings);
         databaseVersionRepository = new DatabaseVersionRepository(connectionSettings);
         whitelistRepository = new WhitelistRepository(connectionSettings);
         databaseHelper = new DatabaseHelper(connectionSettings);
@@ -106,7 +106,7 @@ public static class Program
     }
 
     /// <summary>
-    /// Adds the blacklist and whitelist items for the first user.
+    /// Adds the blacklist and whitelist items for the first MQTT user.
     /// </summary>
     /// <param name="userId">The user identifier.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
@@ -164,30 +164,30 @@ public static class Program
     }
 
     /// <summary>
-    /// Inserts the <see cref="User"/>s.
+    /// Inserts the <see cref="MqttUser"/>s.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
     private static async Task<(Guid, Guid)> InsertUsers()
     {
-        var passwordHasher = new PasswordHasher<User>();
+        var passwordHasher = new PasswordHasher<MqttUser>();
 
-        // Add test user
+        // Add test MQTT user
         var userId = Guid.NewGuid();
 
-        var user = new User
+        var mqttUser = new MqttUser
         {
             Id = userId,
             UserName = "Test",
             ValidateClientId = false
         };
 
-        user.PasswordHash = passwordHasher.HashPassword(user, "test");
-        await userRepository.InsertUser(user);
+        mqttUser.PasswordHash = passwordHasher.HashPassword(mqttUser, "test");
+        await mqttUserRepository.InsertUser(mqttUser);
 
-        // Add broker user
+        // Add broker MQTT user
         var user2Id = Guid.NewGuid();
 
-        var user2 = new User
+        var mqttUser2 = new MqttUser
         {
             Id = user2Id,
             UserName = "mqtt-broker-sync",
@@ -196,8 +196,8 @@ public static class Program
             IsSyncUser = true
         };
 
-        user2.PasswordHash = passwordHasher.HashPassword(user2, "Test");
-        await userRepository.InsertUser(user2);
+        mqttUser2.PasswordHash = passwordHasher.HashPassword(mqttUser2, "Test");
+        await mqttUserRepository.InsertUser(mqttUser2);
         return (userId, user2Id);
     }
 

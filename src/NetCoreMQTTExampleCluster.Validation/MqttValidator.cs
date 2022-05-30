@@ -18,25 +18,25 @@ public class MqttValidator : IMqttValidator
     private static readonly ILogger Logger = Log.ForContext<MqttValidator>();
 
     /// <inheritdoc cref="IMqttValidator"/>
-    public bool ValidateConnection(SimpleMqttConnectionValidatorContext context, User user, IPasswordHasher<User> passwordHasher)
+    public bool ValidateConnection(SimpleMqttConnectionValidatorContext context, MqttUser mqttUser, IPasswordHasher<MqttUser> passwordHasher)
     {
-        Logger.Debug("Executed ValidateConnection with parameters: {@Context}, {@User}.", context, user);
+        Logger.Debug("Executed ValidateConnection with parameters: {@Context}, {@User}.", context, mqttUser);
 
-        Logger.Debug("Current user is {@CurrentUser}.", user);
+        Logger.Debug("Current MQTT user is {@CurrentUser}.", mqttUser);
 
-        if (user is null)
+        if (mqttUser is null)
         {
-            Logger.Debug("Current user was null.");
+            Logger.Debug("Current MQTT user was null.");
             return false;
         }
 
-        if (context.UserName != user.UserName)
+        if (context.UserName != mqttUser.UserName)
         {
-            Logger.Debug("User name in context doesn't match the current user.");
+            Logger.Debug("User name in context doesn't match the current MQTT user.");
             return false;
         }
 
-        var hashingResult = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, context.Password);
+        var hashingResult = passwordHasher.VerifyHashedPassword(mqttUser, mqttUser.PasswordHash, context.Password);
 
         if (hashingResult == PasswordVerificationResult.Failed)
         {
@@ -44,25 +44,25 @@ public class MqttValidator : IMqttValidator
             return false;
         }
 
-        if (!user.ValidateClientId)
+        if (!mqttUser.ValidateClientId)
         {
-            Logger.Debug("Connection valid for {ClientId} and {@User}.", context.ClientId, user);
+            Logger.Debug("Connection valid for {ClientId} and {@User}.", context.ClientId, mqttUser);
             return true;
         }
 
-        if (string.IsNullOrWhiteSpace(user.ClientIdPrefix))
+        if (string.IsNullOrWhiteSpace(mqttUser.ClientIdPrefix))
         {
-            if (context.ClientId != user.ClientId)
+            if (context.ClientId != mqttUser.ClientId)
             {
-                Logger.Debug("Client id in context doesn't match the current user's client id.");
+                Logger.Debug("Client id in context doesn't match the current MQTT user's client id.");
                 return false;
             }
 
-            Logger.Debug("Connection valid for {ClientId} and {@User} when client id prefix was null.", context.ClientId, user);
+            Logger.Debug("Connection valid for {ClientId} and {@User} when client id prefix was null.", context.ClientId, mqttUser);
         }
         else
         {
-            Logger.Debug("Connection valid for {ClientIdPrefix} and {@User} when client id prefix was not null.", user.ClientIdPrefix, user);
+            Logger.Debug("Connection valid for {ClientIdPrefix} and {@User} when client id prefix was not null.", mqttUser.ClientIdPrefix, mqttUser);
         }
 
         return true;
@@ -73,19 +73,19 @@ public class MqttValidator : IMqttValidator
         SimpleMqttApplicationMessageInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
-        User user,
+        MqttUser mqttUser,
         IMemoryCache dataLimitCacheMonth,
         List<string> clientIdPrefixes)
     {
-        Logger.Debug("Executed ValidatePublish with parameters: {@Context}, {@User}.", context, user);
+        Logger.Debug("Executed ValidatePublish with parameters: {@Context}, {@User}.", context, mqttUser);
 
         var clientIdPrefix = GetClientIdPrefix(context.ClientId, clientIdPrefixes);
 
         Logger.Debug("Client id prefix is {ClientIdPrefix}.", clientIdPrefix);
 
-        if (user is null)
+        if (mqttUser is null)
         {
-            Logger.Debug("Current user was null.");
+            Logger.Debug("Current MQTT user was null.");
             return false;
         }
 
@@ -93,18 +93,18 @@ public class MqttValidator : IMqttValidator
 
         Logger.Debug("Topic was {Topic}.", topic);
 
-        if (user.ThrottleUser)
+        if (mqttUser.ThrottleUser)
         {
             var payload = context.ApplicationMessage?.Payload;
 
             if (payload is not null)
             {
-                if (user.MonthlyByteLimit is not null)
+                if (mqttUser.MonthlyByteLimit is not null)
                 {
                     if (IsUserThrottled(
                         context.ClientId,
                         payload.Length,
-                        user.MonthlyByteLimit.Value,
+                        mqttUser.MonthlyByteLimit.Value,
                         dataLimitCacheMonth))
                     {
                         Logger.Debug("User is throttled now.");
@@ -165,18 +165,18 @@ public class MqttValidator : IMqttValidator
         SimpleMqttSubscriptionInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
-        User user,
+        MqttUser mqttUser,
         List<string> clientIdPrefixes)
     {
-        Logger.Debug("Executed ValidateSubscription with parameters: {@Context}, {@User}.", context, user);
+        Logger.Debug("Executed ValidateSubscription with parameters: {@Context}, {@User}.", context, mqttUser);
 
         var clientIdPrefix = GetClientIdPrefix(context.ClientId, clientIdPrefixes);
 
         Logger.Debug("Client id prefix is {ClientIdPrefix}.", clientIdPrefix);
 
-        if (user is null)
+        if (mqttUser is null)
         {
-            Logger.Debug("Current user was null.");
+            Logger.Debug("Current MQTT user was null.");
             return false;
         }
 
@@ -248,7 +248,7 @@ public class MqttValidator : IMqttValidator
     }
 
     /// <summary>
-    /// Checks whether a user has used the maximum of its publishing limit for the month or not.
+    /// Checks whether a MQTT user has used the maximum of its publishing limit for the month or not.
     /// </summary>
     /// <param name="clientId">The client identifier.</param>
     /// <param name="sizeInBytes">The message size in bytes.</param>

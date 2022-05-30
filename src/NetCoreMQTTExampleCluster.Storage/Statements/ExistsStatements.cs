@@ -80,7 +80,7 @@ public class ExistsStatements
             );";
 
     /// <summary>
-    /// A SQL query string to check whether the user table exists.
+    /// A SQL query string to check whether the MQTT user table exists.
     /// </summary>
     public const string CheckUserTableExists =
         @"SELECT EXISTS (
@@ -91,11 +91,11 @@ public class ExistsStatements
             );";
 
     /// <summary>
-    /// A SQL query string to select whether a user name already exists or not.
+    /// A SQL query string to select whether a MQTT user name already exists or not.
     /// </summary>
     public const string UserNameExists =
         @"SELECT EXISTS (
-                SELECT username FROM user
+                SELECT username FROM mqttuser
                 WHERE username = @UserName
             );";
 }

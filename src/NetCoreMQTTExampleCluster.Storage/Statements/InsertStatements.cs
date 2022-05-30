@@ -29,7 +29,7 @@ public class InsertStatements
             VALUES (@Id, @EventType, @EventDetails);";
 
     /// <summary>
-    /// A SQL query string to insert a user.
+    /// A SQL query string to insert a MQTT user.
     /// </summary>
     public const string InsertUser =
         @"INSERT INTO mqttuser (id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description)

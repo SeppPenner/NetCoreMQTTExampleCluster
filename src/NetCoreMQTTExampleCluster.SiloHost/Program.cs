@@ -117,7 +117,7 @@ public class Program
                 s.AddSingleton<IBlacklistRepository>(u => new BlacklistRepository(databaseSettings));
                 s.AddSingleton<IDatabaseVersionRepository>(u => new DatabaseVersionRepository(databaseSettings));
                 s.AddSingleton<IPublishMessageRepository>(a => new PublishMessageRepository(databaseSettings));
-                s.AddSingleton<IUserRepository>(u => new UserRepository(databaseSettings));
+                s.AddSingleton<IMqttUserRepository>(u => new MqttUserRepository(databaseSettings));
                 s.AddSingleton<IWhitelistRepository>(u => new WhitelistRepository(databaseSettings));
                 s.AddSingleton<IMqttValidator>(new MqttValidator());
             });

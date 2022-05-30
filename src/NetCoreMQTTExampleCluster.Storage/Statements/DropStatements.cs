@@ -45,7 +45,7 @@ public class DropStatements
     public const string DropWhitelistTable = @"DROP TABLE IF EXISTS whitelist;";
 
     /// <summary>
-    /// A SQL query string to delete the user table.
+    /// A SQL query string to delete the MQTT user table.
     /// </summary>
     public const string DropUserTable = @"DROP TABLE IF EXISTS mqttuser;";
 }

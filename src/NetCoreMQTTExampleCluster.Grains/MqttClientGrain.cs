@@ -20,12 +20,12 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     /// <summary>
     /// The <see cref="IPasswordHasher{TUser}" />.
     /// </summary>
-    private static readonly IPasswordHasher<User> PasswordHasher = new PasswordHasher<User>();
+    private static readonly IPasswordHasher<MqttUser> PasswordHasher = new PasswordHasher<MqttUser>();
 
     /// <summary>
-    /// The user repository.
+    /// The MQTT user repository.
     /// </summary>
-    private readonly IUserRepository userRepository;
+    private readonly IMqttUserRepository mqttUserRepository;
 
     /// <summary>
     /// The MQTT validator.
@@ -33,14 +33,14 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     private readonly IMqttValidator mqttValidator;
 
     /// <summary>
-    /// The user.
+    /// The MQTT user.
     /// </summary>
-    private User? user;
+    private MqttUser? mqttUser;
 
     /// <summary>
-    /// The user data.
+    /// The MQTT user data.
     /// </summary>
-    private UserData userData = new();
+    private MqttUserData userData = new();
 
     /// <summary>
     /// A value indicating whether the caches are loaded or not.
@@ -58,9 +58,9 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     private ILogger logger;
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public MqttClientGrain(IUserRepository userRepository, IMqttValidator mqttValidator)
+    public MqttClientGrain(IMqttUserRepository mqttUserRepository, IMqttValidator mqttValidator)
     {
-        this.userRepository = userRepository;
+        this.mqttUserRepository = mqttUserRepository;
         this.mqttValidator = mqttValidator;
         this.logger = Log.ForContext("Grain", nameof(MqttClientGrain));
     }
@@ -78,15 +78,15 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            this.user = await this.userRepository.GetUserByName(context.UserName);
+            this.mqttUser = await this.mqttUserRepository.GetUserByName(context.UserName);
 
-            if (this.user is null)
+            if (this.mqttUser is null)
             {
                 return false;
             }
 
             await this.RefreshCache(false);
-            return this.mqttValidator.ValidateConnection(context, this.user, PasswordHasher);
+            return this.mqttValidator.ValidateConnection(context, this.mqttUser, PasswordHasher);
         }
         catch (Exception ex)
         {
@@ -100,7 +100,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            var result = this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.user!, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
+            var result = this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.mqttUser!, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
             return Task.FromResult(result);
         }
         catch (Exception ex)
@@ -115,7 +115,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            var result = this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.user!, this.userData.ClientIdPrefixes);
+            var result = this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.mqttUser!, this.userData.ClientIdPrefixes);
             return Task.FromResult(result);
         }
         catch (Exception ex)
@@ -130,7 +130,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            var result = this.user!.IsSyncUser;
+            var result = this.mqttUser!.IsSyncUser;
             return Task.FromResult(result);
         }
         catch (Exception ex)
@@ -151,7 +151,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
             }
         }
 
-        this.userData = await this.userRepository.GetUserData(this.user!.Id);
+        this.userData = await this.mqttUserRepository.GetUserData(this.mqttUser!.Id);
         this.cacheLoaded = true;
     }
 }

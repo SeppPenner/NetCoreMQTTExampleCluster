@@ -3,16 +3,16 @@
 //   Copyright (c) All rights reserved.
 // </copyright>
 // <summary>
-//   The user class.
+//   The MQTT user class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace NetCoreMQTTExampleCluster.Storage.Data;
 
 /// <summary>
-/// The user class.
+/// The MQTT user class.
 /// </summary>
-public class User
+public class MqttUser
 {
     /// <summary>
     /// Gets or sets the primary key.
@@ -81,9 +81,9 @@ public class User
     public DateTimeOffset? UpdatedAt { get; set; } = null;
 
     /// <summary>
-    /// Returns a <see cref="string"></see> representation of the <see cref="User" /> class.
+    /// Returns a <see cref="string"></see> representation of the <see cref="MqttUser" /> class.
     /// </summary>
-    /// <returns>A <see cref="string"></see> representation of the <see cref="User" /> class.</returns>
+    /// <returns>A <see cref="string"></see> representation of the <see cref="MqttUser" /> class.</returns>
     public override string ToString()
     {
         return JsonConvert.SerializeObject(this);

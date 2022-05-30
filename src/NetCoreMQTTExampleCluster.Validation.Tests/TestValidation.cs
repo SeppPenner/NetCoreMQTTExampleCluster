@@ -16,7 +16,7 @@ namespace NetCoreMQTTExampleCluster.Validation.Tests;
 public class TestValidation
 {
     /// <summary>
-    /// The identifier for user 1.
+    /// The identifier for MQTT user 1.
     /// </summary>
     private static readonly Guid User1Id = Guid.NewGuid();
 
@@ -33,12 +33,12 @@ public class TestValidation
     /// <summary>
     /// The password hasher.
     /// </summary>
-    private readonly IPasswordHasher<User> passwordHasher = new PasswordHasher<User>();
+    private readonly IPasswordHasher<MqttUser> passwordHasher = new PasswordHasher<MqttUser>();
 
     /// <summary>
-    /// The user repository.
+    /// The MQTT user repository.
     /// </summary>
-    private readonly IUserRepository userRepository = new UserRepositoryFake(User1Id);
+    private readonly IMqttUserRepository mqttUserRepository = new UserMqttRepositoryFake(User1Id);
 
     /// <summary>
     /// Tests the validate connection method of the <see cref="MqttValidator"/>.
@@ -47,7 +47,7 @@ public class TestValidation
     [TestMethod]
     public async Task TestValidateConnection()
     {
-        // Test user
+        // Test MQTT user
         var mqttConnectionValidatorContext = new SimpleMqttConnectionValidatorContext
         {
             ClientId = "Test",
@@ -57,11 +57,11 @@ public class TestValidation
             UserName = "Test"
         };
 
-        var user = await this.userRepository.GetUserByName("Test");
+        var mqttUser = await this.mqttUserRepository.GetUserByName("Test");
 
         var result = this.mqttValidator.ValidateConnection(
             mqttConnectionValidatorContext,
-            user,
+            mqttUser,
             this.passwordHasher);
 
         Assert.IsTrue(result);
@@ -77,11 +77,11 @@ public class TestValidation
         var dataLimitCacheMonth = new MemoryCache(new MemoryCacheOptions());
 
         // Add users to users dictionary to simulate that the connection was established successfully:
-        var users = new Dictionary<string, User>
+        var users = new Dictionary<string, MqttUser>
         {
             {
                 "Test",
-                new User
+                new MqttUser
                 {
                     Id = User1Id,
                     UserName = "Test",
@@ -90,7 +90,7 @@ public class TestValidation
             }
         };
 
-        // Test user
+        // Test data
         var mqttApplicationMessage = new MqttApplicationMessage
         {
             Retain = false,
@@ -105,8 +105,8 @@ public class TestValidation
             ClientId = "Test"
         };
 
-        var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
-        var whitelist = await this.userRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
+        var blacklist = await this.mqttUserRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
+        var whitelist = await this.mqttUserRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
         var result = this.mqttValidator.ValidatePublish(
             mqttConnectionValidatorContext,
             blacklist,
@@ -150,11 +150,11 @@ public class TestValidation
     public async Task TestValidateSubscription()
     {
         // Add users to users dictionary to simulate that the connection was established successfully:
-        var users = new Dictionary<string, User>
+        var users = new Dictionary<string, MqttUser>
         {
             {
                 "Test",
-                new User
+                new MqttUser
                 {
                     Id = User1Id,
                     UserName = "Test",
@@ -163,7 +163,7 @@ public class TestValidation
             }
         };
 
-        // Test user
+        // Test data
         var mqttTopicFilter = new MqttTopicFilter
         {
             Topic = "d/e",
@@ -176,8 +176,8 @@ public class TestValidation
             TopicFilter = mqttTopicFilter
         };
 
-        var blacklist = await this.userRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
-        var whitelist = await this.userRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
+        var blacklist = await this.mqttUserRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
+        var whitelist = await this.mqttUserRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
         var result = this.mqttValidator.ValidateSubscription(
             mqttConnectionValidatorContext,
             blacklist,

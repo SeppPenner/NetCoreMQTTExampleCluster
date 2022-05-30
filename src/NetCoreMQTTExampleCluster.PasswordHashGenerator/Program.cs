@@ -17,7 +17,7 @@ public static class Program
     /// <summary>
     /// The password hasher.
     /// </summary>
-    private static readonly IPasswordHasher<User> PasswordHasher = new PasswordHasher<User>();
+    private static readonly IPasswordHasher<MqttUser> PasswordHasher = new PasswordHasher<MqttUser>();
 
     /// <summary>
     /// The main method of the program.
@@ -50,13 +50,13 @@ public static class Program
     /// <returns>A hash representation of the password.</returns>
     private static string HashPassword(string password)
     {
-        var user = new User
+        var mqttUser = new MqttUser
         {
             Id = Guid.NewGuid(),
             UserName = string.Empty,
             ClientId = string.Empty
         };
 
-        return PasswordHasher.HashPassword(user, password);
+        return PasswordHasher.HashPassword(mqttUser, password);
     }
 }

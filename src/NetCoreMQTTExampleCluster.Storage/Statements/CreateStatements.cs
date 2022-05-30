@@ -84,7 +84,7 @@ public class CreateStatements
             );";
 
     /// <summary>
-    /// A SQL query string to create the user table.
+    /// A SQL query string to create the MQTT user table.
     /// </summary>
     public const string CreateUserTable =
         @"CREATE TABLE IF NOT EXISTS mqttuser (

@@ -3,15 +3,15 @@
 //   Copyright (c) All rights reserved.
 // </copyright>
 // <summary>
-//   The user data class.
+//   The MQTT user data class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 namespace NetCoreMQTTExampleCluster.Storage.Data;
 
 /// <summary>
-/// The user data class.
+/// The MQTT user data class.
 /// </summary>
-public class UserData
+public class MqttUserData
 {
     /// <summary>
     /// Gets or sets the subscription whitelist.

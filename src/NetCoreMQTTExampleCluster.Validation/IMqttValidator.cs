@@ -18,13 +18,13 @@ public interface IMqttValidator
     /// Validates the connection.
     /// </summary>
     /// <param name="context">The context.</param>
-    /// <param name="user">The user.</param>
+    /// <param name="mqttUser">The MQTT user.</param>
     /// <param name="passwordHasher">The password hasher.</param>
     /// <returns>A value indicating whether the connection is accepted or not.</returns>
     bool ValidateConnection(
         SimpleMqttConnectionValidatorContext context,
-        User user,
-        IPasswordHasher<User> passwordHasher);
+        MqttUser mqttUser,
+        IPasswordHasher<MqttUser> passwordHasher);
 
     /// <summary>
     /// Validates the message publication.
@@ -32,7 +32,7 @@ public interface IMqttValidator
     /// <param name="context">The context.</param>
     /// <param name="blacklist">The blacklist.</param>
     /// <param name="whitelist">The whitelist.</param>
-    /// <param name="user">The user.</param>
+    /// <param name="mqttUser">The MQTT user.</param>
     /// <param name="dataLimitCacheMonth">The data limit cache for the month.</param>
     /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
@@ -40,7 +40,7 @@ public interface IMqttValidator
         SimpleMqttApplicationMessageInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
-        User user,
+        MqttUser mqttUser,
         IMemoryCache dataLimitCacheMonth,
         List<string> clientIdPrefixes);
 
@@ -50,13 +50,13 @@ public interface IMqttValidator
     /// <param name="context">The context.</param>
     /// <param name="blacklist">The blacklist.</param>
     /// <param name="whitelist">The whitelist.</param>
-    /// <param name="user">The user.</param>
+    /// <param name="mqttUser">The MQTT user.</param>
     /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
     bool ValidateSubscription(
         SimpleMqttSubscriptionInterceptorContext context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
-        User user,
+        MqttUser mqttUser,
         List<string> clientIdPrefixes);
 }

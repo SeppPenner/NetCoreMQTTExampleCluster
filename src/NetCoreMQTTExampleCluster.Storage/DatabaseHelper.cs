@@ -194,11 +194,11 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
 
         if (forceDelete)
         {
-            this.logger.Information("Force delete the user table.");
+            this.logger.Information("Force delete the MQTT user table.");
             await connection.ExecuteAsync(DropStatements.DropUserTable);
-            this.logger.Information("Deleted user table.");
+            this.logger.Information("Deleted MQTT user table.");
             await connection.ExecuteAsync(CreateStatements.CreateUserTable);
-            this.logger.Information("Created user table.");
+            this.logger.Information("Created MQTT user table.");
         }
         else
         {
@@ -206,9 +206,9 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
 
             if (Convert.ToBoolean(checkTableExistsResult) == false)
             {
-                this.logger.Information("The user table doesn't exist. I'm creating it.");
+                this.logger.Information("The MQTT user table doesn't exist. I'm creating it.");
                 await connection.ExecuteAsync(CreateStatements.CreateUserTable);
-                this.logger.Information("Created user table.");
+                this.logger.Information("Created MQTT user table.");
             }
         }
     }
