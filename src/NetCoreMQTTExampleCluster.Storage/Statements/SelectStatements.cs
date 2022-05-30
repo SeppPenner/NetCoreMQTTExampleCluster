@@ -48,7 +48,7 @@ public class SelectStatements
     /// <summary>
     /// A SQL query string to select all users.
     /// </summary>
-    public const string SelectAllUsers =
+    public const string SelectAllMqttUsers =
         @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description, createdat, updatedat, deletedat
             FROM mqttuser
 			WHERE deletedat IS NULL;";
@@ -64,7 +64,7 @@ public class SelectStatements
     /// <summary>
     /// A SQL query string to select the MQTT user by their identifier.
     /// </summary>
-    public const string SelectUserById =
+    public const string SelectMqttUserById =
         @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description, createdat, updatedat, deletedat
             FROM mqttuser
             WHERE id = @Id
@@ -73,7 +73,7 @@ public class SelectStatements
     /// <summary>
     /// A SQL query string to select the MQTT user by their user name.
     /// </summary>
-    public const string SelectUserByUserName =
+    public const string SelectMqttUserByUserName =
         @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description, createdat, updatedat, deletedat
             FROM mqttuser
             WHERE username = @UserName
@@ -82,7 +82,7 @@ public class SelectStatements
     /// <summary>
     /// A SQL query string to select the MQTT user's name and identifier by their user name.
     /// </summary>
-    public const string SelectUserNameAndIdByUserName =
+    public const string SelectMqttUserNameAndIdByUserName =
         @"SELECT username, id
             FROM mqttuser
             WHERE username = @UserName;";
@@ -185,7 +185,7 @@ public class SelectStatements
     /// <summary>
     /// A SQL query string to select all blacklist items for a MQTT user.
     /// </summary>
-    public const string SelectBlacklistItemsForUser =
+    public const string SelectBlacklistItemsForMqttUser =
         @"SELECT id, userid, type, value, createdat, updatedat, deletedat
             FROM blacklist
             WHERE userid = @UserId AND type = @Type
@@ -194,7 +194,7 @@ public class SelectStatements
     /// <summary>
     /// A SQL query string to select all whitelist items for a MQTT user.
     /// </summary>
-    public const string SelectWhitelistItemsForUser =
+    public const string SelectWhitelistItemsForMqttUser =
         @"SELECT id, userid, type, value, createdat, updatedat, deletedat
             FROM whitelist
             WHERE userid = @UserId AND type = @Type

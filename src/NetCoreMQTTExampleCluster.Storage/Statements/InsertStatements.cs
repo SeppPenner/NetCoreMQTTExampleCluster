@@ -31,7 +31,7 @@ public class InsertStatements
     /// <summary>
     /// A SQL query string to insert a MQTT user.
     /// </summary>
-    public const string InsertUser =
+    public const string InsertMqttUser =
         @"INSERT INTO mqttuser (id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description)
             VALUES (@Id, @UserName, @PasswordHash, @ClientIdPrefix, @ClientId, @ValidateClientId, @ThrottleUser, @MonthlyByteLimit, @IsSyncUser, @Description);";
 

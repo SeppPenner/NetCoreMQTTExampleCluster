@@ -24,62 +24,62 @@ public class MqttUserRepository: BaseRepository, IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<List<MqttUser>> GetUsers()
+    public async Task<List<MqttUser>> GetMqttUsers()
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        var users = await connection.QueryAsync<MqttUser>(SelectStatements.SelectAllUsers);
+        var users = await connection.QueryAsync<MqttUser>(SelectStatements.SelectAllMqttUsers);
         return users?.ToList() ?? new List<MqttUser>();
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUser> GetUserById(Guid userId)
+    public async Task<MqttUser> GetMqttUserById(Guid userId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<MqttUser>(SelectStatements.SelectUserById, new {Id = userId});
+        return await connection.QueryFirstOrDefaultAsync<MqttUser>(SelectStatements.SelectMqttUserById, new {Id = userId});
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUser> GetUserByName(string userName)
+    public async Task<MqttUser> GetMqttUserByName(string userName)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<MqttUser>(SelectStatements.SelectUserByUserName, new {UserName = userName});
+        return await connection.QueryFirstOrDefaultAsync<MqttUser>(SelectStatements.SelectMqttUserByUserName, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<(string, Guid)> GetUserNameAndUserIdByName(string userName)
+    public async Task<(string, Guid)> GetMqttUserNameAndUserIdByName(string userName)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<(string, Guid)>(SelectStatements.SelectUserNameAndIdByUserName, new {UserName = userName});
+        return await connection.QueryFirstOrDefaultAsync<(string, Guid)>(SelectStatements.SelectMqttUserNameAndIdByUserName, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<bool> UserNameExists(string userName)
+    public async Task<bool> MqttUserNameExists(string userName)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<bool>(ExistsStatements.UserNameExists, new {UserName = userName});
+        return await connection.QueryFirstOrDefaultAsync<bool>(ExistsStatements.MqttUserNameExists, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<bool> InsertUser(MqttUser mqttUser)
+    public async Task<bool> InsertMqttUser(MqttUser mqttUser)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        var result = await connection.ExecuteAsync(InsertStatements.InsertUser, mqttUser);
+        var result = await connection.ExecuteAsync(InsertStatements.InsertMqttUser, mqttUser);
         return result == 1;
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type)
+    public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForMqttUser(Guid userId, BlacklistWhitelistType type)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        var blacklistItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemsForUser, new { UserId = userId, Type = type });
+        var blacklistItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectBlacklistItemsForMqttUser, new { UserId = userId, Type = type });
         return blacklistItems?.ToList() ?? new List<BlacklistWhitelist>();
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type)
+    public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForMqttUser(Guid userId, BlacklistWhitelistType type)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        var whiteListItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemsForUser, new { UserId = userId, Type = type });
+        var whiteListItems = await connection.QueryAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemsForMqttUser, new { UserId = userId, Type = type });
         return whiteListItems?.ToList() ?? new List<BlacklistWhitelist>();
     }
 
@@ -92,22 +92,22 @@ public class MqttUserRepository: BaseRepository, IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUserData> GetUserData(Guid userId)
+    public async Task<MqttUserData> GetMqttUserData(Guid userId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         var clientIdPrefixes = await connection.QueryAsync<string>(SelectStatements.SelectAllClientIdPrefixes);
         var subscriptionWhitelist = await connection.QueryAsync<BlacklistWhitelist>(
-                                        SelectStatements.SelectWhitelistItemsForUser,
+                                        SelectStatements.SelectWhitelistItemsForMqttUser,
                                         new { UserId = userId, Type = BlacklistWhitelistType.Subscribe });
         var subscriptionBlacklist = await connection.QueryAsync<BlacklistWhitelist>(
-                                        SelectStatements.SelectBlacklistItemsForUser,
+                                        SelectStatements.SelectBlacklistItemsForMqttUser,
                                         new { UserId = userId, Type = BlacklistWhitelistType.Subscribe });
         var publishWhitelist = await connection.QueryAsync<BlacklistWhitelist>(
-                                   SelectStatements.SelectWhitelistItemsForUser,
+                                   SelectStatements.SelectWhitelistItemsForMqttUser,
                                    new { UserId = userId, Type = BlacklistWhitelistType.Publish });
         var publishBlacklist = await connection.QueryAsync<BlacklistWhitelist>(
-                                   SelectStatements.SelectBlacklistItemsForUser,
+                                   SelectStatements.SelectBlacklistItemsForMqttUser,
                                    new { UserId = userId, Type = BlacklistWhitelistType.Publish });
 
         return new MqttUserData

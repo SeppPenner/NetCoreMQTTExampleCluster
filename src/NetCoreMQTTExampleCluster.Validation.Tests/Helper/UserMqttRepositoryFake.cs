@@ -94,28 +94,28 @@ public class UserMqttRepositoryFake : IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<List<MqttUser>> GetUsers()
+    public async Task<List<MqttUser>> GetMqttUsers()
     {
         await Task.Delay(1);
         return this.mqttUsers;
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUser> GetUserById(Guid userId)
+    public async Task<MqttUser> GetMqttUserById(Guid userId)
     {
         await Task.Delay(1);
         return this.mqttUsers.FirstOrDefault(u => u.Id == userId);
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUser> GetUserByName(string userName)
+    public async Task<MqttUser> GetMqttUserByName(string userName)
     {
         await Task.Delay(1);
         return this.mqttUsers.FirstOrDefault(u => u.UserName == userName);
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<(string, Guid)> GetUserNameAndUserIdByName(string userName)
+    public async Task<(string, Guid)> GetMqttUserNameAndUserIdByName(string userName)
     {
         await Task.Delay(1);
         var mqttUser = this.mqttUsers.FirstOrDefault(u => u.UserName == userName);
@@ -123,14 +123,14 @@ public class UserMqttRepositoryFake : IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<bool> UserNameExists(string userName)
+    public async Task<bool> MqttUserNameExists(string userName)
     {
         await Task.Delay(1);
         return this.mqttUsers.Any(u => u.UserName == userName);
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<bool> InsertUser(MqttUser mqttUser)
+    public async Task<bool> InsertMqttUser(MqttUser mqttUser)
     {
         await Task.Delay(1);
         this.mqttUsers.Add(mqttUser);
@@ -138,14 +138,14 @@ public class UserMqttRepositoryFake : IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type)
+    public async Task<List<BlacklistWhitelist>> GetBlacklistItemsForMqttUser(Guid userId, BlacklistWhitelistType type)
     {
         await Task.Delay(1);
         return this.blacklists.ContainsKey(userId) ? this.blacklists[userId].Where(b => b.Type == type).ToList() : new List<BlacklistWhitelist>();
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type)
+    public async Task<List<BlacklistWhitelist>> GetWhitelistItemsForMqttUser(Guid userId, BlacklistWhitelistType type)
     {
         await Task.Delay(1);
         return this.whiteLists.ContainsKey(userId) ? this.whiteLists[userId].Where(b => b.Type == type).ToList() : new List<BlacklistWhitelist>();
@@ -159,7 +159,7 @@ public class UserMqttRepositoryFake : IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUserData> GetUserData(Guid userId)
+    public async Task<MqttUserData> GetMqttUserData(Guid userId)
     {
         await Task.Delay(1);
         return new MqttUserData();

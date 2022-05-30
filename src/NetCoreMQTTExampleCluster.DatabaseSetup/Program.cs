@@ -182,7 +182,7 @@ public static class Program
         };
 
         mqttUser.PasswordHash = passwordHasher.HashPassword(mqttUser, "test");
-        await mqttUserRepository.InsertUser(mqttUser);
+        await mqttUserRepository.InsertMqttUser(mqttUser);
 
         // Add broker MQTT user
         var user2Id = Guid.NewGuid();
@@ -197,7 +197,7 @@ public static class Program
         };
 
         mqttUser2.PasswordHash = passwordHasher.HashPassword(mqttUser2, "Test");
-        await mqttUserRepository.InsertUser(mqttUser2);
+        await mqttUserRepository.InsertMqttUser(mqttUser2);
         return (userId, user2Id);
     }
 

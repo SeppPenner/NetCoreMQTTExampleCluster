@@ -78,7 +78,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            this.mqttUser = await this.mqttUserRepository.GetUserByName(context.UserName);
+            this.mqttUser = await this.mqttUserRepository.GetMqttUserByName(context.UserName);
 
             if (this.mqttUser is null)
             {
@@ -151,7 +151,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
             }
         }
 
-        this.userData = await this.mqttUserRepository.GetUserData(this.mqttUser!.Id);
+        this.userData = await this.mqttUserRepository.GetMqttUserData(this.mqttUser!.Id);
         this.cacheLoaded = true;
     }
 }

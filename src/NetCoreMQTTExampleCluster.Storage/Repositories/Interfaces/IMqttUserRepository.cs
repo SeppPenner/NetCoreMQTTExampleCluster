@@ -18,42 +18,42 @@ public interface IMqttUserRepository
     /// Gets a <see cref="List{T}" /> of all <see cref="MqttUser" />s.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<List<MqttUser>> GetUsers();
+    Task<List<MqttUser>> GetMqttUsers();
 
     /// <summary>
     /// Gets a <see cref="MqttUser" /> by their identifier.
     /// </summary>
     /// <param name="userId">The <see cref="MqttUser" />'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<MqttUser> GetUserById(Guid userId);
+    Task<MqttUser> GetMqttUserById(Guid userId);
 
     /// <summary>
     /// Gets a <see cref="MqttUser" /> by their user name.
     /// </summary>
     /// <param name="userName">The <see cref="MqttUser" />'s name to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<MqttUser> GetUserByName(string userName);
+    Task<MqttUser> GetMqttUserByName(string userName);
 
     /// <summary>
     /// Gets a <see cref="MqttUser" />'s name and identifier by their user name.
     /// </summary>
     /// <param name="userName">The <see cref="MqttUser" />'s name to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<(string, Guid)> GetUserNameAndUserIdByName(string userName);
+    Task<(string, Guid)> GetMqttUserNameAndUserIdByName(string userName);
 
     /// <summary>
     /// Gets a <see cref="bool" /> value indicating whether the user name already exists or not.
     /// </summary>
     /// <param name="userName">The user name to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<bool> UserNameExists(string userName);
+    Task<bool> MqttUserNameExists(string userName);
 
     /// <summary>
     /// Inserts a <see cref="MqttUser" /> to the database.
     /// </summary>
     /// <param name="mqttUser">The <see cref="MqttUser" /> to insert.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<bool> InsertUser(MqttUser mqttUser);
+    Task<bool> InsertMqttUser(MqttUser mqttUser);
 
     /// <summary>
     /// Gets the blacklist items for a <see cref="MqttUser" />.
@@ -61,7 +61,7 @@ public interface IMqttUserRepository
     /// <param name="userId">The user identifier to query for.</param>
     /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<List<BlacklistWhitelist>> GetBlacklistItemsForUser(Guid userId, BlacklistWhitelistType type);
+    Task<List<BlacklistWhitelist>> GetBlacklistItemsForMqttUser(Guid userId, BlacklistWhitelistType type);
 
     /// <summary>
     /// Gets the whitelist items for a <see cref="MqttUser" />.
@@ -69,7 +69,7 @@ public interface IMqttUserRepository
     /// <param name="userId">The user identifier to query for.</param>
     /// <param name="type">The <see cref="BlacklistWhitelistType" />.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<List<BlacklistWhitelist>> GetWhitelistItemsForUser(Guid userId, BlacklistWhitelistType type);
+    Task<List<BlacklistWhitelist>> GetWhitelistItemsForMqttUser(Guid userId, BlacklistWhitelistType type);
 
     /// <summary>
     /// Gets the client identifier prefixes for all <see cref="MqttUser" />s.
@@ -82,5 +82,5 @@ public interface IMqttUserRepository
     /// </summary>
     /// <param name="userId">The <see cref="MqttUser" />'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<MqttUserData> GetUserData(Guid userId);
+    Task<MqttUserData> GetMqttUserData(Guid userId);
 }

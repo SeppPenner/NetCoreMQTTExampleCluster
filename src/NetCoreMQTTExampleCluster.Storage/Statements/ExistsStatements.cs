@@ -93,7 +93,7 @@ public class ExistsStatements
     /// <summary>
     /// A SQL query string to select whether a MQTT user name already exists or not.
     /// </summary>
-    public const string UserNameExists =
+    public const string MqttUserNameExists =
         @"SELECT EXISTS (
                 SELECT username FROM mqttuser
                 WHERE username = @UserName

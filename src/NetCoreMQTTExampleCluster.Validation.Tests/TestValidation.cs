@@ -57,7 +57,7 @@ public class TestValidation
             UserName = "Test"
         };
 
-        var mqttUser = await this.mqttUserRepository.GetUserByName("Test");
+        var mqttUser = await this.mqttUserRepository.GetMqttUserByName("Test");
 
         var result = this.mqttValidator.ValidateConnection(
             mqttConnectionValidatorContext,
@@ -105,8 +105,8 @@ public class TestValidation
             ClientId = "Test"
         };
 
-        var blacklist = await this.mqttUserRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
-        var whitelist = await this.mqttUserRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Publish);
+        var blacklist = await this.mqttUserRepository.GetBlacklistItemsForMqttUser(User1Id, BlacklistWhitelistType.Publish);
+        var whitelist = await this.mqttUserRepository.GetWhitelistItemsForMqttUser(User1Id, BlacklistWhitelistType.Publish);
         var result = this.mqttValidator.ValidatePublish(
             mqttConnectionValidatorContext,
             blacklist,
@@ -176,8 +176,8 @@ public class TestValidation
             TopicFilter = mqttTopicFilter
         };
 
-        var blacklist = await this.mqttUserRepository.GetBlacklistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
-        var whitelist = await this.mqttUserRepository.GetWhitelistItemsForUser(User1Id, BlacklistWhitelistType.Subscribe);
+        var blacklist = await this.mqttUserRepository.GetBlacklistItemsForMqttUser(User1Id, BlacklistWhitelistType.Subscribe);
+        var whitelist = await this.mqttUserRepository.GetWhitelistItemsForMqttUser(User1Id, BlacklistWhitelistType.Subscribe);
         var result = this.mqttValidator.ValidateSubscription(
             mqttConnectionValidatorContext,
             blacklist,
