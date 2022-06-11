@@ -19,6 +19,11 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     private readonly IEventLogRepository eventLogRepository;
 
     /// <summary>
+    /// The publish message repository.
+    /// </summary>
+    private readonly IPublishMessageRepository publishMessageRepository;
+
+    /// <summary>
     /// The brokers.
     /// </summary>
     private readonly IDictionary<Guid, IBrokerConnectionSettings> brokers = new ConcurrentDictionary<Guid, IBrokerConnectionSettings>();
@@ -32,11 +37,6 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// The publish message queue.
     /// </summary>
     private readonly ConcurrentQueue<PublishMessage> publishMessageQueue = new();
-
-    /// <summary>
-    /// The publish message repository.
-    /// </summary>
-    private readonly IPublishMessageRepository publishMessageRepository;
 
     /// <summary>
     /// The logger.
