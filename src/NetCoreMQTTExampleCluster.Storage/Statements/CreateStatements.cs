@@ -86,7 +86,7 @@ public class CreateStatements
     /// <summary>
     /// A SQL query string to create the MQTT user table.
     /// </summary>
-    public const string CreateUserTable =
+    public const string CreateMqttUserTable =
         @"CREATE TABLE IF NOT EXISTS mqttuser (
                 id                                      UUID            NOT NULL PRIMARY KEY,
                 username                                TEXT            NOT NULL UNIQUE,
@@ -97,6 +97,20 @@ public class CreateStatements
                 throttleuser                            BOOLEAN         DEFAULT false,
                 monthlybytelimit                        BIGINT          NULL,
                 issyncuser                              BOOL            DEFAULT false,
+                description                             TEXT            NULL,
+                createdat                               TIMESTAMPTZ     DEFAULT now() NOT NULL,
+                updatedat                               TIMESTAMPTZ     NULL,
+                deletedat                               TIMESTAMPTZ     NULL
+            );";
+
+    /// <summary>
+    /// A SQL query string to create the web user table.
+    /// </summary>
+    public const string CreateWebUserTable =
+        @"CREATE TABLE IF NOT EXISTS webuser (
+                id                                      UUID            NOT NULL PRIMARY KEY,
+                username                                TEXT            NOT NULL UNIQUE,
+                passwordhash                            TEXT            NOT NULL,
                 description                             TEXT            NULL,
                 createdat                               TIMESTAMPTZ     DEFAULT now() NOT NULL,
                 updatedat                               TIMESTAMPTZ     NULL,

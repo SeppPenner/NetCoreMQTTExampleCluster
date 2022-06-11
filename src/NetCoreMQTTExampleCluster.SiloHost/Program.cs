@@ -118,6 +118,7 @@ public class Program
                 s.AddSingleton<IDatabaseVersionRepository>(u => new DatabaseVersionRepository(databaseSettings));
                 s.AddSingleton<IPublishMessageRepository>(a => new PublishMessageRepository(databaseSettings));
                 s.AddSingleton<IMqttUserRepository>(u => new MqttUserRepository(databaseSettings));
+                s.AddSingleton<IWebUserRepository>(u => new WebUserRepository(databaseSettings));
                 s.AddSingleton<IWhitelistRepository>(u => new WhitelistRepository(databaseSettings));
                 s.AddSingleton<IMqttValidator>(new MqttValidator());
             });

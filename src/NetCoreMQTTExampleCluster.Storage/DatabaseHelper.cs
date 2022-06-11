@@ -54,7 +54,8 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
         await this.CreateEventLogTable(forceDelete);
         await this.CreatePublishMessageTable(forceDelete);
         await this.CreateDatabaseVersionTable(forceDelete);
-        await this.CreateUserTable(forceDelete);
+        await this.CreateWebUserTable(forceDelete);
+        await this.CreateMqttUserTable(forceDelete);
         await this.CreateWhitelistTable(forceDelete);
         await this.CreateBlacklistTable(forceDelete);
     }
@@ -188,27 +189,53 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
     }
 
     /// <inheritdoc cref="IDatabaseHelper" />
-    public async Task CreateUserTable(bool forceDelete)
+    public async Task CreateMqttUserTable(bool forceDelete)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
 
         if (forceDelete)
         {
             this.logger.Information("Force delete the MQTT user table.");
-            await connection.ExecuteAsync(DropStatements.DropUserTable);
+            await connection.ExecuteAsync(DropStatements.DropMqttUserTable);
             this.logger.Information("Deleted MQTT user table.");
-            await connection.ExecuteAsync(CreateStatements.CreateUserTable);
+            await connection.ExecuteAsync(CreateStatements.CreateMqttUserTable);
             this.logger.Information("Created MQTT user table.");
         }
         else
         {
-            var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckUserTableExists);
+            var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckMqttUserTableExists);
 
             if (Convert.ToBoolean(checkTableExistsResult) == false)
             {
                 this.logger.Information("The MQTT user table doesn't exist. I'm creating it.");
-                await connection.ExecuteAsync(CreateStatements.CreateUserTable);
+                await connection.ExecuteAsync(CreateStatements.CreateMqttUserTable);
                 this.logger.Information("Created MQTT user table.");
+            }
+        }
+    }
+
+    /// <inheritdoc cref="IDatabaseHelper" />
+    public async Task CreateWebUserTable(bool forceDelete)
+    {
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
+
+        if (forceDelete)
+        {
+            this.logger.Information("Force delete the web user table.");
+            await connection.ExecuteAsync(DropStatements.DropWebUserTable);
+            this.logger.Information("Deleted web user table.");
+            await connection.ExecuteAsync(CreateStatements.CreateWebUserTable);
+            this.logger.Information("Created web user table.");
+        }
+        else
+        {
+            var checkTableExistsResult = await connection.ExecuteScalarAsync(ExistsStatements.CheckWebUserTableExists);
+
+            if (Convert.ToBoolean(checkTableExistsResult) == false)
+            {
+                this.logger.Information("The web user table doesn't exist. I'm creating it.");
+                await connection.ExecuteAsync(CreateStatements.CreateWebUserTable);
+                this.logger.Information("Created web user table.");
             }
         }
     }

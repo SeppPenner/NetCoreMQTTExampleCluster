@@ -47,5 +47,10 @@ public class DropStatements
     /// <summary>
     /// A SQL query string to delete the MQTT user table.
     /// </summary>
-    public const string DropUserTable = @"DROP TABLE IF EXISTS mqttuser;";
+    public const string DropMqttUserTable = @"DROP TABLE IF EXISTS mqttuser;";
+
+    /// <summary>
+    /// A SQL query string to delete the web user table.
+    /// </summary>
+    public const string DropWebUserTable = @"DROP TABLE IF EXISTS webuser;";    
 }

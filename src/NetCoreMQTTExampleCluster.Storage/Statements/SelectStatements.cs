@@ -46,7 +46,7 @@ public class SelectStatements
 			AND deletedat IS NULL;";
 
     /// <summary>
-    /// A SQL query string to select all users.
+    /// A SQL query string to select all MQTT users.
     /// </summary>
     public const string SelectAllMqttUsers =
         @"SELECT id, username, passwordhash, clientidprefix, clientid, validateclientid, throttleuser, monthlybytelimit, issyncuser, description, createdat, updatedat, deletedat
@@ -54,7 +54,7 @@ public class SelectStatements
 			WHERE deletedat IS NULL;";
 
     /// <summary>
-    /// A SQL query string to select all client id prefixes for all users.
+    /// A SQL query string to select all client id prefixes for all MQTT users.
     /// </summary>
     public const string SelectAllClientIdPrefixes =
         @"SELECT clientidprefix
@@ -86,6 +86,32 @@ public class SelectStatements
         @"SELECT username, id
             FROM mqttuser
             WHERE username = @UserName;";
+
+    /// <summary>
+    /// A SQL query string to select all web users.
+    /// </summary>
+    public const string SelectAllWebUsers =
+        @"SELECT id, username, passwordhash, description, createdat, updatedat, deletedat
+            FROM webuser
+			WHERE deletedat IS NULL;";
+
+    /// <summary>
+    /// A SQL query string to select the web user by their identifier.
+    /// </summary>
+    public const string SelectWebUserById =
+        @"SELECT id, username, passwordhash, description, createdat, updatedat, deletedat
+            FROM webuser
+            WHERE id = @Id
+			AND deletedat IS NULL;";
+
+    /// <summary>
+    /// A SQL query string to select the web user by their user name.
+    /// </summary>
+    public const string SelectWebUserByUserName =
+        @"SELECT id, username, passwordhash, description, createdat, updatedat, deletedat
+            FROM webuser
+            WHERE username = @UserName
+			AND deletedat IS NULL;";
 
     /// <summary>
     /// A SQL query string to select all database versions.

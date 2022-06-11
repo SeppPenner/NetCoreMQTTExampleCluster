@@ -29,6 +29,13 @@ public interface IDatabaseHelper
     Task DeleteDatabase(string database);
 
     /// <summary>
+    /// Creates all tables.
+    /// </summary>
+    /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the number of affected rows.</returns>
+    Task CreateAllTables(bool forceDelete);
+
+    /// <summary>
     /// Creates the event log table.
     /// </summary>
     /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
@@ -41,13 +48,6 @@ public interface IDatabaseHelper
     /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
     Task CreatePublishMessageTable(bool forceDelete);
-
-    /// <summary>
-    /// Creates all tables.
-    /// </summary>
-    /// <param name="forceDelete">A <see cref="bool"/> value to force the deletion of the table.</param>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the number of affected rows.</returns>
-    Task CreateAllTables(bool forceDelete);
 
     /// <summary>
     /// Creates the database version table.
@@ -71,22 +71,36 @@ public interface IDatabaseHelper
     Task CreateBlacklistTable(bool forceDelete);
 
     /// <summary>
+    /// Creates the MQTT user table.
+    /// </summary>
+    /// <param name="forceDelete">A <see cref="bool" /> value to force the deletion of the table.</param>
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+    Task CreateMqttUserTable(bool forceDelete);
+
+    /// <summary>
+    /// Creates the web user table.
+    /// </summary>
+    /// <param name="forceDelete">A <see cref="bool" /> value to force the deletion of the table.</param>
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+    Task CreateWebUserTable(bool forceDelete);
+
+    /// <summary>
     /// Enables the TimeScaleDB extension.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
     Task EnableTimeScaleDbExtension();
 
     /// <summary>
-    /// Created the Orleans tables.
-    /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task CreateOrleansTables();
-
-    /// <summary>
     /// Enables the TimeScaleDB extension.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
     Task CreateHyperTables();
+
+    /// <summary>
+    /// Created the Orleans tables.
+    /// </summary>
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+    Task CreateOrleansTables();
 
     /// <summary>
     /// Creates a compound index for the publish message table on timestamp and client identifier.

@@ -82,12 +82,23 @@ public class ExistsStatements
     /// <summary>
     /// A SQL query string to check whether the MQTT user table exists.
     /// </summary>
-    public const string CheckUserTableExists =
+    public const string CheckMqttUserTableExists =
         @"SELECT EXISTS (
                 SELECT 1
                 FROM   information_schema.tables 
                 WHERE  table_schema = 'public'
                 AND    table_name = 'mqttuser'
+            );";
+
+    /// <summary>
+    /// A SQL query string to check whether the wev user table exists.
+    /// </summary>
+    public const string CheckWebUserTableExists =
+        @"SELECT EXISTS (
+                SELECT 1
+                FROM   information_schema.tables 
+                WHERE  table_schema = 'public'
+                AND    table_name = 'webuser'
             );";
 
     /// <summary>

@@ -36,6 +36,13 @@ public class InsertStatements
             VALUES (@Id, @UserName, @PasswordHash, @ClientIdPrefix, @ClientId, @ValidateClientId, @ThrottleUser, @MonthlyByteLimit, @IsSyncUser, @Description);";
 
     /// <summary>
+    /// A SQL query string to insert a web user.
+    /// </summary>
+    public const string InsertWebUser =
+        @"INSERT INTO webuser (id, username, passwordhash, description)
+            VALUES (@Id, @UserName, @PasswordHash, @Description);";
+
+    /// <summary>
     /// A SQL query string to insert a database version.
     /// </summary>
     public const string InsertDatabaseVersion =
