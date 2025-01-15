@@ -18,7 +18,7 @@ public class MqttValidator : IMqttValidator
     private static readonly ILogger Logger = Log.ForContext<MqttValidator>();
 
     /// <inheritdoc cref="IMqttValidator"/>
-    public bool ValidateConnection(SimpleMqttConnectionValidatorContext context, MqttUser mqttUser, IPasswordHasher<MqttUser> passwordHasher)
+    public bool ValidateConnection(SimpleValidatingConnectionEventArgs context, MqttUser mqttUser, IPasswordHasher<MqttUser> passwordHasher)
     {
         Logger.Debug("Executed ValidateConnection with parameters: {@Context}, {@User}.", context, mqttUser);
 
@@ -70,7 +70,7 @@ public class MqttValidator : IMqttValidator
 
     /// <inheritdoc cref="IMqttValidator"/>
     public bool ValidatePublish(
-        SimpleMqttApplicationMessageInterceptorContext context,
+        SimpleInterceptingPublishEventArgs context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         MqttUser mqttUser,
@@ -95,21 +95,18 @@ public class MqttValidator : IMqttValidator
 
         if (mqttUser.ThrottleUser)
         {
-            var payload = context.ApplicationMessage?.Payload;
+            var payload = context.ApplicationMessage.Payload;
 
-            if (payload is not null)
+            if (mqttUser.MonthlyByteLimit is not null)
             {
-                if (mqttUser.MonthlyByteLimit is not null)
+                if (IsUserThrottled(
+                    context.ClientId,
+                    payload.Length,
+                    mqttUser.MonthlyByteLimit.Value,
+                    dataLimitCacheMonth))
                 {
-                    if (IsUserThrottled(
-                        context.ClientId,
-                        payload.Length,
-                        mqttUser.MonthlyByteLimit.Value,
-                        dataLimitCacheMonth))
-                    {
-                        Logger.Debug("User is throttled now.");
-                        return false;
-                    }
+                    Logger.Debug("User is throttled now.");
+                    return false;
                 }
             }
         }
@@ -162,7 +159,7 @@ public class MqttValidator : IMqttValidator
 
     /// <inheritdoc cref="IMqttValidator"/>
     public bool ValidateSubscription(
-        SimpleMqttSubscriptionInterceptorContext context,
+        SimpleInterceptingSubscriptionEventArgs context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         MqttUser mqttUser,

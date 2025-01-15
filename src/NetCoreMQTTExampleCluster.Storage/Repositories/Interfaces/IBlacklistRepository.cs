@@ -25,14 +25,14 @@ public interface IBlacklistRepository
     /// </summary>
     /// <param name="blacklistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<BlacklistWhitelist> GetBlacklistItemById(Guid blacklistItemId);
+    Task<BlacklistWhitelist?> GetBlacklistItemById(Guid blacklistItemId);
 
     /// <summary>
     /// Gets a <see cref="BlacklistWhitelist" /> item by its type.
     /// </summary>
     /// <param name="blacklistItemType">The <see cref="BlacklistWhitelistType" /> to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<BlacklistWhitelist> GetBlacklistItemByType(BlacklistWhitelistType blacklistItemType);
+    Task<BlacklistWhitelist?> GetBlacklistItemByType(BlacklistWhitelistType blacklistItemType);
 
     /// <summary>
     /// Gets a <see cref="BlacklistWhitelist" /> item by its type.
@@ -40,7 +40,7 @@ public interface IBlacklistRepository
     /// <param name="blacklistItemId">The <see cref="BlacklistWhitelist" />'s identifier to query for.</param>
     /// <param name="blacklistItemType">The <see cref="BlacklistWhitelistType" /> to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<BlacklistWhitelist> GetBlacklistItemByIdAndType(Guid blacklistItemId, BlacklistWhitelistType blacklistItemType);
+    Task<BlacklistWhitelist?> GetBlacklistItemByIdAndType(Guid blacklistItemId, BlacklistWhitelistType blacklistItemType);
 
     /// <summary>
     /// Inserts a <see cref="BlacklistWhitelist" /> item to the database.

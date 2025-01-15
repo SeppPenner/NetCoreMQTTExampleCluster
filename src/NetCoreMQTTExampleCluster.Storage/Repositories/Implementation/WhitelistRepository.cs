@@ -29,24 +29,24 @@ public class WhitelistRepository: BaseRepository, IWhitelistRepository
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />
-    public async Task<BlacklistWhitelist> GetWhitelistItemById(Guid whitelistItemId)
+    public async Task<BlacklistWhitelist?> GetWhitelistItemById(Guid whitelistItemId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemById, new {Id = whitelistItemId});
-    }
-
-    /// <inheritdoc cref="IBlacklistRepository" />
-    public async Task<BlacklistWhitelist> GetWhitelistItemByIdAndType(Guid whitelistItemId, BlacklistWhitelistType whitelistItemType)
-    {
-        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemByIdAndType, new {Id = whitelistItemId, Type = whitelistItemType});
+        return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist?>(SelectStatements.SelectWhitelistItemById, new {Id = whitelistItemId});
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />
-    public async Task<BlacklistWhitelist> GetWhitelistItemByType(BlacklistWhitelistType whitelistItemType)
+    public async Task<BlacklistWhitelist?> GetWhitelistItemByIdAndType(Guid whitelistItemId, BlacklistWhitelistType whitelistItemType)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist>(SelectStatements.SelectWhitelistItemByType, new {Type = whitelistItemType});
+        return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist?>(SelectStatements.SelectWhitelistItemByIdAndType, new {Id = whitelistItemId, Type = whitelistItemType});
+    }
+
+    /// <inheritdoc cref="IWhitelistRepository" />
+    public async Task<BlacklistWhitelist?> GetWhitelistItemByType(BlacklistWhitelistType whitelistItemType)
+    {
+        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
+        return await connection.QueryFirstOrDefaultAsync<BlacklistWhitelist?>(SelectStatements.SelectWhitelistItemByType, new {Type = whitelistItemType});
     }
 
     /// <inheritdoc cref="IWhitelistRepository" />

@@ -46,6 +46,11 @@ public static class Program
     {
         var connectionSettings = await ReadSettingsFile();
 
+        if (connectionSettings is null)
+        {
+            throw new InvalidOperationException("The connection settings are null");
+        }
+
         mqttUserRepository = new MqttUserRepository(connectionSettings);
         databaseVersionRepository = new DatabaseVersionRepository(connectionSettings);
         whitelistRepository = new WhitelistRepository(connectionSettings);
@@ -85,12 +90,18 @@ public static class Program
     /// Reads the settings file.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    private static async Task<MqttDatabaseConnectionSettings> ReadSettingsFile()
+    private static async Task<MqttDatabaseConnectionSettings?> ReadSettingsFile()
     {
         var currentLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        if (string.IsNullOrWhiteSpace(currentLocation))
+        {
+            throw new InvalidOperationException("The current location is null or empty");
+        }
+
         var settingsFile = Path.Combine(currentLocation, "appsettings.json");
         var settingsString = await File.ReadAllTextAsync(settingsFile);
-        return JsonConvert.DeserializeObject<MqttDatabaseConnectionSettings>(settingsString);
+        return JsonConvert.DeserializeObject<MqttDatabaseConnectionSettings?>(settingsString);
     }
 
     /// <summary>

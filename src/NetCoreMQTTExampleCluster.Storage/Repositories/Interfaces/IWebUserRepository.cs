@@ -25,14 +25,14 @@ public interface IWebUserRepository
     /// </summary>
     /// <param name="userId">The <see cref="WebUser" />'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<WebUser> GetWebUserById(Guid userId);
+    Task<WebUser?> GetWebUserById(Guid userId);
 
     /// <summary>
     /// Gets a <see cref="WebUser" /> by their user name.
     /// </summary>
     /// <param name="userName">The <see cref="WebUser" />'s name to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<WebUser> GetWebUserByName(string userName);
+    Task<WebUser?> GetWebUserByName(string userName);
 
     /// <summary>
     /// Inserts a <see cref="WebUser" /> to the database.

@@ -22,7 +22,7 @@ public interface IMqttValidator
     /// <param name="passwordHasher">The password hasher.</param>
     /// <returns>A value indicating whether the connection is accepted or not.</returns>
     bool ValidateConnection(
-        SimpleMqttConnectionValidatorContext context,
+        SimpleValidatingConnectionEventArgs context,
         MqttUser mqttUser,
         IPasswordHasher<MqttUser> passwordHasher);
 
@@ -37,7 +37,7 @@ public interface IMqttValidator
     /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
     bool ValidatePublish(
-        SimpleMqttApplicationMessageInterceptorContext context,
+        SimpleInterceptingPublishEventArgs context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         MqttUser mqttUser,
@@ -54,7 +54,7 @@ public interface IMqttValidator
     /// <param name="clientIdPrefixes">The client identifier prefixes.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
     bool ValidateSubscription(
-        SimpleMqttSubscriptionInterceptorContext context,
+        SimpleInterceptingSubscriptionEventArgs context,
         List<BlacklistWhitelist> blacklist,
         List<BlacklistWhitelist> whitelist,
         MqttUser mqttUser,

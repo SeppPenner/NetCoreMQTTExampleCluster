@@ -32,17 +32,17 @@ public class WebUserRepository : BaseRepository, IWebUserRepository
     }
 
     /// <inheritdoc cref="IWebUserRepository" />
-    public async Task<WebUser> GetWebUserById(Guid userId)
+    public async Task<WebUser?> GetWebUserById(Guid userId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<WebUser>(SelectStatements.SelectWebUserById, new {Id = userId});
+        return await connection.QueryFirstOrDefaultAsync<WebUser?>(SelectStatements.SelectWebUserById, new {Id = userId});
     }
 
     /// <inheritdoc cref="IWebUserRepository" />
-    public async Task<WebUser> GetWebUserByName(string userName)
+    public async Task<WebUser?> GetWebUserByName(string userName)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<WebUser>(SelectStatements.SelectWebUserByUserName, new {UserName = userName});
+        return await connection.QueryFirstOrDefaultAsync<WebUser?>(SelectStatements.SelectWebUserByUserName, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IWebUserRepository" />

@@ -9,6 +9,8 @@
 
 namespace NetCoreMQTTExampleCluster.Validation.Tests;
 
+using System.Buffers;
+
 /// <summary>
 /// A class that tests the <see cref="MqttValidator"/>.
 /// </summary>
@@ -48,7 +50,7 @@ public class TestValidation
     public async Task TestValidateConnection()
     {
         // Test MQTT user
-        var mqttConnectionValidatorContext = new SimpleMqttConnectionValidatorContext
+        var mqttConnectionValidatorContext = new SimpleValidatingConnectionEventArgs
         {
             ClientId = "Test",
             CleanSession = true,
@@ -90,16 +92,20 @@ public class TestValidation
             }
         };
 
-        // Test data
+        // Test data.
+        var byteData = Encoding.UTF8.GetBytes("asdf");
+        var memory = new ReadOnlyMemory<byte>(byteData);
+        var sequence = new ReadOnlySequence<byte>(memory);
+
         var mqttApplicationMessage = new MqttApplicationMessage
         {
             Retain = false,
-            Payload = Encoding.UTF8.GetBytes("asdf"),
+            Payload = sequence,
             Topic = "a/b",
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        var mqttConnectionValidatorContext = new SimpleMqttApplicationMessageInterceptorContext()
+        var mqttConnectionValidatorContext = new SimpleInterceptingPublishEventArgs()
         {
             ApplicationMessage = mqttApplicationMessage,
             ClientId = "Test"
@@ -120,12 +126,12 @@ public class TestValidation
         mqttApplicationMessage = new MqttApplicationMessage
         {
             Retain = false,
-            Payload = Encoding.UTF8.GetBytes("asdf"),
+            Payload = sequence,
             Topic = "a/d",
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        mqttConnectionValidatorContext = new SimpleMqttApplicationMessageInterceptorContext()
+        mqttConnectionValidatorContext = new SimpleInterceptingPublishEventArgs()
         {
             ApplicationMessage = mqttApplicationMessage,
             ClientId = "Test"
@@ -170,7 +176,7 @@ public class TestValidation
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        var mqttConnectionValidatorContext = new SimpleMqttSubscriptionInterceptorContext()
+        var mqttConnectionValidatorContext = new SimpleInterceptingSubscriptionEventArgs()
         {
             ClientId = "Test",
             TopicFilter = mqttTopicFilter
@@ -193,7 +199,7 @@ public class TestValidation
             QualityOfServiceLevel = MqttQualityOfServiceLevel.AtLeastOnce
         };
 
-        mqttConnectionValidatorContext = new SimpleMqttSubscriptionInterceptorContext()
+        mqttConnectionValidatorContext = new SimpleInterceptingSubscriptionEventArgs()
         {
             ClientId = "Test",
             TopicFilter = mqttTopicFilter

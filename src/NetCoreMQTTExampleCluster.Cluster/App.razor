@@ -1,0 +1,56 @@
+@using Microsoft.Extensions.Localization
+
+<CascadingAuthenticationState>
+    <AppStateProvider @ref="@this.AppState">
+        <Router AppAssembly="typeof(Program).Assembly" PreferExactMatches="@true">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        <div class="login-container">
+                            <div class="login-body">
+                                <h2 class="smp-page-heading">@this.Localizer!["UnauthorizedTitle"]</h2>
+                                <p class="smp-page-text">@this.Localizer!["UnauthorizedText"]</p>
+                                <MatButton OnClick="@(this.OnGoToLogin)" Raised="true" Class="smp-page-text">@this.Localizer!["Login"]</MatButton>
+                            </div>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+            </Found>
+            <NotFound>
+                <LayoutView Layout="typeof(MainLayout)">
+                    <div class="login-body">
+                        <h2 class="smp-page-heading">@this.Localizer!["NotFoundTitle"]</h2>
+                        <p class="smp-page-text">@this.Localizer!["NotFoundText"]</p>
+                        <MatButton OnClick="@(this.OnGoToLogin)" Raised="true" Class="smp-page-text">@this.Localizer!["Login"]</MatButton>
+                    </div>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </AppStateProvider>
+</CascadingAuthenticationState>
+
+@code
+{
+    /// <summary>
+    /// Gets or sets the localizer.
+    /// </summary>
+    [Inject]
+    protected IStringLocalizer<App>? Localizer { get; set; }
+
+    /// <summary>
+    /// Gets or sets the app state.
+    /// </summary>
+    private AppStateProvider AppState { get; set; } = new();
+
+    /// <summary>
+    /// The method called when the go to login action is triggered.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+    public async Task OnGoToLogin()
+    {
+        this.AppState!.ToastSuccess(this.Localizer!["SuccessfullyLoggedOut"]);
+        await Task.Delay(1000);
+        await this.AppState.AuthStateProvider!.Logout();
+        await this.AppState.AuthStateProvider!.NavigateToLogin();
+    }
+}

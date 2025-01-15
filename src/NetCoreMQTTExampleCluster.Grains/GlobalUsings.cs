@@ -11,8 +11,6 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Caching.Memory;
 
 global using MQTTnet;
-global using MQTTnet.Client.Options;
-global using MQTTnet.Server;
 
 global using NetCoreMQTTExampleCluster.Grains.Interfaces;
 global using NetCoreMQTTExampleCluster.Models.Interfaces;

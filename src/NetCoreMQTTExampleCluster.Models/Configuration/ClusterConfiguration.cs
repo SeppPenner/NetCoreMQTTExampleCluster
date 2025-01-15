@@ -55,6 +55,11 @@ public class ClusterConfiguration : IConfigurationValid
     /// </summary>
     public MqttDatabaseConnectionSettings? DatabaseSettings { get; set; }
 
+    /// <summary>
+    /// Gets or sets the JSON web token configuration key.
+    /// </summary>
+    public string JsonWebTokenConfigurationKey { get; set; } = string.Empty;
+
     /// <inheritdoc cref="IConfigurationValid"/>
     public bool IsValid()
     {
@@ -91,6 +96,16 @@ public class ClusterConfiguration : IConfigurationValid
         if (this.DatabaseSettings is null || !this.DatabaseSettings.IsValid())
         {
             throw new ConfigurationException("The database settings are invalid.");
+        }
+
+        if (string.IsNullOrWhiteSpace(this.JsonWebTokenConfigurationKey))
+        {
+            throw new ConfigurationException("The JSON web token configuration key is empty.");
+        }
+
+        if (this.JsonWebTokenConfigurationKey.Length < 32)
+        {
+            throw new ConfigurationException("The JSON WebToken configuration key is too short.");
         }
 
         return true;

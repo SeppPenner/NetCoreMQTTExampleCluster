@@ -34,13 +34,13 @@ public class JsonMapper<T> : SqlMapper.TypeHandler<T> where T : class, new()
     /// </summary>
     /// <param name="value">The value from the database.</param>
     /// <returns>The typed value.</returns>
-    public override T Parse(object value)
+    public override T? Parse(object value)
     {
         var config = new T();
 
         if (value is not null)
         {
-            config = JsonConvert.DeserializeObject<T>(value.ToString(), this.jsonSerializerSettingsCustom);
+            config = JsonConvert.DeserializeObject<T?>(value?.ToString() ?? string.Empty, this.jsonSerializerSettingsCustom);
         }
 
         return config;
@@ -51,7 +51,7 @@ public class JsonMapper<T> : SqlMapper.TypeHandler<T> where T : class, new()
     /// </summary>
     /// <param name="parameter">The parameter to configure.</param>
     /// <param name="value">The parameter value.</param>
-    public override void SetValue(IDbDataParameter parameter, T value)
+    public override void SetValue(IDbDataParameter parameter, T? value)
     {
         parameter.Value = JsonConvert.SerializeObject(value, this.jsonSerializerSettingsCustom);
     }

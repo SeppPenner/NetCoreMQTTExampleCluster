@@ -188,7 +188,7 @@ public class Program
         }
 
         var configuration = configurationBuilder.Build();
-        configuration.Bind(ServiceName.Name, Configuration);
+        configuration.Bind(ServiceName.Name ?? "NetCoreMQTTExampleCluster.SiloHost", Configuration);
 
         if (!Configuration.IsValid())
         {

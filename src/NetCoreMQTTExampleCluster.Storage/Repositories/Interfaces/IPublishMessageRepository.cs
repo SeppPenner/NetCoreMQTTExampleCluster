@@ -25,7 +25,7 @@ public interface IPublishMessageRepository
     /// </summary>
     /// <param name="publishMessageId">The <see cref="PublishMessage"/>'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<PublishMessage> GetPublishMessageById(Guid publishMessageId);
+    Task<PublishMessage?> GetPublishMessageById(Guid publishMessageId);
 
     /// <summary>
     /// Inserts a <see cref="PublishMessage" /> to the database.

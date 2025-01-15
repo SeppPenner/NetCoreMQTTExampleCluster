@@ -29,10 +29,10 @@ public class EventLogRepository : BaseRepository, IEventLogRepository
     }
 
     /// <inheritdoc cref="IEventLogRepository" />
-    public async Task<EventLog> GetEventLogById(Guid eventLogId)
+    public async Task<EventLog?> GetEventLogById(Guid eventLogId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<EventLog>(SelectStatements.SelectEventLogById, new { Id = eventLogId });
+        return await connection.QueryFirstOrDefaultAsync<EventLog?>(SelectStatements.SelectEventLogById, new { Id = eventLogId });
     }
 
     /// <inheritdoc cref="IEventLogRepository" />

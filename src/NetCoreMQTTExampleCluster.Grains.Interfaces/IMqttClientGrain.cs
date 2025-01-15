@@ -19,21 +19,21 @@ public interface IMqttClientGrain : IGrainWithStringKey
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-    Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context);
+    Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs context);
 
     /// <summary>
     /// Proceeds the published message for one client identifier.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
-    Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context);
+    Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context);
 
     /// <summary>
     /// Proceeds the connection for one client identifier.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the connection is accepted or not.</returns>
-    Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context);
+    Task<bool> ProceedConnect(SimpleValidatingConnectionEventArgs context);
 
     /// <summary>
     /// Checks whether the user is a user used for synchronization.

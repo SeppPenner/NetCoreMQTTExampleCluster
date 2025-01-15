@@ -32,10 +32,10 @@ public class PublishMessageRepository : BaseRepository, IPublishMessageRepositor
     }
 
     /// <inheritdoc cref="IPublishMessageRepository" />
-    public async Task<PublishMessage> GetPublishMessageById(Guid publishMessageId)
+    public async Task<PublishMessage?> GetPublishMessageById(Guid publishMessageId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<PublishMessage>(SelectStatements.SelectPublishMessageById, new { Id = publishMessageId });
+        return await connection.QueryFirstOrDefaultAsync<PublishMessage?>(SelectStatements.SelectPublishMessageById, new { Id = publishMessageId });
     }
 
     /// <inheritdoc cref="IPublishMessageRepository" />

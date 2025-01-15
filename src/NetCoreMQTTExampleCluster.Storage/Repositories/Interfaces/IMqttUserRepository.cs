@@ -25,14 +25,14 @@ public interface IMqttUserRepository
     /// </summary>
     /// <param name="userId">The <see cref="MqttUser" />'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<MqttUser> GetMqttUserById(Guid userId);
+    Task<MqttUser?> GetMqttUserById(Guid userId);
 
     /// <summary>
     /// Gets a <see cref="MqttUser" /> by their user name.
     /// </summary>
     /// <param name="userName">The <see cref="MqttUser" />'s name to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<MqttUser> GetMqttUserByName(string userName);
+    Task<MqttUser?> GetMqttUserByName(string userName);
 
     /// <summary>
     /// Gets a <see cref="MqttUser" />'s name and identifier by their user name.

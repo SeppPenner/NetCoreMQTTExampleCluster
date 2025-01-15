@@ -32,36 +32,36 @@ public interface IMqttRepositoryGrain : IGrainWithIntegerKey
     /// <summary>
     /// Proceeds the subscription.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="eventArgs">The event args.</param>
     /// <returns>A value indicating whether the subscription is accepted or not.</returns>
-    Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context);
+    Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs eventArgs);
 
     /// <summary>
     /// Proceeds the published message.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="eventArgs">The event args.</param>
     /// <param name="brokerId">The broker identifier.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
-    Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context, Guid brokerId);
+    Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs eventArgs, Guid brokerId);
 
     /// <summary>
     /// Proceeds the unsubscription for one client identifier.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="eventArgs">The event args.</param>
     /// <returns>A <see cref="Task"/> returning any asynchronous operation.</returns>
-    Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context);
+    Task ProceedUnsubscription(SimpleClientUnsubscribedTopicEventArgs eventArgs);
 
     /// <summary>
     /// Proceeds the connection for one client identifier.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="eventArgs">The event args.</param>
     /// <returns>A value indicating whether the connection is accepted or not.</returns>
-    Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context);
+    Task<bool> ProceedConnect(SimpleValidatingConnectionEventArgs eventArgs);
 
     /// <summary>
     /// Proceeds the disconnection for one client identifier.
     /// </summary>
     /// <param name="eventArgs">The event args.</param>
     /// <returns>A <see cref="Task"/> returning any asynchronous operation.</returns>
-    Task ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs);
+    Task ProceedDisconnect(SimpleClientDisconnectedEventArgs eventArgs);
 }

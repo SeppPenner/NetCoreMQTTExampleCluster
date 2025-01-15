@@ -6,8 +6,8 @@ global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 global using MQTTnet;
+global using MQTTnet.Packets;
 global using MQTTnet.Protocol;
-global using MQTTnet.Server;
 
 global using NetCoreMQTTExampleCluster.Grains.Interfaces;
 global using NetCoreMQTTExampleCluster.Storage.Data;

@@ -29,17 +29,17 @@ public class DatabaseVersionRepository : BaseRepository, IDatabaseVersionReposit
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />
-    public async Task<DatabaseVersion> GetDatabaseVersionById(Guid databaseVersionId)
+    public async Task<DatabaseVersion?> GetDatabaseVersionById(Guid databaseVersionId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<DatabaseVersion>(SelectStatements.SelectDatabaseVersionById, new {Id = databaseVersionId});
+        return await connection.QueryFirstOrDefaultAsync<DatabaseVersion?>(SelectStatements.SelectDatabaseVersionById, new {Id = databaseVersionId});
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />
-    public async Task<DatabaseVersion> GetDatabaseVersionByName(string databaseVersionName)
+    public async Task<DatabaseVersion?> GetDatabaseVersionByName(string databaseVersionName)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<DatabaseVersion>(SelectStatements.SelectDatabaseVersionByName, new {DatabaseVersionName = databaseVersionName});
+        return await connection.QueryFirstOrDefaultAsync<DatabaseVersion?>(SelectStatements.SelectDatabaseVersionByName, new {DatabaseVersionName = databaseVersionName});
     }
 
     /// <inheritdoc cref="IDatabaseVersionRepository" />

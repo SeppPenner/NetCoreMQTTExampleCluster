@@ -118,7 +118,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public async Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context)
+    public async Task<bool> ProceedConnect(SimpleValidatingConnectionEventArgs context)
     {
         try
         {
@@ -149,7 +149,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public Task ProceedDisconnect(MqttServerClientDisconnectedEventArgs eventArgs)
+    public Task ProceedDisconnect(SimpleClientDisconnectedEventArgs eventArgs)
     {
         if (eventArgs is null)
         {
@@ -175,7 +175,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
     [AlwaysInterleave]
-    public async Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context, Guid brokerId)
+    public async Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context, Guid brokerId)
     {
         try
         {
@@ -189,12 +189,12 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
             }
 
             // Save published message to the database
-            var payloadString = context.ApplicationMessage?.Payload is null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage?.Payload);
+            var payloadString = Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
 
             var publishMessage = new PublishMessage
             {
                 ClientId = context.ClientId,
-                Topic = context.ApplicationMessage?.Topic,
+                Topic = context.ApplicationMessage.Topic,
                 Payload = new PublishedMessagePayload(payloadString),
                 QoS = context.ApplicationMessage?.QualityOfServiceLevel,
                 Retain = context.ApplicationMessage?.Retain
@@ -220,7 +220,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public async Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context)
+    public async Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs context)
     {
         try
         {
@@ -251,28 +251,28 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public Task ProceedUnsubscription(MqttUnsubscriptionInterceptorContext context)
+    public Task ProceedUnsubscription(SimpleClientUnsubscribedTopicEventArgs eventArgs)
     {
-        if (context is null)
+        if (eventArgs is null)
         {
-            throw new ArgumentNullException(nameof(context));
+            throw new ArgumentNullException(nameof(eventArgs));
         }
 
-        if (string.IsNullOrWhiteSpace(context.ClientId))
+        if (string.IsNullOrWhiteSpace(eventArgs.ClientId))
         {
-            throw new ArgumentNullException(nameof(context.ClientId));
+            throw new ArgumentNullException(nameof(eventArgs.ClientId));
         }
 
-        if (string.IsNullOrWhiteSpace(context.Topic))
+        if (string.IsNullOrWhiteSpace(eventArgs.TopicFilter))
         {
-            throw new ArgumentNullException(nameof(context.Topic));
+            throw new ArgumentNullException(nameof(eventArgs.TopicFilter));
         }
 
         // Save unsubscription to the database
         var eventLog = new EventLog
         {
             EventType = EventType.Unsubscription,
-            EventDetails = $"Unsubscription: ClientId = {context.ClientId}, Topic = {context.Topic}."
+            EventDetails = $"Unsubscription: ClientId = {eventArgs.ClientId}, TopicFilter = {eventArgs.TopicFilter}."
         };
 
         this.eventLogQueue.Enqueue(eventLog);
@@ -286,7 +286,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <param name="context">The context.</param>
     /// <param name="brokerConnectionSettings">The broker connection settings.</param>
     /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-    private static async Task PublishMessageToBroker(SimpleMqttApplicationMessageInterceptorContext context, IBrokerConnectionSettings brokerConnectionSettings)
+    private static async Task PublishMessageToBroker(SimpleInterceptingPublishEventArgs context, IBrokerConnectionSettings brokerConnectionSettings)
     {
         if (context.ApplicationMessage is null)
         {
@@ -294,27 +294,34 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
         }
 
         // Create a new MQTT client
-        var factory = new MqttFactory();
+        var factory = new MqttClientFactory();
         var mqttClient = factory.CreateMqttClient();
         var optionsBuilder = new MqttClientOptionsBuilder().WithClientId(brokerConnectionSettings.ClientId).WithTcpServer(brokerConnectionSettings.HostName, brokerConnectionSettings.Port)
             .WithCredentials(brokerConnectionSettings.UserName, brokerConnectionSettings.Password).WithCleanSession(brokerConnectionSettings.UseCleanSession);
 
         if (brokerConnectionSettings.UseTls)
         {
-            optionsBuilder.WithTls();
+            optionsBuilder.WithTlsOptions(options =>
+            {
+                options.UseTls();
+            });
         }
 
         var options = optionsBuilder.Build();
 
         // Deserialize payload
-        var payloadString = context.ApplicationMessage?.Payload is null ? string.Empty : Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
+        var payloadString = Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
 
         // Connect the MQTT client
         await mqttClient.ConnectAsync(options, CancellationToken.None);
 
         // Send the message
-        var message = new MqttApplicationMessageBuilder().WithTopic(context.ApplicationMessage.Topic).WithPayload(payloadString).WithQualityOfServiceLevel(context.ApplicationMessage.QualityOfServiceLevel)
-            .WithRetainFlag(context.ApplicationMessage.Retain).Build();
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(context.ApplicationMessage.Topic)
+            .WithPayload(payloadString)
+            .WithQualityOfServiceLevel(context.ApplicationMessage.QualityOfServiceLevel)
+            .WithRetainFlag(context.ApplicationMessage.Retain)
+            .Build();
 
         await mqttClient.PublishAsync(message, CancellationToken.None);
         await mqttClient.DisconnectAsync(null, CancellationToken.None);
@@ -326,7 +333,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// <param name="context">The context.</param>
     /// <param name="brokerId">The broker identifier.</param>
     /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-    private async Task PublishMessageToBrokers(SimpleMqttApplicationMessageInterceptorContext context, Guid brokerId)
+    private async Task PublishMessageToBrokers(SimpleInterceptingPublishEventArgs context, Guid brokerId)
     {
         var tasks = this.brokers
             .Where(kvp => kvp.Key != brokerId)

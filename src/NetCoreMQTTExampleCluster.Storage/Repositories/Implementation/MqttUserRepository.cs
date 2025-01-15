@@ -32,17 +32,17 @@ public class MqttUserRepository: BaseRepository, IMqttUserRepository
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUser> GetMqttUserById(Guid userId)
+    public async Task<MqttUser?> GetMqttUserById(Guid userId)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<MqttUser>(SelectStatements.SelectMqttUserById, new {Id = userId});
+        return await connection.QueryFirstOrDefaultAsync<MqttUser?>(SelectStatements.SelectMqttUserById, new {Id = userId});
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />
-    public async Task<MqttUser> GetMqttUserByName(string userName)
+    public async Task<MqttUser?> GetMqttUserByName(string userName)
     {
         await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
-        return await connection.QueryFirstOrDefaultAsync<MqttUser>(SelectStatements.SelectMqttUserByUserName, new {UserName = userName});
+        return await connection.QueryFirstOrDefaultAsync<MqttUser?>(SelectStatements.SelectMqttUserByUserName, new {UserName = userName});
     }
 
     /// <inheritdoc cref="IMqttUserRepository" />

@@ -9,16 +9,10 @@
 namespace NetCoreMQTTExampleCluster.Cluster;
 
 /// <inheritdoc cref="BackgroundServiceBase{T}"/>
-/// <inheritdoc cref="IMqttServerSubscriptionInterceptor"/>
-/// <inheritdoc cref="IMqttServerUnsubscriptionInterceptor"/>
-/// <inheritdoc cref="IMqttServerApplicationMessageInterceptor"/>
-/// <inheritdoc cref="IMqttServerConnectionValidator"/>
-/// <inheritdoc cref="IMqttServerClientDisconnectedHandler"/>
 /// <summary>
 /// The main class that runs the MQTT service.
 /// </summary>
-public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttServerSubscriptionInterceptor, IMqttServerUnsubscriptionInterceptor,
-    IMqttServerApplicationMessageInterceptor, IMqttServerConnectionValidator, IMqttServerClientDisconnectedHandler
+public class MqttService : BackgroundServiceBase<ClusterConfiguration>
 {
     /// <summary>
     /// The broker identifier.
@@ -34,7 +28,17 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
     /// The MQTT server.
     /// </summary>
     [NotNull]
-    private IMqttServer? mqttServer = null;
+    private MqttServer? mqttServer = null;
+
+    /// <summary>
+    /// The MQTT factory.
+    /// </summary>
+    private readonly MqttServerFactory mqttServerFactory = new();
+
+    /// <summary>
+    /// The client identifiers.
+    /// </summary>
+    private static readonly HashSet<string> clientIds = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttService" /> class.
@@ -53,7 +57,7 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
         var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(this.CancellationTokenSource.Token, cancellationToken);
 
         // Connect Orleans.
-        await this.ConnectOrleans(() => this.CreateOrleansClient(), linkedTokenSource.Token);
+        await this.ConnectOrleans(this.CreateOrleansClient, linkedTokenSource.Token);
 
         // Startup the service.
         await this.StartupService();
@@ -92,14 +96,14 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
     /// <summary>
     /// Handles the MQTT unsubscription.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="args">The args.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    public async Task InterceptUnsubscriptionAsync(MqttUnsubscriptionInterceptorContext context)
+    public async Task ClientUnsubscribed(ClientUnsubscribedTopicEventArgs args)
     {
         try
         {
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            await repositoryGrain.ProceedUnsubscription(context);
+            await repositoryGrain.ProceedUnsubscription(new SimpleClientUnsubscribedTopicEventArgs(args));
         }
         catch (Exception ex)
         {
@@ -110,15 +114,15 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
     /// <summary>
     /// Validates the MQTT connection.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="args">The args.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    public async Task ValidateConnectionAsync(MqttConnectionValidatorContext context)
+    public async Task ValidateConnection(ValidatingConnectionEventArgs args)
     {
         try
         {
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var connectionValid = await repositoryGrain.ProceedConnect(new SimpleMqttConnectionValidatorContext(context));
-            context.ReasonCode = connectionValid ? MqttConnectReasonCode.Success : MqttConnectReasonCode.BadUserNameOrPassword;
+            var connectionValid = await repositoryGrain.ProceedConnect(new SimpleValidatingConnectionEventArgs(args));
+            args.ReasonCode = connectionValid ? MqttConnectReasonCode.Success : MqttConnectReasonCode.BadUserNameOrPassword;
         }
         catch (Exception ex)
         {
@@ -129,15 +133,15 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
     /// <summary>
     /// Validates the MQTT subscriptions.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="args">The args.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    public async Task InterceptSubscriptionAsync(MqttSubscriptionInterceptorContext context)
+    public async Task InterceptSubscription(InterceptingSubscriptionEventArgs args)
     {
         try
         {
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var subscriptionValid = await repositoryGrain.ProceedSubscription(new SimpleMqttSubscriptionInterceptorContext(context));
-            context.AcceptSubscription = subscriptionValid;
+            var subscriptionValid = await repositoryGrain.ProceedSubscription(new SimpleInterceptingSubscriptionEventArgs(args));
+            args.ProcessSubscription = subscriptionValid;
         }
         catch (Exception ex)
         {
@@ -148,15 +152,15 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
     /// <summary>
     /// Validates the MQTT application messages.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="args">The args.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    public async Task InterceptApplicationMessagePublishAsync(MqttApplicationMessageInterceptorContext context)
+    public async Task InterceptPublish(InterceptingPublishEventArgs args)
     {
         try
         {
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var publishValid = await repositoryGrain.ProceedPublish(new SimpleMqttApplicationMessageInterceptorContext(context), this.brokerId);
-            context.AcceptPublish = publishValid;
+            var publishValid = await repositoryGrain.ProceedPublish(new SimpleInterceptingPublishEventArgs(args), this.brokerId);
+            args.ProcessPublish = publishValid;
         }
         catch (Exception ex)
         {
@@ -167,14 +171,16 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
     /// <summary>
     /// Validates the MQTT client disconnect.
     /// </summary>
-    /// <param name="eventArgs">The event args.</param>
+    /// <param name="args">The event args.</param>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    public async Task HandleClientDisconnectedAsync(MqttServerClientDisconnectedEventArgs eventArgs)
+    public async Task ClientDisconnected(ClientDisconnectedEventArgs args)
     {
         try
         {
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            await repositoryGrain.ProceedDisconnect(eventArgs);
+            await repositoryGrain.ProceedDisconnect(new SimpleClientDisconnectedEventArgs(args));
+            // Todo: Maybe move this to grain?
+            clientIds.Remove(args.ClientId);
         }
         catch (Exception ex)
         {
@@ -251,27 +257,30 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>, IMqttSer
             "test",
             X509KeyStorageFlags.Exportable);
 
-        var optionsBuilder = new MqttServerOptionsBuilder();
+        var optionsBuilder = this.mqttServerFactory
+                .CreateServerOptionsBuilder();
 
         optionsBuilder = this.ServiceConfiguration.UnencryptedPort is null
                              ? optionsBuilder.WithoutDefaultEndpoint()
                              : optionsBuilder.WithDefaultEndpoint()
                                  .WithDefaultEndpointPort(this.ServiceConfiguration.UnencryptedPort.Value);
 
-        optionsBuilder.WithEncryptedEndpoint().WithEncryptedEndpointPort(this.ServiceConfiguration.Port)
-            .WithEncryptionCertificate(certificate.Export(X509ContentType.Pfx))
-            .WithEncryptionSslProtocol(SslProtocols.Tls12)
-            .WithConnectionValidator(this)
-            .WithSubscriptionInterceptor(this)
-            .WithApplicationMessageInterceptor(this)
-            .WithUnsubscriptionInterceptor(this);
+        optionsBuilder
+                .WithEncryptedEndpoint()
+                .WithEncryptedEndpointPort(this.ServiceConfiguration.Port)
+                .WithEncryptionCertificate(certificate.Export(X509ContentType.Pfx))
+                .WithEncryptionSslProtocol(SslProtocols.Tls12);
 
-        this.mqttServer = new MqttFactory().CreateMqttServer();
+        this.mqttServer = new MqttServerFactory().CreateMqttServer(optionsBuilder.Build());
 
-        // Todo: Move this to handler once available
-        this.mqttServer.ClientDisconnectedHandler = this;
+        // Register the MQTT server events.
+        this.mqttServer.ClientUnsubscribedTopicAsync += this.ClientUnsubscribed;
+        this.mqttServer.InterceptingSubscriptionAsync += this.InterceptSubscription;
+        this.mqttServer.InterceptingPublishAsync += this.InterceptPublish;
+        this.mqttServer.ValidatingConnectionAsync += this.ValidateConnection;
+        this.mqttServer.ClientDisconnectedAsync += this.ClientDisconnected;
 
-        await this.mqttServer.StartAsync(optionsBuilder.Build());
+        await this.mqttServer.StartAsync();
 
         var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
         await repositoryGrain.ConnectBroker(this.ServiceConfiguration.BrokerConnectionSettings!, this.brokerId);

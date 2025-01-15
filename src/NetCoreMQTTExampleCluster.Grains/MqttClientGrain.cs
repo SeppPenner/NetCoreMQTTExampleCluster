@@ -74,7 +74,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public async Task<bool> ProceedConnect(SimpleMqttConnectionValidatorContext context)
+    public async Task<bool> ProceedConnect(SimpleValidatingConnectionEventArgs context)
     {
         try
         {
@@ -96,7 +96,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public Task<bool> ProceedPublish(SimpleMqttApplicationMessageInterceptorContext context)
+    public Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context)
     {
         try
         {
@@ -111,7 +111,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public Task<bool> ProceedSubscription(SimpleMqttSubscriptionInterceptorContext context)
+    public Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs context)
     {
         try
         {

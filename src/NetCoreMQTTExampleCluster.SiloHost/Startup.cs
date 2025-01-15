@@ -25,7 +25,7 @@ public class Startup
     /// <param name="configuration">The configuration.</param>
     public Startup(IConfiguration configuration)
     {
-        configuration.GetSection(Program.ServiceName.Name).Bind(this.mqttConfiguration);
+        configuration.GetSection(Program.ServiceName.Name ?? "NetCoreMQTTExampleCluster.SiloHost").Bind(this.mqttConfiguration);
     }
 
     /// <summary>

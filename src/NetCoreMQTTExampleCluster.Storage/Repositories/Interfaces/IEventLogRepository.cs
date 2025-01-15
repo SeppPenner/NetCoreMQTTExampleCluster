@@ -25,7 +25,7 @@ public interface IEventLogRepository
     /// </summary>
     /// <param name="eventLogId">The <see cref="EventLog"/>'s identifier to query for.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    Task<EventLog> GetEventLogById(Guid eventLogId);
+    Task<EventLog?> GetEventLogById(Guid eventLogId);
 
     /// <summary>
     /// Inserts a <see cref="EventLog" /> to the database.
