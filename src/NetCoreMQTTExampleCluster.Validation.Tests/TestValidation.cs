@@ -70,6 +70,42 @@ public class TestValidation
     }
 
     /// <summary>
+    /// Tests the client identifier prefix validation of the validate connection method of the <see cref="MqttValidator"/>.
+    /// </summary>
+    /// <param name="validateClientIdPrefix">A value indicating whether the client identifier prefix is validated or not.</param>
+    /// <param name="clientId">The client identifier.</param>
+    /// <param name="expected">The expected result.</param>
+    [TestMethod]
+    [DataRow(false, "mqtt-broker-sync-1", true)]
+    [DataRow(false, "other-client", true)]
+    [DataRow(true, "mqtt-broker-sync-1", true)]
+    [DataRow(true, "other-client", false)]
+    [DataRow(true, "MQTT-BROKER-SYNC-1", false)]
+    public void TestValidateConnectionClientIdPrefix(bool validateClientIdPrefix, string clientId, bool expected)
+    {
+        var mqttUser = new MqttUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = "mqtt-broker-sync",
+            ClientIdPrefix = "mqtt-broker-sync",
+            ValidateClientId = true
+        };
+
+        mqttUser.PasswordHash = this.passwordHasher.HashPassword(mqttUser, "Test");
+
+        var context = new SimpleValidatingConnectionEventArgs
+        {
+            ClientId = clientId,
+            UserName = "mqtt-broker-sync",
+            Password = "Test"
+        };
+
+        var result = new MqttValidator(validateClientIdPrefix).ValidateConnection(context, mqttUser, this.passwordHasher);
+
+        Assert.AreEqual(expected, result);
+    }
+
+    /// <summary>
     /// Tests the validate publish method of the <see cref="MqttValidator"/>.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>

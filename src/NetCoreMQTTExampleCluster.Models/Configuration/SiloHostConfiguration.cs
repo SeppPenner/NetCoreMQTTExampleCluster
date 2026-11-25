@@ -25,6 +25,12 @@ public class SiloHostConfiguration : IConfigurationValid
     public int HeartbeatIntervalInMilliSeconds { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether MQTT users with a client identifier prefix may only connect
+    /// with client identifiers that start with this prefix.
+    /// </summary>
+    public bool ValidateClientIdPrefix { get; set; }
+
+    /// <summary>
     /// Gets or sets the database settings.
     /// </summary>
     public MqttDatabaseConnectionSettings? DatabaseSettings { get; set; }

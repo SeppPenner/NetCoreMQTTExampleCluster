@@ -17,6 +17,23 @@ public class MqttValidator : IMqttValidator
     /// </summary>
     private static readonly ILogger Logger = Log.ForContext<MqttValidator>();
 
+    /// <summary>
+    /// A value indicating whether the client identifier prefix of the MQTT users is validated on connect or not.
+    /// </summary>
+    private readonly bool validateClientIdPrefix;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MqttValidator"/> class.
+    /// </summary>
+    /// <param name="validateClientIdPrefix">
+    /// A value indicating whether MQTT users with <see cref="MqttUser.ValidateClientId"/> and a <see cref="MqttUser.ClientIdPrefix"/>
+    /// may only connect with client identifiers that start with this prefix.
+    /// </param>
+    public MqttValidator(bool validateClientIdPrefix = false)
+    {
+        this.validateClientIdPrefix = validateClientIdPrefix;
+    }
+
     /// <inheritdoc cref="IMqttValidator"/>
     public bool ValidateConnection(SimpleValidatingConnectionEventArgs context, MqttUser mqttUser, IPasswordHasher<MqttUser> passwordHasher)
     {
@@ -62,6 +79,12 @@ public class MqttValidator : IMqttValidator
         }
         else
         {
+            if (this.validateClientIdPrefix && !context.ClientId.StartsWith(mqttUser.ClientIdPrefix, StringComparison.Ordinal))
+            {
+                Logger.Debug("Client id in context doesn't start with the current MQTT user's client id prefix.");
+                return false;
+            }
+
             Logger.Debug("Connection valid for {ClientIdPrefix} and {@User} when client id prefix was not null.", mqttUser.ClientIdPrefix, mqttUser);
         }
 

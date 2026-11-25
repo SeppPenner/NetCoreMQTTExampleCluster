@@ -152,6 +152,7 @@ To do this, change the file `appsettings.json`.
 |-|-|-|
 |`LogFolderPath`|The folder the service logs to.|No|
 |`HeartbeatIntervalInMilliseconds`|The heartbeat interval.|No|
+|`ValidateClientIdPrefix`|Whether MQTT users with `ValidateClientId` and a `ClientIdPrefix` may only connect with client identifiers that start with this prefix (default: `false`).|Yes|
 |`Database`|The database connection settings.|No|
 |`Database.Host`|The host of the database connection.|No|
 |`Database.Database`|The database of the database connection.|No|
@@ -181,6 +182,7 @@ Example:
   "NetCoreMQTTExampleCluster.SiloHost": {
     "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.SiloHost",
     "HeartbeatIntervalInMilliseconds": 30000,
+    "ValidateClientIdPrefix": true,
     "DatabaseSettings": {
       "Host": "localhost",
       "Database": "mqtt",

@@ -121,7 +121,7 @@ public class Program
                 s.AddSingleton<IMqttUserRepository>(u => new MqttUserRepository(databaseSettings));
                 s.AddSingleton<IWebUserRepository>(u => new WebUserRepository(databaseSettings));
                 s.AddSingleton<IWhitelistRepository>(u => new WhitelistRepository(databaseSettings));
-                s.AddSingleton<IMqttValidator>(new MqttValidator());
+                s.AddSingleton<IMqttValidator>(new MqttValidator(Configuration.ValidateClientIdPrefix));
             });
 
         builder.UseAdoNetClustering(
