@@ -14,11 +14,12 @@ and [Orleans](https://dotnet.github.io/orleans/).
 # Hints
 
 The user `mqtt-broker-sync` must be present and must not be used for anything else than the broker synchronization!
+The brokers deliver the messages of this user without validating them again and don't store them.
 
 # Setup
 
-1. Create the database with the project `NetCoreMQTTExampleCluster.DatabaseSetup`, adapting the `appsettings.json` as required.
-2. Start the projects `NetCoreMQTTExampleCluster.SiloHost` and `NetCoreMQTTExampleCluster.Cluster` as `several start projects`.
+1. Create the database with the project `NetCoreMQTTExampleCluster.DatabaseSetup`, adapting the `appsettings.json` as required. It creates whatever is missing and keeps an existing database with its data. Start it with `--drop-database` to delete an existing database first.
+2. Start the projects `NetCoreMQTTExampleCluster.SiloHost` and `NetCoreMQTTExampleCluster.Cluster` as `several start projects`. For two brokers on one machine, copy the output folder of `NetCoreMQTTExampleCluster.Cluster` twice and use the `appsettings.json` files from `doc/Example setup/Broker1` and `doc/Example setup/Broker2`.
 3. Connect with a MQTT client using `Test` as user, `test` as Password and any `clientId`. The user can only publish to the topics: `a/b` and `a/d` and subscribe to `d/e` and `d`.
 
 # Use
@@ -60,14 +61,13 @@ To do this, change the file `appsettings.json`.
 |`LogFolderPath`|The folder the service logs to.|No|
 |`Port`|The encrypted port of the MQTT cluster client.|No|
 |`UnencryptedPort`|The unencrypted port of the MQTT cluster client. (This should only be used locally).|Yes|
-|`JsonWebTokenConfigurationKey`|The key to validate JSON web tokens, at least 32 characters. Replace the example value.|No|
 |`HeartbeatIntervalInMilliseconds`|The heartbeat interval.|No|
 |`ServiceDelayInMilliseconds`|The delay between two runs of the cyclic service task.|No|
-|`BrokerConnectionSettings`|The connection that the SiloHost establishes to the broker if a message is published by another MQTT cluster client.|No|
-|`BrokerConnectionSettings.ClientId`|The ClientId of the connection.|No|
-|`BrokerConnectionSettings.HostName`|The host name of the connection.|No|
-|`BrokerConnectionSettings.Port`|The port of the connection.|No|
-|`BrokerConnectionSettings.UserName`|The user name of the connection.|No|
+|`BrokerConnectionSettings`|The synchronization connection: the other brokers connect to this broker with these settings to forward the messages of their clients.|No|
+|`BrokerConnectionSettings.ClientId`|The client identifier this broker uses for its own connections to the other brokers. It has to be unique per broker and start with the `ClientIdPrefix` of the synchronization user if `ValidateClientIdPrefix` is set in the SiloHost.|No|
+|`BrokerConnectionSettings.HostName`|The host name the other brokers connect to.|No|
+|`BrokerConnectionSettings.Port`|The port the other brokers connect to.|No|
+|`BrokerConnectionSettings.UserName`|The user name of the connection, a user with `IsSyncUser`.|No|
 |`BrokerConnectionSettings.Password`|The password of the connection.|No|
 |`BrokerConnectionSettings.UseTls`|Whether TLS should be used for the connection.|No|
 |`BrokerConnectionSettings.UseCleanSession`|Whether the "CleanSession" flag should be used for the connection.|No|
@@ -91,7 +91,6 @@ Example:
     "ServiceDelayInMilliseconds": 30000,
     "Port": 8883,
     "UnencryptedPort": 1883,
-    "JsonWebTokenConfigurationKey": "ChangeThisExampleKeyBeforeProductionUse",
     "BrokerConnectionSettings": {
       "ClientId": "mqtt-broker-sync-1",
       "HostName": "localhost",
@@ -121,6 +120,9 @@ Example:
 ## NetCoreMQTTExampleCluster.DatabaseSetup
 
 To do this, change the file `appsettings.json`.
+
+Without arguments, the program creates the database, the TimescaleDB extension, the Orleans tables, the own tables and the seed users if they don't exist and keeps everything that exists.
+The command line argument `--drop-database` deletes the database first and creates it again, all data is lost then.
 
 |Setting|Description|Optional|
 |-|-|-|
@@ -216,27 +218,33 @@ Example:
 # Structure
 ![](images/structure.svg)
 
-The MQTT clients connect to any MQTT broker. All inquiries are forwarded to the SiloHost and synchronized there.
+The MQTT clients connect to any MQTT broker. The brokers have every connection, subscription and publish validated by the SiloHost.
+Each broker forwards the accepted messages of its clients to the other brokers, over one MQTT connection per broker.
 
 # Schedule
 
 ## General
 
-Every action is saved by the SiloHost into the table `eventlog`.
+Every action is saved by the SiloHost into the table `eventlog`, every accepted message into the table `publishmessage`.
+Each silo collects the entries and writes them every 20 seconds and when it stops.
+A payload that is valid UTF-8 without the NUL character is stored as text, any other payload as Base64 with `"IsBase64": true`.
 
 ## Broker connect
 
 ![](images/broker-connect.svg)
 
-The MQTT broker connects to the SiloHost by specifying the `BrokerConnectionSettings` and a random `brokerId` (GUUID).
-The SiloHost stores the `BrokerConnectionSettings` for the `brokerId` in a `Dictionary`.
+The MQTT broker connects to the SiloHost by specifying the `BrokerConnectionSettings`, a random `brokerId` (GUID) and an observer.
+The SiloHost stores the `BrokerConnectionSettings` for the `brokerId` in a `Dictionary`, returns the list of all brokers and tells the other brokers about the new one through their observers.
+Each broker keeps one MQTT connection to every other broker in the list.
+The brokers repeat the registration every `ServiceDelayInMilliseconds`, because the SiloHost keeps the list in memory only.
+A broker that registers with the host name and port of a known broker replaces it, this happens when a broker restarts after a crash.
 
 ## Broker disonnect
 
 ![](images/broker-disconnect.svg)
 
 The MQTT broker disconnects from the SiloHost by specifying its `brokerId`.
-The SiloHost removes the entry with the `brokerId` from its `Dictionary`.
+The SiloHost removes the entry with the `brokerId` from its `Dictionary` and tells the other brokers, which close their connection to it.
 
 ## Client connect
 
@@ -269,7 +277,10 @@ The MQTT client passes the `MqttUnsubscriptionInterceptorContext` to the MQTT br
 ![](images/client-publish1.svg)
 ![](images/client-publish2.svg)
 
-The MQTT client passes the `MqttApplicationMessageInterceptorContext` to the MQTT broker. The broker passes this on to the SiloHost and supplements his `brokerId`. The SiloHost validates the data and returns to the MQTT broker whether the MQTT client is allowed to publish or not. If this is the case, the SiloHost sends the packet to all other brokers except the one who initially sent the message.
+The MQTT client publishes a message to the MQTT broker. The broker passes it on to the SiloHost as `SimpleInterceptingPublishEventArgs`. The SiloHost validates the data and returns to the MQTT broker whether the MQTT client is allowed to publish or not.
+If this is the case, the broker publishes the message to all other brokers over its connections to them, with the payload bytes and the MQTT 5 properties unchanged.
+The other brokers deliver it to their clients without validating it again and don't forward it any further.
+If another broker can't be reached, the connection to it retries every five seconds and keeps up to 10,000 messages, the oldest are dropped first.
 
 # Temporarily locking clients
 Users can be blocked temporarily (until the end of the current month) if they exceed a certain data quota.

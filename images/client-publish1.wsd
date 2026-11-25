@@ -2,8 +2,8 @@
 
 skinparam componentStyle uml2
 
-file "Publish(MqttApplicationMessageInterceptorContext)" as PublishPackage
-file "Publish(MqttApplicationMessageInterceptorContext, brokerId)" as PublishPackage2
+file "Publish(MqttApplicationMessage)" as PublishPackage
+file "ProceedPublish(SimpleInterceptingPublishEventArgs)" as PublishPackage2
 file "ValidatePublish()" as ValidatePublish
 
 frame SiloHost {

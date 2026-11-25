@@ -2,8 +2,9 @@
 
 skinparam componentStyle uml2
 
-file "Disconnect(brokerId)" as DisconnectPackage
+file "DisconnectBroker(brokerId)" as DisconnectPackage
 file "RemoveBrokerFromDictionary()" as Dictionary
+file "BrokersChanged(broker list)" as Notify
 
 frame SiloHost {
 }
@@ -11,8 +12,17 @@ frame SiloHost {
 frame "MqttBroker" as MqttBroker {
 }
 
+frame "MqttBroker 2" as MqttBroker2 {
+}
+
+frame "MqttBroker n" as MqttBrokerN {
+}
+
 MqttBroker --> DisconnectPackage
 DisconnectPackage --> SiloHost
 SiloHost --> Dictionary
+SiloHost --> Notify
+Notify --> MqttBroker2
+Notify --> MqttBrokerN
 
 @enduml

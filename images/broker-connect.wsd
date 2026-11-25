@@ -2,8 +2,10 @@
 
 skinparam componentStyle uml2
 
-file "Connect(brokerConnectionSettings, brokerId)" as ConnectPackage
-file "StoreBrokerIdInDictionary()" as Dictionary
+file "ConnectBroker(brokerConnectionSettings, brokerId, observer)" as ConnectPackage
+file "StoreBrokerInDictionary()" as Dictionary
+file "Broker list" as BrokerList
+file "BrokersChanged(broker list)" as Notify
 
 frame SiloHost {
 }
@@ -11,8 +13,19 @@ frame SiloHost {
 frame "MqttBroker" as MqttBroker {
 }
 
+frame "MqttBroker 2" as MqttBroker2 {
+}
+
+frame "MqttBroker n" as MqttBrokerN {
+}
+
 MqttBroker --> ConnectPackage
 ConnectPackage --> SiloHost
 SiloHost --> Dictionary
+SiloHost --> BrokerList
+BrokerList --> MqttBroker
+SiloHost --> Notify
+Notify --> MqttBroker2
+Notify --> MqttBrokerN
 
 @enduml

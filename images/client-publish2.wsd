@@ -3,7 +3,7 @@
 skinparam componentStyle uml2
 
 file "ValidatePublish()" as ValidatePublish
-file "Publish(MqttApplicationMessageInterceptorContext)" as Publish
+file "Publish(MqttApplicationMessage) over the synchronization connections" as Publish
 file "true" as CanPublish
 file "true" as CanPublish2
 file "true" as CanPublish3
@@ -26,11 +26,11 @@ frame "MqttBroker n" as MqttBrokerN {
 ValidatePublish --> CanPublish
 CanPublish --> SiloHost
 SiloHost --> CanPublish2
-SiloHost --> Publish
-Publish --> MqttBroker2
-Publish --> MqttBrokerN
 CanPublish2 --> MqttBroker
 MqttBroker --> CanPublish3
 CanPublish3 --> MqttClient
+MqttBroker --> Publish
+Publish --> MqttBroker2
+Publish --> MqttBrokerN
 
 @enduml

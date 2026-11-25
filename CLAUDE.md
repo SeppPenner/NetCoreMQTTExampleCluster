@@ -4,8 +4,9 @@
 
 NetCoreMQTTExampleCluster is an example of an MQTT broker cluster. Several MQTT brokers built with
 MQTTnet share one Orleans silo. The silo validates every connect, subscribe and publish against a
-PostgreSQL database with the TimescaleDB extension, writes an event log and forwards every accepted
-message to all other brokers. There is no NuGet package, no installer and no CI in this repository.
+PostgreSQL database with the TimescaleDB extension and writes an event log. Each broker forwards the
+accepted messages of its clients to all other brokers over one persistent MQTT connection per broker.
+There is no NuGet package, no installer and no CI in this repository.
 The product is the source code: two services and two console tools.
 
 One solution `src/NetCoreMQTTExampleCluster.sln` with 13 projects, every one of them with
@@ -14,24 +15,29 @@ prefix is left out below.
 
 Services and tools (`OutputType` `Exe`):
 
-- `Cluster`: the MQTT broker, called "MQTT cluster client" in the readme. `MqttService` hosts the
-  MQTTnet server, hands every MQTT event to the repository grain through an Orleans client and
-  registers the broker with the silo. Several instances run side by side.
+- `Cluster`: the MQTT broker, called "MQTT cluster client" in the readme. A generic host without a
+  web host. `MqttService` hosts the MQTTnet server, hands every MQTT event to the client grain of the
+  MQTT client identifier through an Orleans client, registers the broker at the repository grain and
+  forwards accepted messages through `BrokerSynchronizer`. Several instances run side by side.
 - `SiloHost`: the Orleans silo with ADO.NET clustering and reminders on PostgreSQL, the repositories,
-  the `MqttValidator` and the Orleans dashboard on `DashboardPort` (4321) under `/dashboard`.
-- `DatabaseSetup`: creates the database from scratch and seeds two users, see "Known quirks".
+  the `MqttValidator`, the `MqttPersistenceQueue` and the Orleans dashboard on `DashboardPort` (4321)
+  under `/dashboard`.
+- `DatabaseSetup`: creates the database and whatever is missing in it and seeds two users,
+  `--drop-database` deletes the database first, see "Known quirks".
 - `PasswordHashGenerator`: an interactive console tool that prints an ASP.NET Core Identity password
   hash for the `mqttuser` table.
 
 Libraries:
 
 - `Grains.Interfaces`: `IMqttRepositoryGrain` (integer key, always `GlobalConstants.RepositoryGrainId`,
-  which is 0), `IMqttClientGrain` (string key, the MQTT client identifier), the serializable
+  which is 0), `IMqttClientGrain` (string key, the MQTT client identifier), `IMqttBrokerObserver` (the
+  grain observer each broker registers for changes of the broker list), the serializable
   `Simple*EventArgs` copies of the MQTTnet event arguments and, under `Surrogates/`, the Orleans
   surrogates and converters for `MqttApplicationMessage`, `MqttTopicFilter` and `MqttUserProperty`.
-- `Grains`: `MqttRepositoryGrain` holds the broker list, queues the event log and the published
-  messages and forwards messages to the other brokers. `MqttClientGrain` loads the MQTT user with its
-  black and white lists and delegates every check to `IMqttValidator`.
+- `Grains`: `MqttRepositoryGrain` holds the broker list and notifies the brokers through their
+  observers. `MqttClientGrain` loads the MQTT user with its black and white lists, delegates every
+  check to `IMqttValidator` and queues event log entries and accepted messages in
+  `MqttPersistenceQueue`, a hosted service per silo that writes them to the database.
 - `Validation`: `MqttValidator`, the rules for connect, publish and subscribe including the monthly
   byte limit.
 - `TopicCheck`: `TopicChecker.Regex`, the match of a topic against a filter with `+` and `#`.
@@ -50,9 +56,9 @@ Tests, all MSTest:
 
 Repository root: `README.md` (the only user documentation: setup, every setting, the sequence
 diagrams), `Changelog.md`, `Updating.md` (one line, see "Updating Orleans and packages"),
-`License.txt` (MIT), `images/` (PlantUML sources `*.wsd` with the rendered `*.svg` and `*.png`),
-`doc/Example setup/` (outdated, see "Known quirks"), `.claude/skills/github-issue/` and
-`.gitattributes`.
+`License.txt` (MIT), `images/` (PlantUML sources `*.wsd` with the rendered `*.svg` and `*.png`,
+rendered with the Docker image `plantuml/plantuml`), `doc/Example setup/` (the `appsettings.json` of
+two brokers on one machine), `.claude/skills/github-issue/` and `.gitattributes`.
 
 ## Build
 
@@ -65,8 +71,6 @@ dotnet test src/NetCoreMQTTExampleCluster.sln -c Release
 ```
 
 - Two target frameworks `net10.0;net11.0` in every project, so building needs the .NET 11 SDK.
-  `Microsoft.AspNetCore.Authentication.JwtBearer` in `Cluster` is referenced per target framework
-  (10.0.x for `net10.0`, 11.0.x for `net11.0`), keep that split when updating packages.
 - There is no `Directory.Build.props`. All build properties are duplicated in the 13 `.csproj`
   files: `TreatWarningsAsErrors`, `NuGetAudit` with `NuGetAuditMode=all`, `LangVersion latest`,
   `ImplicitUsings` and `NoWarn` `NU1803`. Every warning breaks the build, NuGet warnings (`NU****`)
@@ -87,8 +91,8 @@ dotnet test src/NetCoreMQTTExampleCluster.sln -c Release
 - Restore needs nuget.org. If a private feed is configured globally on the machine and answers 404
   for public packages, restore fails with `NU1301`. Then build with an explicit source:
   `dotnet build src/NetCoreMQTTExampleCluster.sln --source https://api.nuget.org/v3/index.json`.
-- `dotnet test` runs 27 tests per framework, 54 runs in total (TopicCheck 13, Validation 8,
-  Grains.Interfaces 6). They need no network and no database. Never claim a test run happened
+- `dotnet test` runs 28 tests per framework, 56 runs in total (TopicCheck 13, Validation 8,
+  Grains.Interfaces 7). They need no network and no database. Never claim a test run happened
   without running it.
 - The unit tests do not cover the brokers, the grains or the database. A change there needs the end
   to end run in [verification.md](.claude/skills/github-issue/references/verification.md): a
@@ -99,8 +103,8 @@ dotnet test src/NetCoreMQTTExampleCluster.sln -c Release
 ## Running it
 
 - Ports: MQTT 1883 unencrypted and 8883 with TLS on each broker, silo 7101, gateway 7102, dashboard
-  4321. The web host of a `Cluster` instance uses the ASP.NET Core default port unless
-  `ASPNETCORE_URLS` says otherwise, so a second instance needs its own value.
+  4321. A second broker on the same machine needs its own `Port` and `UnencryptedPort`, see
+  `doc/Example setup/`.
 - Start the `SiloHost` first. A `Cluster` instance gives up after ten failed connection attempts to
   the silo, two seconds apart, and terminates.
 - Both services read the environment from `ASPNETCORE_ENVIRONMENT`. Without it the environment is
@@ -140,31 +144,49 @@ Follow the surrounding code, it is consistent throughout every file:
 
 Do not silently "clean up" these, they are existing behaviour:
 
-- **`DatabaseSetup` drops the database.** It runs `DROP DATABASE` on the configured name, creates it
-  again, enables TimescaleDB, runs the Orleans scripts `Main`, `Clustering` and `Reminders`
-  (`Persistence` is embedded but never executed), creates the own tables with hypertables on
-  `eventlog` and `publishmessage` and seeds the data. Never point it at a database whose content is
+- **`DatabaseSetup` drops the database only with `--drop-database`.** Without arguments it creates
+  the database if it is missing, enables TimescaleDB, runs each Orleans script `Main`, `Clustering`
+  and `Reminders` only if its table is missing (the scripts can't run twice, `Persistence` is embedded
+  but never executed), creates missing tables, hypertables on `eventlog` and `publishmessage` and the
+  compound index, and inserts a seed user with its lists only if the user name does not exist. With
+  `--drop-database` it runs `DROP DATABASE` first, never pass it for a database whose content is
   needed. It ends with `Console.ReadKey()`, which throws with redirected input after the work is done.
 - **Seed users.** `Test` with password `test`, no client identifier check, may publish to `a/b` and
   `a/d` and subscribe to `d/e` and `d`. `mqtt-broker-sync` with password `Test`, `IsSyncUser`,
   `ValidateClientId` with the prefix `mqtt-broker-sync`, may publish and subscribe to `#`. The seed
   data lives in `DatabaseSetup/Program.cs`, keep the readme in line with it.
-- **The sync user prevents loops.** A message published by a user with `IsSyncUser` is validated and
-  stored, but not forwarded again. Every broker's `BrokerConnectionSettings` logs in as that user,
-  and the user must not be used for anything else.
-- **One repository grain for all brokers.** Key 0, `[Reentrant]`, `ProceedPublish` additionally
-  `[AlwaysInterleave]`. The broker list lives only in memory. The brokers register again every
-  `ServiceDelayInMilliseconds` (30 s), which restores the list after a silo restart or a grain
-  deactivation. Event log entries and published messages are queued and written every 20 seconds
-  (the first time after 5) and on deactivation, a silo crash loses the queue.
-- **Forwarding opens one MQTT connection per message and broker.** `PublishMessageToBroker` connects,
-  publishes and disconnects for every message, fire and forget via `.Ignore()`. The payload is
-  decoded as UTF-8 and encoded again, so a payload that is not valid UTF-8 arrives altered on the
-  other brokers. Together with the single repository grain this is the known scaling limit,
-  discussed in issue #1.
-- **The client grain caches the user.** `MqttClientGrain` loads the user and its lists once per
-  activation. Changes in the database take effect after the grain is deactivated (Orleans collects
-  idle grains after 15 minutes by default) or the silo restarts.
+- **Messages of the sync user are trusted.** A broker remembers the client identifiers of the
+  connections whose user has `IsSyncUser` and delivers their messages without a grain call, without
+  storing them and without forwarding them again, which prevents loops. The origin broker validated
+  and stored them already, so each message is stored once. The key is the client identifier and not
+  the user name, because MQTTnet keeps the user name of the first connection when another user
+  resumes a persistent session. Every broker's `BrokerConnectionSettings` logs in as that user, and
+  the user must not be used for anything else.
+- **The repository grain holds only the broker list.** Key 0, in memory only. Connect, subscribe,
+  publish, unsubscribe and disconnect go from the broker to the client grain directly. The grain tells
+  the other brokers through `IMqttBrokerObserver` when a broker connects or disconnects. The brokers
+  register again every `ServiceDelayInMilliseconds` (30 s), which restores the list after a silo
+  restart or a grain deactivation, forwarding between two brokers resumes once both registered again.
+  A broker that registers with the `HostName` and `Port` of a known broker replaces it (a restart
+  after a crash). A crashed broker that does not come back stays in the list, the others retry it.
+- **Forwarding runs in the brokers.** `BrokerSynchronizer` keeps one `BrokerForwarder` per other
+  broker: one persistent MQTT 5 connection with the own `BrokerConnectionSettings.ClientId` and the
+  credentials, host and port from the other broker's settings, a queue of 10,000 messages that drops
+  the oldest when full, publishing in order with one acknowledgement at a time and a retry every
+  5 seconds. The payload bytes and the MQTT 5 properties are forwarded unchanged. A stopped forwarder
+  gives its queue 5 seconds.
+- **Event log and published messages are written per silo.** `MqttPersistenceQueue` queues them and
+  writes every 20 seconds (the first time after 5) and when the silo stops. It is registered before
+  `UseOrleans`, so it stops after the silo and writes what the grains queued last. A silo crash loses
+  the queue. `publishmessage.payload` is JSONB `{"Message": ...}`, a payload that is not valid UTF-8
+  or contains the NUL character is stored as Base64 with `"IsBase64": true`, because PostgreSQL
+  rejects it in JSONB and the whole batch would fail.
+- **The client grain caches the user.** `MqttClientGrain` loads the user on every accepted connect,
+  its lists once per activation and again when another user connects with the same client
+  identifier. A refused connect does not touch the cached user. Changes in the database take effect
+  after the grain is deactivated (Orleans collects idle grains after 15 minutes by default) or the
+  silo restarts. After a deactivation the grain loads the user by the user name of the publish, which
+  MQTTnet takes from the first connection of a persistent session.
 - **The monthly byte limit lives in memory.** `ThrottleUser` plus `MonthlyByteLimit` count into a
   static `MemoryCache` per silo process that expires at the end of the month. A silo restart resets
   the count.
@@ -186,21 +208,16 @@ Do not silently "clean up" these, they are existing behaviour:
 - **The configuration section is the assembly name.** Both services bind the section
   `NetCoreMQTTExampleCluster.Cluster` or `NetCoreMQTTExampleCluster.SiloHost` from
   `Assembly.GetName()`. Renaming an assembly breaks the configuration. `IsValid()` throws a
-  `ConfigurationException` on the first invalid value, `JsonWebTokenConfigurationKey` needs at least
-  32 characters. The shipped key is a placeholder, kept deliberately. `appsettings.Development.json`
-  is identical to `appsettings.json` in both services.
-- **Blazor leftovers in `Cluster`.** `App.razor` and `_Imports.razor` reference MatBlazor, AutoMapper,
-  BlazorPro and `IVU.Portal.*` namespaces that do not exist here. The project uses
-  `Microsoft.NET.Sdk`, not the Razor SDK, so these files are never compiled. `Startup` still
-  registers MVC, Razor Pages, server side Blazor, SignalR and JWT authentication and serves an empty
-  `wwwroot`, but maps no endpoint. Leave it alone unless the task is to remove it.
+  `ConfigurationException` on the first invalid value. `appsettings.Development.json` is identical to
+  `appsettings.json` in both services.
 - **Two copies of the Orleans SQL scripts.** `Storage/OrleansQueries/PostgreSQL-*.sql` are embedded
   and executed by `DatabaseSetup`. `SiloHost/OrleansAdoNetContent/` holds the scripts for MySQL,
   Oracle, PostgreSQL and SQL Server for reference and is used by nothing. Its PostgreSQL files are
   identical to the embedded ones (Orleans 10.4.2).
-- **`doc/Example setup/` is outdated.** The two JSON files date from the initial commit in 2020: flat
-  JSON without the section name, no `LogFolderPath`, no JWT key, and the user `Test` as sync user.
-  Nothing loads them. Use verification.md for a two broker setup.
+- **`doc/Example setup/`** holds the `appsettings.json` of two brokers on one machine: ports 1883 and
+  8883, 1884 and 8884, the sync client identifiers `mqtt-broker-sync-1` and `mqtt-broker-sync-2` and
+  the unencrypted sync connection. Nothing loads them, keep them in line with the shipped
+  `appsettings.json` of `Cluster`.
 - **AppVeyor badge without CI in the repository.** `README.md` links an AppVeyor build that is
   configured outside of this repository and has no .NET 11, left that way deliberately. There is no
   `.github` folder and no pipeline file here.
