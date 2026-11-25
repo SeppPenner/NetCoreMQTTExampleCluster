@@ -7,7 +7,6 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 
-global using NetCoreMQTTExampleCluster.Grains;
 global using NetCoreMQTTExampleCluster.Models.Configuration;
 global using NetCoreMQTTExampleCluster.Models.Constants;
 global using NetCoreMQTTExampleCluster.Models.Extensions;
@@ -18,6 +17,7 @@ global using NetCoreMQTTExampleCluster.Validation;
 
 global using Orleans;
 global using Orleans.Configuration;
+global using Orleans.Dashboard;
 global using Orleans.Hosting;
 
 global using Serilog;

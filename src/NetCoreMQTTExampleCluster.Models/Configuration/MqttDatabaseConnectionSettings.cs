@@ -63,13 +63,13 @@ public class MqttDatabaseConnectionSettings : IMqttDatabaseConnectionSettings, I
     /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string ToConnectionString()
     {
-        return $"Host={this.Host};Port={this.Port};Username={this.Username};Password={this.Password};Database={this.Database};Pooling={this.Pooling};Timezone={this.Timezone};Enlist=false;Maximum Pool Size=400;ConvertInfinityDateTime=true";
+        return $"Host={this.Host};Port={this.Port};Username={this.Username};Password={this.Password};Database={this.Database};Pooling={this.Pooling};Timezone={this.Timezone};Enlist=false;Maximum Pool Size=400";
     }
 
     /// <inheritdoc cref="IMqttDatabaseConnectionSettings"/>
     public string ToAdminConnectionString()
     {
-        return $"Host={this.Host};Port={this.Port};Username={this.Username};Password={this.Password};Database=postgres;Pooling={this.Pooling};Timezone={this.Timezone};Enlist=false;Maximum Pool Size=400;ConvertInfinityDateTime=true";
+        return $"Host={this.Host};Port={this.Port};Username={this.Username};Password={this.Password};Database=postgres;Pooling={this.Pooling};Timezone={this.Timezone};Enlist=false;Maximum Pool Size=400";
     }
 
     /// <inheritdoc cref="IConfigurationValid"/>

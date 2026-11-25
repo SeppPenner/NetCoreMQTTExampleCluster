@@ -21,14 +21,8 @@ public static class DashboardOptionsExtensions
     /// <param name="readOptions">The options from the configuration.</param>
     public static void Bind(this DashboardOptions options, DashboardOptions readOptions)
     {
-        options.Password = readOptions.Password;
-        options.BasePath = readOptions.BasePath;
         options.CounterUpdateIntervalMs = readOptions.CounterUpdateIntervalMs;
         options.HideTrace = readOptions.HideTrace;
-        options.Host = readOptions.Host;
-        options.HostSelf = readOptions.HostSelf;
-        options.Port = readOptions.Port;
-        options.ScriptPath = readOptions.ScriptPath;
-        options.Username = readOptions.Username;
+        options.HistoryLength = readOptions.HistoryLength;
     }
 }

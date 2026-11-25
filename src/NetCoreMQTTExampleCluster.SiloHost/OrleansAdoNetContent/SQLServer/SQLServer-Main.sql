@@ -20,7 +20,7 @@ Implementation notes:
    Orleans handles exception as a failure and will retry.
 
 7) The implementation follows the Extended Orleans membership protocol. For more information, see at:
-        https://docs.microsoft.com/dotnet/orleans/implementation/cluster-management
+        https://learn.microsoft.com/dotnet/orleans/implementation/cluster-management
         https://github.com/dotnet/orleans/blob/main/src/Orleans.Core/SystemTargetInterfaces/IMembershipTable.cs
 */
 
@@ -37,6 +37,7 @@ EXECUTE sp_executesql @snapshotSettings;
 -- This table defines Orleans operational queries. Orleans uses these to manage its operations,
 -- these are the only queries Orleans issues to the database.
 -- These can be redefined (e.g. to provide non-destructive updates) provided the stated interface principles hold.
+IF OBJECT_ID(N'[OrleansQuery]', 'U') IS NULL
 CREATE TABLE OrleansQuery
 (
 	QueryKey VARCHAR(64) NOT NULL,

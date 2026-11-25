@@ -42,6 +42,7 @@ public interface IMqttRepositoryGrain : IGrainWithIntegerKey
     /// <param name="eventArgs">The event args.</param>
     /// <param name="brokerId">The broker identifier.</param>
     /// <returns>A value indicating whether the published message is accepted or not.</returns>
+    [AlwaysInterleave]
     Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs eventArgs, Guid brokerId);
 
     /// <summary>

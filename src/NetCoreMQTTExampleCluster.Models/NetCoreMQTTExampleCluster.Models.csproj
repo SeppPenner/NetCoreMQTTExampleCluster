@@ -12,12 +12,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="GitVersion.MsBuild" Version="6.1.0">
+        <PackageReference Include="GitVersion.MsBuild" Version="7.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Orleans.Core" Version="3.7.1" />
-        <PackageReference Include="OrleansDashboard" Version="3.6.2" />
+        <PackageReference Include="Microsoft.Orleans.Dashboard" Version="10.4.2" />
+        <PackageReference Include="Microsoft.Orleans.Sdk" Version="10.4.2" />
     </ItemGroup>
 
     <ItemGroup>

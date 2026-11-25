@@ -52,18 +52,20 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="Grain" />
-    public override Task OnActivateAsync()
+    public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
         this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
-        this.RegisterTimer(this.OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20));
-        return base.OnActivateAsync();
+        this.RegisterGrainTimer(
+            this.OnTimer,
+            new GrainTimerCreationOptions(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20)) { Interleave = true });
+        return base.OnActivateAsync(cancellationToken);
     }
 
     /// <inheritdoc cref="Grain" />
-    public override async Task OnDeactivateAsync()
+    public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
-        await this.OnTimer(null!);
-        await base.OnDeactivateAsync();
+        await this.OnTimer();
+        await base.OnDeactivateAsync(reason, cancellationToken);
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
@@ -174,7 +176,6 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    [AlwaysInterleave]
     public async Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context, Guid brokerId)
     {
         try
@@ -346,7 +347,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
     /// Runs the timer function and writes the data to the database.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    private async Task OnTimer(object _)
+    private async Task OnTimer()
     {
         try
         {

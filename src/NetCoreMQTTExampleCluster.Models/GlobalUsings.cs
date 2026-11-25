@@ -3,6 +3,7 @@ global using System.Diagnostics;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Net;
 
+global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 
 global using NetCoreMQTTExampleCluster.Models.Constants;
@@ -14,7 +15,7 @@ global using NetCoreMQTTExampleCluster.Storage.Interfaces;
 
 global using Orleans;
 global using Orleans.Configuration;
-global using OrleansDashboard;
+global using Orleans.Dashboard;
 
 global using Serilog;
 #pragma warning restore IDE0065 // Die using-Anweisung wurde falsch platziert.

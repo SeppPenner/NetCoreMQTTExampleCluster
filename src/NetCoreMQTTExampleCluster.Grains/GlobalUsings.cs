@@ -20,6 +20,7 @@ global using NetCoreMQTTExampleCluster.Validation;
 
 global using Orleans;
 global using Orleans.Concurrency;
+global using Orleans.Runtime;
 
 global using Serilog;
 #pragma warning restore IDE0065 // Die using-Anweisung wurde falsch platziert.

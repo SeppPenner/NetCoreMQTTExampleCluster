@@ -21,6 +21,11 @@ public class OrleansSiloConfiguration : OrleansConfiguration
     public DashboardOptions? DashboardOptions { get; set; }
 
     /// <summary>
+    /// Gets or sets the port of the Orleans dashboard.
+    /// </summary>
+    public int DashboardPort { get; set; } = 4321;
+
+    /// <summary>
     /// Gets or sets the Orleans endpoint options.
     /// </summary>
     public SiloEndpointOptions? EndpointOptions { get; set; }
@@ -46,6 +51,11 @@ public class OrleansSiloConfiguration : OrleansConfiguration
         if (this.DashboardOptions is null)
         {
             throw new ConfigurationException("The dashboard options are empty.");
+        }
+
+        if (!this.DashboardPort.IsPortValid())
+        {
+            throw new ConfigurationException("The dashboard port is invalid.");
         }
 
         if (this.EndpointOptions is null || !this.EndpointOptions.IsValid())

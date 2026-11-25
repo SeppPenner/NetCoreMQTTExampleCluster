@@ -87,6 +87,7 @@ public class Program
                 webBuilder =>
                 {
                     webBuilder.UseContentRoot(currentLocation);
+                    webBuilder.UseUrls($"http://*:{Configuration.OrleansConfiguration!.DashboardPort}");
                     webBuilder.UseStartup<Startup>();
                 })
             .UseOrleans(
@@ -151,22 +152,11 @@ public class Program
                 endpointOptions.Bind(options);
             });
 
-        builder.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(MqttRepositoryGrain).Assembly).WithReferences());
-
-        builder.ConfigureLogging(
-            logging =>
-            {
-                logging.AddSerilog();
-            });
-
-        builder.UseDashboard(
+        builder.AddDashboard(
             options =>
             {
                 options.Bind(orleansConfiguration.DashboardOptions!);
             });
-
-        builder.AddSimpleMessageStreamProvider(GlobalConstants.SimpleMessageStreamProvider);
-        builder.AddMemoryGrainStorage(GlobalConstants.PubSubStore);
     }
 
     /// <summary>

@@ -26,7 +26,7 @@ The user `mqtt-broker-sync` must be present and must not be used for anything el
 * The broker can be reached at `localhost: 1883` (locally, unencrypted).
 * If you add a valid certificate for a domain, it can be accessed under `yourdomain:8883`.
 * Users can be managed in the database `mqtt`. The blacklists and whitelists are also saved there.
-* The Orleans dashboard is available by default at http://localhost:4321.
+* The Orleans dashboard is available by default at http://localhost:4321/dashboard.
 
 # Projects
 
@@ -60,7 +60,9 @@ To do this, change the file `appsettings.json`.
 |`LogFolderPath`|The folder the service logs to.|No|
 |`Port`|The encrypted port of the MQTT cluster client.|No|
 |`UnencryptedPort`|The unencrypted port of the MQTT cluster client. (This should only be used locally).|Yes|
+|`JsonWebTokenConfigurationKey`|The key to validate JSON web tokens, at least 32 characters. Replace the example value.|No|
 |`HeartbeatIntervalInMilliseconds`|The heartbeat interval.|No|
+|`ServiceDelayInMilliseconds`|The delay between two runs of the cyclic service task.|No|
 |`BrokerConnectionSettings`|The connection that the SiloHost establishes to the broker if a message is published by another MQTT cluster client.|No|
 |`BrokerConnectionSettings.ClientId`|The ClientId of the connection.|No|
 |`BrokerConnectionSettings.HostName`|The host name of the connection.|No|
@@ -86,8 +88,10 @@ Example:
   "NetCoreMQTTExampleCluster.Cluster": {
     "LogFolderPath": "C:\\log\\NetCoreMQTTExampleCluster.Cluster",
     "HeartbeatIntervalInMilliseconds": 30000,
+    "ServiceDelayInMilliseconds": 30000,
     "Port": 8883,
     "UnencryptedPort": 1883,
+    "JsonWebTokenConfigurationKey": "ChangeThisExampleKeyBeforeProductionUse",
     "BrokerConnectionSettings": {
       "ClientId": "mqtt-broker-sync-1",
       "HostName": "localhost",
@@ -160,7 +164,7 @@ To do this, change the file `appsettings.json`.
 |`OrleansConfiguration.ClusterOptions.ServiceId`|The ServiceId of the Orleans-SiloHost.|No|
 |`OrleansConfiguration.DashboardOptions`|The configuration of the Orleans dashboard of the Orleans SiloHost.|No|
 |`OrleansConfiguration.DashboardOptions.CounterUpdateIntervalMs`|The update interval of the Orleans dashboard.|No|
-|`OrleansConfiguration.DashboardOptions.Port`|The port of the Orleans dashboard.|No|
+|`OrleansConfiguration.DashboardPort`|The port of the Orleans dashboard (the web host of the SiloHost), defaults to 4321.|No|
 |`OrleansConfiguration.EndpointOptions`|The endpoint configuration of the Orleans SiloHost.|No|
 |`OrleansConfiguration.EndpointOptions.AdvertisedIPAddress`|The Orleans SiloHost IP address.|No|
 |`OrleansConfiguration.EndpointOptions.SiloPort`|The Orleans SiloHost port.|No|
@@ -190,9 +194,9 @@ Example:
         "ServiceId": "mqtt-silo-001-A"
       },
       "DashboardOptions": {
-        "CounterUpdateIntervalMs": 1000,
-        "Port": 4321
+        "CounterUpdateIntervalMs": 1000
       },
+      "DashboardPort": 4321,
       "EndpointOptions": {
         "AdvertisedIPAddress": "127.0.0.1",
         "SiloPort": 7101,

@@ -8,9 +8,7 @@ CREATE TABLE OrleansStorage
     grainidextensionstring character varying(512) ,
     serviceid character varying(150)  NOT NULL,
     payloadbinary bytea,
-    payloadxml xml,
-    payloadjson text,
-    modifiedon timestamp without time zone NOT NULL,
+    modifiedon timestamptz NOT NULL,
     version integer
 );
 
@@ -27,9 +25,7 @@ CREATE OR REPLACE FUNCTION writetostorage(
     _grainidextensionstring character varying,
     _serviceid character varying,
     _grainstateversion integer,
-    _payloadbinary bytea,
-    _payloadjson text,
-    _payloadxml xml)
+    _payloadbinary bytea)
     RETURNS TABLE(newgrainstateversion integer)
     LANGUAGE 'plpgsql'
 AS $function$
@@ -56,15 +52,13 @@ AS $function$
     -- If the version number explicitly returned is still the same, Orleans interprets it so the update did not succeed
     -- and throws an InconsistentStateException.
     --
-    -- See further information at https://docs.microsoft.com/dotnet/orleans/grains/grain-persistence.
+    -- See further information at https://learn.microsoft.com/dotnet/orleans/grains/grain-persistence.
     IF _GrainStateVersion IS NOT NULL
     THEN
         UPDATE OrleansStorage
         SET
             PayloadBinary = _PayloadBinary,
-            PayloadJson = _PayloadJson,
-            PayloadXml = _PayloadXml,
-            ModifiedOn = (now() at time zone 'utc'),
+            ModifiedOn = now(),
             Version = Version + 1
 
         WHERE
@@ -98,8 +92,6 @@ AS $function$
             GrainIdExtensionString,
             ServiceId,
             PayloadBinary,
-            PayloadJson,
-            PayloadXml,
             ModifiedOn,
             Version
         )
@@ -112,9 +104,7 @@ AS $function$
             _GrainIdExtensionString,
             _ServiceId,
             _PayloadBinary,
-            _PayloadJson,
-            _PayloadXml,
-           (now() at time zone 'utc'),
+           now(),
             1
         WHERE NOT EXISTS
          (
@@ -148,7 +138,7 @@ VALUES
 (
     'WriteToStorageKey','
 
-        select * from WriteToStorage(@GrainIdHash, @GrainIdN0, @GrainIdN1, @GrainTypeHash, @GrainTypeString, @GrainIdExtensionString, @ServiceId, @GrainStateVersion, @PayloadBinary, @PayloadJson, CAST(@PayloadXml AS xml));
+        select * from WriteToStorage(@GrainIdHash, @GrainIdN0, @GrainIdN1, @GrainTypeHash, @GrainTypeString, @GrainIdExtensionString, @ServiceId, @GrainStateVersion, @PayloadBinary);
 ');
 
 INSERT INTO OrleansQuery(QueryKey, QueryText)
@@ -157,8 +147,6 @@ VALUES
     'ReadFromStorageKey','
     SELECT
         PayloadBinary,
-        PayloadXml,
-        PayloadJson,
         (now() at time zone ''utc''),
         Version
     FROM
@@ -180,8 +168,6 @@ VALUES
     UPDATE OrleansStorage
     SET
         PayloadBinary = NULL,
-        PayloadJson = NULL,
-        PayloadXml = NULL,
         Version = Version + 1
     WHERE
         GrainIdHash = @GrainIdHash AND @GrainIdHash IS NOT NULL
@@ -193,4 +179,21 @@ VALUES
         AND ServiceId = @ServiceId AND @ServiceId IS NOT NULL
         AND Version IS NOT NULL AND Version = @GrainStateVersion AND @GrainStateVersion IS NOT NULL
     Returning Version as NewGrainStateVersion
+');
+
+INSERT INTO OrleansQuery(QueryKey, QueryText)
+VALUES
+(
+    'DeleteStorageKey','
+    DELETE FROM OrleansStorage
+    WHERE
+        GrainIdHash = @GrainIdHash AND @GrainIdHash IS NOT NULL
+        AND GrainTypeHash = @GrainTypeHash AND @GrainTypeHash IS NOT NULL
+        AND GrainIdN0 = @GrainIdN0 AND @GrainIdN0 IS NOT NULL
+        AND GrainIdN1 = @GrainIdN1 AND @GrainIdN1 IS NOT NULL
+        AND GrainTypeString = @GrainTypeString AND @GrainTypeString IS NOT NULL
+        AND ((@GrainIdExtensionString IS NOT NULL AND GrainIdExtensionString IS NOT NULL AND GrainIdExtensionString = @GrainIdExtensionString) OR @GrainIdExtensionString IS NULL AND GrainIdExtensionString IS NULL)
+        AND ServiceId = @ServiceId AND @ServiceId IS NOT NULL
+        AND Version IS NOT NULL AND Version = @GrainStateVersion AND @GrainStateVersion IS NOT NULL
+    Returning Version + 1 as NewGrainStateVersion
 ');

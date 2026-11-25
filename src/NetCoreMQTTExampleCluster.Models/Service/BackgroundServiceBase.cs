@@ -35,10 +35,15 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
     protected DateTimeOffset LastHeartbeatAt { get; set; }
 
     /// <summary>
-    /// Gets or sets the Orleans client.
+    /// The host that runs the Orleans client.
+    /// </summary>
+    private IHost? orleansClientHost;
+
+    /// <summary>
+    /// Gets the Orleans client.
     /// </summary>
     [NotNull]
-    protected IClusterClient? OrleansClient { get; set; }
+    protected IClusterClient? OrleansClient { get; private set; }
 
     /// <summary>
     /// The service configuration.
@@ -68,28 +73,28 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
     /// <summary>
     /// Connects the Orleans client.
     /// </summary>
-    /// <param name="createOrleansClientCallback">The callback to create the Orleans client.</param>
+    /// <param name="createOrleansClientHost">The callback to create the host that runs the Orleans client.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <exception cref="Exception">The configuration is invalid or the silo connect failed.</exception>
-    protected async Task ConnectOrleans(Func<Task> createOrleansClientCallback, CancellationToken cancellationToken)
+    /// <exception cref="Exception">The silo connect failed.</exception>
+    protected async Task ConnectOrleans(Func<IHost> createOrleansClientHost, CancellationToken cancellationToken)
     {
-        await createOrleansClientCallback();
-
         this.Logger.Information("Connecting to Orleans Silo.");
 
-        if (Debugger.IsAttached)
+        var host = createOrleansClientHost();
+
+        try
         {
-            await Task.Delay(3000, cancellationToken);
+            await host.StartAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            host.Dispose();
+            this.Logger.Fatal(ex, "Silo is down, terminating.");
+            throw new Exception("Silo connect failed.", ex);
         }
 
-        var isConnected = await this.ConnectOrleansClient(createOrleansClientCallback, cancellationToken);
-
-        if (!isConnected)
-        {
-            this.Logger.Fatal("Silo is down, terminating.");
-            throw new Exception("Silo connect failed.");
-        }
-
+        this.orleansClientHost = host;
+        this.OrleansClient = host.Services.GetRequiredService<IClusterClient>();
         this.Logger.Information("Orleans connected.");
     }
 
@@ -135,40 +140,19 @@ public abstract class BackgroundServiceBase<T> : BackgroundService where T : cla
     }
 
     /// <summary>
-    /// Connects the Orleans client.
-    /// </summary>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <param name="createOrleansClientCallback">The create Orleans client callback.</param>
-    private async Task<bool> ConnectOrleansClient(Func<Task> createOrleansClientCallback, CancellationToken cancellationToken)
-    {
-        await this.OrleansClient.DisposeAsync();
-
-        await createOrleansClientCallback();
-
-        var connectTask = this.OrleansClient.Connect();
-
-        // Unfortunately, this timeout check is required.
-        var delay = Task.Delay(6000, cancellationToken);
-        var result = await Task.WhenAny(connectTask, delay);
-
-        return result != delay && !result.IsFaulted;
-    }
-
-    /// <summary>
     /// Stops the Orleans client.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    private async Task<bool> StopOrleansClient(CancellationToken cancellationToken)
+    private async Task StopOrleansClient(CancellationToken cancellationToken)
     {
-        if (this.OrleansClient?.IsInitialized is true)
+        if (this.orleansClientHost is null)
         {
-            _ = this.OrleansClient.Close();
-            await Task.Delay(1000, cancellationToken);
-            return true;
+            return;
         }
 
-        await Task.Delay(1000, cancellationToken);
-        return false;
+        await this.orleansClientHost.StopAsync(cancellationToken);
+        this.orleansClientHost.Dispose();
+        this.orleansClientHost = null;
     }
 
     /// <summary>

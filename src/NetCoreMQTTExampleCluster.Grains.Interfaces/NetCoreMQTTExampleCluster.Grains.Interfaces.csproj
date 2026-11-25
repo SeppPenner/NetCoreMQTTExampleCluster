@@ -12,17 +12,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="GitVersion.MsBuild" Version="6.1.0">
+        <PackageReference Include="GitVersion.MsBuild" Version="7.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Orleans.CodeGenerator.MSBuild" Version="3.7.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.7.1" />
-        <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
-        <PackageReference Include="MQTTnet.Server" Version="5.0.1.1416" />
+        <PackageReference Include="Microsoft.Orleans.Sdk" Version="10.4.2" />
+        <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
+        <PackageReference Include="MQTTnet.Server" Version="5.2.0.1603" />
     </ItemGroup>
 
     <ItemGroup>

@@ -20,16 +20,6 @@ public class GlobalConstants
     public const string Invariant = "Npgsql";
 
     /// <summary>
-    /// The simple message stream provider name.
-    /// </summary>
-    public const string SimpleMessageStreamProvider = "SMSProvider";
-
-    /// <summary>
-    /// The pub-sub store.
-    /// </summary>
-    public const string PubSubStore = "PubSubStore";
-
-    /// <summary>
     /// The repository grain identifier.
     /// </summary>
     public const int RepositoryGrainId = 0;

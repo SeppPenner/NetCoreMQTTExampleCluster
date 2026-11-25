@@ -17,7 +17,7 @@ public class Startup
     /// <summary>
     /// The MQTT configuration.
     /// </summary>
-    private readonly ClusterConfiguration mqttConfiguration = new();
+    private readonly SiloHostConfiguration mqttConfiguration = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Startup"/> class.
@@ -66,7 +66,7 @@ public class Startup
         app.UseSerilogRequestLogging();
         app.UseRouting();
 
-        app.Map("/dashboard", a => a.UseOrleansDashboard());
+        app.UseEndpoints(endpoints => endpoints.MapOrleansDashboard("/dashboard"));
 
         _ = app.ApplicationServices.GetService<SiloHostService>();
     }

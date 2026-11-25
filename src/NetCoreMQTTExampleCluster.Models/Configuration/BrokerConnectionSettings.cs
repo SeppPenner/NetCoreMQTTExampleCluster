@@ -11,27 +11,35 @@ namespace NetCoreMQTTExampleCluster.Models.Configuration;
 
 /// <inheritdoc cref="IBrokerConnectionSettings"/>
 /// <inheritdoc cref="IConfigurationValid"/>
+[GenerateSerializer]
 public class BrokerConnectionSettings : IBrokerConnectionSettings, IConfigurationValid
 {
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(0)]
     public string ClientId { get; set; } = string.Empty;
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(1)]
     public string HostName { get; set; } = string.Empty;
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(2)]
     public int Port { get; set; }
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(3)]
     public string UserName { get; set; } = string.Empty;
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(4)]
     public string Password { get; set; } = string.Empty;
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(5)]
     public bool UseTls { get; set; }
 
     /// <inheritdoc cref="IBrokerConnectionSettings"/>
+    [Id(6)]
     public bool UseCleanSession { get; set; }
 
     /// <inheritdoc cref="IConfigurationValid"/>

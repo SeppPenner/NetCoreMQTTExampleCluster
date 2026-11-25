@@ -28,7 +28,7 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task CreateDatabase(string database)
     {
-        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
+        await using var connection = await this.GetAdminDatabaseConnection().ConfigureAwait(false);
         var checkDatabaseExists = await connection.ExecuteScalarAsync(ExistsStatements.CheckDatabaseExists, new { this.ConnectionSettings.Database });
 
         if (Convert.ToBoolean(checkDatabaseExists) == false)
@@ -43,7 +43,7 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
     /// <inheritdoc cref="IDatabaseHelper" />
     public async Task DeleteDatabase(string database)
     {
-        await using var connection = await this.GetDatabaseConnection().ConfigureAwait(false);
+        await using var connection = await this.GetAdminDatabaseConnection().ConfigureAwait(false);
         var sql = DropStatements.DropDatabase.Replace("@Database", database);
         await connection.ExecuteAsync(sql);
     }
@@ -303,6 +303,17 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
         Log.Information("Creating compound index.");
         await connection.ExecuteAsync(CreateStatements.CreatePublishMessageCompoundIndex);
         Log.Information("Created compound index.");
+    }
+
+    /// <summary>
+    /// Gets a connection to the administration database (postgres) to create or delete the actual database.
+    /// </summary>
+    /// <returns>A <see cref="NpgsqlConnection"/>.</returns>
+    private async Task<NpgsqlConnection> GetAdminDatabaseConnection()
+    {
+        var connection = new NpgsqlConnection(this.ConnectionSettings.ToAdminConnectionString());
+        await connection.OpenAsync().ConfigureAwait(false);
+        return connection;
     }
 
     /// <summary>

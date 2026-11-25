@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Validation.Tests", "NetCoreMQTTExampleCluster.Validation.Tests\NetCoreMQTTExampleCluster.Validation.Tests.csproj", "{BAD051CD-DF28-4716-A0BC-042E5D3CA2AF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreMQTTExampleCluster.Grains.Interfaces.Tests", "NetCoreMQTTExampleCluster.Grains.Interfaces.Tests\NetCoreMQTTExampleCluster.Grains.Interfaces.Tests.csproj", "{B1CF061E-312E-4711-B926-5D3EE3B7701C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{BAD051CD-DF28-4716-A0BC-042E5D3CA2AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAD051CD-DF28-4716-A0BC-042E5D3CA2AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAD051CD-DF28-4716-A0BC-042E5D3CA2AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1CF061E-312E-4711-B926-5D3EE3B7701C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1CF061E-312E-4711-B926-5D3EE3B7701C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1CF061E-312E-4711-B926-5D3EE3B7701C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1CF061E-312E-4711-B926-5D3EE3B7701C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

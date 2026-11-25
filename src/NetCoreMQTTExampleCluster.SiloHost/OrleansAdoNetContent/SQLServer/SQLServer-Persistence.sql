@@ -43,6 +43,7 @@
 --
 -- 7. In the storage operations queries the columns need to be in the exact same order
 -- since the storage table operations support optionally streaming.
+IF OBJECT_ID(N'[OrleansStorage]', 'U') IS NULL
 CREATE TABLE OrleansStorage
 (
     -- These are for the book keeping. Orleans calculates
@@ -62,16 +63,8 @@ CREATE TABLE OrleansStorage
     GrainIdExtensionString    NVARCHAR(512) NULL,
     ServiceId                NVARCHAR(150) NOT NULL,
 
-    -- The usage of the Payload records is exclusive in that
-    -- only one should be populated at any given time and two others
-    -- are NULL. The types are separated to advantage on special
-    -- processing capabilities present on database engines (not all might
-    -- have both JSON and XML types.
-    --
-    -- One is free to alter the size of these fields.
+    -- Payload
     PayloadBinary    VARBINARY(MAX) NULL,
-    PayloadXml        XML NULL,
-    PayloadJson        NVARCHAR(MAX) NULL,
 
     -- Informational field, no other use.
     ModifiedOn DATETIME2(3) NOT NULL,
@@ -85,7 +78,10 @@ CREATE TABLE OrleansStorage
     -- rows down to [0, n] relevant ones, n being the number of collided value pairs.
 );
 
-CREATE NONCLUSTERED INDEX IX_OrleansStorage ON OrleansStorage(GrainIdHash, GrainTypeHash);
+IF NOT EXISTS(SELECT * FROM sys.indexes WHERE name = 'IX_OrleansStorage' AND object_id = OBJECT_ID('OrleansStorage'))
+BEGIN
+	CREATE NONCLUSTERED INDEX IX_OrleansStorage ON OrleansStorage(GrainIdHash, GrainTypeHash);
+END
 
 -- This ensures lock escalation will not lock the whole table, which can potentially be enormous.
 -- See more information at https://www.littlekendra.com/2016/02/04/why-rowlock-hints-can-make-queries-slower-and-blocking-worse-in-sql-server/.
@@ -100,8 +96,7 @@ BEGIN
 END
 
 INSERT INTO OrleansQuery(QueryKey, QueryText)
-VALUES
-(
+SELECT
     'WriteToStorageKey',
     '-- When Orleans is running in normal, non-split state, there will
     -- be only one grain with the given ID and type combination only. This
@@ -117,7 +112,7 @@ VALUES
     -- If the version number explicitly returned is still the same, Orleans interprets it so the update did not succeed
     -- and throws an InconsistentStateException.
     --
-    -- See further information at https://docs.microsoft.com/dotnet/orleans/grains/grain-persistence.
+    -- See further information at https://learn.microsoft.com/dotnet/orleans/grains/grain-persistence.
     BEGIN TRANSACTION;
     SET XACT_ABORT, NOCOUNT ON;
 
@@ -131,8 +126,6 @@ VALUES
         UPDATE OrleansStorage
         SET
             PayloadBinary = @PayloadBinary,
-            PayloadJson = @PayloadJson,
-            PayloadXml = @PayloadXml,
             ModifiedOn = GETUTCDATE(),
             Version = Version + 1,
             @NewGrainStateVersion = Version + 1,
@@ -163,8 +156,6 @@ VALUES
             GrainIdExtensionString,
             ServiceId,
             PayloadBinary,
-            PayloadJson,
-            PayloadXml,
             ModifiedOn,
             Version
         )
@@ -177,8 +168,6 @@ VALUES
             @GrainIdExtensionString,
             @ServiceId,
             @PayloadBinary,
-            @PayloadJson,
-            @PayloadXml,
             GETUTCDATE(),
             1
          WHERE NOT EXISTS
@@ -204,11 +193,15 @@ VALUES
 
     SELECT @NewGrainStateVersion AS NewGrainStateVersion;
     COMMIT TRANSACTION;'
+WHERE NOT EXISTS 
+( 
+    SELECT 1 
+    FROM OrleansQuery oqt
+    WHERE oqt.[QueryKey] = 'WriteToStorageKey'
 );
 
 INSERT INTO OrleansQuery(QueryKey, QueryText)
-VALUES
-(
+SELECT
     'ClearStorageKey',
     'BEGIN TRANSACTION;
     SET XACT_ABORT, NOCOUNT ON;
@@ -216,8 +209,6 @@ VALUES
     UPDATE OrleansStorage
     SET
         PayloadBinary = NULL,
-        PayloadJson = NULL,
-        PayloadXml = NULL,
         ModifiedOn = GETUTCDATE(),
         Version = Version + 1,
         @NewGrainStateVersion = Version + 1
@@ -234,11 +225,15 @@ VALUES
 
     SELECT @NewGrainStateVersion;
     COMMIT TRANSACTION;'
+WHERE NOT EXISTS 
+( 
+    SELECT 1 
+    FROM OrleansQuery oqt
+    WHERE oqt.[QueryKey] = 'ClearStorageKey'
 );
 
 INSERT INTO OrleansQuery(QueryKey, QueryText)
-VALUES
-(
+SELECT
     'ReadFromStorageKey',
     '-- The application code will deserialize the relevant result. Not that the query optimizer
     -- estimates the result of rows based on its knowledge on the index. It does not know there
@@ -249,8 +244,6 @@ VALUES
     -- should guarantee the execution time is robustly basically the same from query-to-query.
     SELECT
         PayloadBinary,
-        PayloadXml,
-        PayloadJson,
         Version
     FROM
         OrleansStorage
@@ -263,4 +256,34 @@ VALUES
         AND ((@GrainIdExtensionString IS NOT NULL AND GrainIdExtensionString IS NOT NULL AND GrainIdExtensionString = @GrainIdExtensionString) OR @GrainIdExtensionString IS NULL AND GrainIdExtensionString IS NULL)
         AND ServiceId = @ServiceId AND @ServiceId IS NOT NULL
         OPTION(FAST 1, OPTIMIZE FOR(@GrainIdHash UNKNOWN, @GrainTypeHash UNKNOWN));'
+WHERE NOT EXISTS 
+( 
+    SELECT 1 
+    FROM OrleansQuery oqt
+    WHERE oqt.[QueryKey] = 'ReadFromStorageKey'
+);
+
+INSERT INTO OrleansQuery(QueryKey, QueryText)
+SELECT
+    'DeleteStorageKey',
+    'BEGIN TRANSACTION;
+    SET XACT_ABORT, NOCOUNT ON;
+    DELETE FROM OrleansStorage OUTPUT DELETED.Version + 1
+    WHERE
+        GrainIdHash = @GrainIdHash AND @GrainIdHash IS NOT NULL
+        AND GrainTypeHash = @GrainTypeHash AND @GrainTypeHash IS NOT NULL
+        AND (GrainIdN0 = @GrainIdN0 OR @GrainIdN0 IS NULL)
+        AND (GrainIdN1 = @GrainIdN1 OR @GrainIdN1 IS NULL)
+        AND (GrainTypeString = @GrainTypeString OR @GrainTypeString IS NULL)
+        AND ((@GrainIdExtensionString IS NOT NULL AND GrainIdExtensionString IS NOT NULL AND GrainIdExtensionString = @GrainIdExtensionString) OR @GrainIdExtensionString IS NULL AND GrainIdExtensionString IS NULL)
+        AND ServiceId = @ServiceId AND @ServiceId IS NOT NULL
+        AND Version IS NOT NULL AND Version = @GrainStateVersion AND @GrainStateVersion IS NOT NULL
+        OPTION(FAST 1, OPTIMIZE FOR(@GrainIdHash UNKNOWN, @GrainTypeHash UNKNOWN));
+
+    COMMIT TRANSACTION;'
+WHERE NOT EXISTS
+(
+    SELECT 1
+    FROM OrleansQuery oqt
+    WHERE oqt.[QueryKey] = 'DeleteStorageKey'
 );

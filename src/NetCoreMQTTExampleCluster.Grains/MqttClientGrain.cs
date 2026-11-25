@@ -66,11 +66,11 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="Grain" />
-    public override Task OnActivateAsync()
+    public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
         this.clientId = this.GetPrimaryKeyString();
         this.logger = Log.ForContext("Grain", nameof(MqttClientGrain)).ForContext("Id", this.clientId);
-        return base.OnActivateAsync();
+        return base.OnActivateAsync(cancellationToken);
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />

@@ -57,7 +57,7 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(this.CancellationTokenSource.Token, cancellationToken);
 
         // Connect Orleans.
-        await this.ConnectOrleans(this.CreateOrleansClient, linkedTokenSource.Token);
+        await this.ConnectOrleans(this.CreateOrleansClientHost, linkedTokenSource.Token);
 
         // Startup the service.
         await this.StartupService();
@@ -68,10 +68,10 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         this.Logger.Information("Stopping MQTT service...");
-        await this.StopService("MQTT service is stopped.", cancellationToken);
         await this.mqttServer.StopAsync();
         var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
         await repositoryGrain.DisconnectBroker(this.brokerId);
+        await this.StopService("MQTT service is stopped.", cancellationToken);
         await base.StopAsync(cancellationToken);
 #pragma warning disable CA1816 // Dispose-Methoden müssen SuppressFinalize aufrufen
         GC.SuppressFinalize(this);
@@ -211,30 +211,48 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     }
 
     /// <summary>
-    /// Creates the Orleans client.
+    /// Creates the host that runs the Orleans client.
     /// </summary>
-    private Task CreateOrleansClient()
+    /// <returns>The host that runs the Orleans client.</returns>
+    private IHost CreateOrleansClientHost()
     {
-        this.OrleansClient = new ClientBuilder()
-            .Configure<ClusterOptions>(
-                options =>
-                {
-                    options.ClusterId = this.ServiceConfiguration.OrleansConfiguration!.ClusterOptions!.ClusterId;
-                    options.ServiceId = this.ServiceConfiguration.OrleansConfiguration!.ClusterOptions!.ServiceId;
-                })
-            .UseAdoNetClustering(
-                options =>
-                {
-                    options.Invariant = GlobalConstants.Invariant;
-                    options.ConnectionString = this.ServiceConfiguration.DatabaseSettings!.ToConnectionString();
-                })
-            .ConfigureApplicationParts(
-                parts => parts.AddApplicationPart(typeof(IMqttRepositoryGrain).Assembly).WithReferences())
-            .ConfigureLogging(logging => logging.AddSerilog())
-            .AddSimpleMessageStreamProvider(GlobalConstants.SimpleMessageStreamProvider)
-            .Build();
+        const int MaximumConnectionAttempts = 10;
+        var connectionAttempts = 0;
 
-        return Task.CompletedTask;
+        return new HostBuilder()
+            .UseOrleansClient(
+                client =>
+                {
+                    client.Configure<ClusterOptions>(
+                        options =>
+                        {
+                            options.ClusterId = this.ServiceConfiguration.OrleansConfiguration!.ClusterOptions!.ClusterId;
+                            options.ServiceId = this.ServiceConfiguration.OrleansConfiguration!.ClusterOptions!.ServiceId;
+                        });
+
+                    client.UseAdoNetClustering(
+                        options =>
+                        {
+                            options.Invariant = GlobalConstants.Invariant;
+                            options.ConnectionString = this.ServiceConfiguration.DatabaseSettings!.ToConnectionString();
+                        });
+
+                    // Wait for the silo, e.g. if the silo host and the cluster are started at the same time.
+                    client.UseConnectionRetryFilter(
+                        async (exception, cancellationToken) =>
+                        {
+                            if (++connectionAttempts >= MaximumConnectionAttempts)
+                            {
+                                return false;
+                            }
+
+                            this.Logger.Warning("Connecting to the silo failed (attempt {Attempt}), retrying: {Message}", connectionAttempts, exception.Message);
+                            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                            return true;
+                        });
+                })
+            .UseSerilog()
+            .Build();
     }
 
     /// <summary>
@@ -254,8 +272,7 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         // Todo: Move to configuration.
         var certificate = X509CertificateLoader.LoadPkcs12FromFile(
             Path.Combine(currentLocation, "certificate.pfx"),
-            "test",
-            X509KeyStorageFlags.Exportable);
+            "test");
 
         var optionsBuilder = this.mqttServerFactory
                 .CreateServerOptionsBuilder();
@@ -268,7 +285,7 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         optionsBuilder
                 .WithEncryptedEndpoint()
                 .WithEncryptedEndpointPort(this.ServiceConfiguration.Port)
-                .WithEncryptionCertificate(certificate.Export(X509ContentType.Pfx))
+                .WithEncryptionCertificate(certificate)
                 .WithEncryptionSslProtocol(SslProtocols.Tls12);
 
         this.mqttServer = new MqttServerFactory().CreateMqttServer(optionsBuilder.Build());
