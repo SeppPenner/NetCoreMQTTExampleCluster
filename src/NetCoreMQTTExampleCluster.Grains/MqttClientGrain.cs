@@ -136,7 +136,7 @@ public class MqttClientGrain : Grain, IMqttClientGrain
             {
                 ClientId = context.ClientId,
                 Topic = context.ApplicationMessage.Topic,
-                Payload = new PublishedMessagePayload(Encoding.UTF8.GetString(context.ApplicationMessage.Payload)),
+                Payload = PublishedMessagePayload.FromBytes(context.ApplicationMessage.Payload.ToArray()),
                 QoS = context.ApplicationMessage.QualityOfServiceLevel,
                 Retain = context.ApplicationMessage.Retain
             });

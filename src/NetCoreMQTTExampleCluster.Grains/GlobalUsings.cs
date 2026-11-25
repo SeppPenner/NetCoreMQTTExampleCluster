@@ -1,5 +1,6 @@
 #pragma warning disable IDE0065 // Die using-Anweisung wurde falsch platziert.
 global using System;
+global using System.Buffers;
 global using System.Collections.Concurrent;
 global using System.Collections.Generic;
 global using System.Linq;
