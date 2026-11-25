@@ -268,29 +268,10 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
 
         this.logger.Information("Creating Orleans tables.");
 
-        // Load PostgreSQL-Main.sql
-        var mainStatements = ReadSqlFile("NetCoreMQTTExampleCluster.Storage.OrleansQueries.PostgreSQL-Main.sql");
-
-        if (!string.IsNullOrWhiteSpace(mainStatements))
-        {
-            await connection.ExecuteAsync(mainStatements);
-        }
-
-        // Load PostgreSQL-Clustering.sql
-        var clusteringStatements = ReadSqlFile("NetCoreMQTTExampleCluster.Storage.OrleansQueries.PostgreSQL-Clustering.sql");
-
-        if (!string.IsNullOrWhiteSpace(clusteringStatements))
-        {
-            await connection.ExecuteAsync(clusteringStatements);
-        }
-
-        // Load PostgreSQL-Reminders.sql
-        var remindersStatements = ReadSqlFile("NetCoreMQTTExampleCluster.Storage.OrleansQueries.PostgreSQL-Reminders.sql");
-
-        if (!string.IsNullOrWhiteSpace(remindersStatements))
-        {
-            await connection.ExecuteAsync(remindersStatements);
-        }
+        // The Orleans scripts can't run twice, so each script is skipped if its table already exists.
+        await this.RunOrleansScript(connection, "PostgreSQL-Main.sql", "orleansquery");
+        await this.RunOrleansScript(connection, "PostgreSQL-Clustering.sql", "orleansmembershiptable");
+        await this.RunOrleansScript(connection, "PostgreSQL-Reminders.sql", "orleansreminderstable");
 
         this.logger.Information("Created Orleans tables.");
     }
@@ -314,6 +295,31 @@ public class DatabaseHelper : BaseRepository, IDatabaseHelper
         var connection = new NpgsqlConnection(this.ConnectionSettings.ToAdminConnectionString());
         await connection.OpenAsync().ConfigureAwait(false);
         return connection;
+    }
+
+    /// <summary>
+    /// Runs one of the embedded Orleans scripts unless the table it creates already exists.
+    /// </summary>
+    /// <param name="connection">The database connection.</param>
+    /// <param name="fileName">The file name of the script in the folder <c>OrleansQueries</c>.</param>
+    /// <param name="tableName">The table the script creates, in lower case.</param>
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
+    private async Task RunOrleansScript(NpgsqlConnection connection, string fileName, string tableName)
+    {
+        var tableExists = await connection.ExecuteScalarAsync(ExistsStatements.CheckTableExists, new { TableName = tableName });
+
+        if (Convert.ToBoolean(tableExists))
+        {
+            this.logger.Information("The Orleans table {TableName} already exists, skipping {FileName}.", tableName, fileName);
+            return;
+        }
+
+        var statements = ReadSqlFile($"NetCoreMQTTExampleCluster.Storage.OrleansQueries.{fileName}");
+
+        if (!string.IsNullOrWhiteSpace(statements))
+        {
+            await connection.ExecuteAsync(statements);
+        }
     }
 
     /// <summary>

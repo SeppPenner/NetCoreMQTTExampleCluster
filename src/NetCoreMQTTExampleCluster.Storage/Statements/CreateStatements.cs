@@ -126,15 +126,15 @@ public class CreateStatements
     /// <summary>
     /// A SQL query string to create a hyper table from the event log table.
     /// </summary>
-    public const string CreateEventLogHyperTable = @"SELECT create_hypertable('eventlog', 'createdat');";
+    public const string CreateEventLogHyperTable = @"SELECT create_hypertable('eventlog', 'createdat', if_not_exists => TRUE);";
 
     /// <summary>
     /// A SQL query string to create a hyper table from the publish message table.
     /// </summary>
-    public const string CreatePublishMessageHyperTable = @"SELECT create_hypertable('publishmessage', 'createdat');";
+    public const string CreatePublishMessageHyperTable = @"SELECT create_hypertable('publishmessage', 'createdat', if_not_exists => TRUE);";
 
     /// <summary>
     /// A SQL query string to create a compound index for timestamp and city identifier for the weather data table.
     /// </summary>
-    public const string CreatePublishMessageCompoundIndex = @"CREATE INDEX ON publishmessage (createdat DESC, clientid);";
+    public const string CreatePublishMessageCompoundIndex = @"CREATE INDEX IF NOT EXISTS publishmessage_createdat_clientid_idx ON publishmessage (createdat DESC, clientid);";
 }

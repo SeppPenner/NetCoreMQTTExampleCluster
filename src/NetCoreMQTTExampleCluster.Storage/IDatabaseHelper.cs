@@ -15,7 +15,7 @@ namespace NetCoreMQTTExampleCluster.Storage;
 public interface IDatabaseHelper
 {
     /// <summary>
-    /// Creates the database.
+    /// Creates the database if it doesn't exist.
     /// </summary>
     /// <param name="database">The database to create.</param>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the number of affected rows.</returns>
@@ -91,13 +91,13 @@ public interface IDatabaseHelper
     Task EnableTimeScaleDbExtension();
 
     /// <summary>
-    /// Enables the TimeScaleDB extension.
+    /// Creates the hyper tables for the event log and the published messages if they aren't hyper tables already.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
     Task CreateHyperTables();
 
     /// <summary>
-    /// Created the Orleans tables.
+    /// Creates the Orleans tables. Each Orleans script is skipped if its table already exists.
     /// </summary>
     /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
     Task CreateOrleansTables();

@@ -21,7 +21,18 @@ public class ExistsStatements
         @"SELECT EXISTS (
                 SELECT datname
                 FROM pg_catalog.pg_database
-                WHERE datname = '@Database'
+                WHERE datname = @Database
+            );";
+
+    /// <summary>
+    /// A SQL query string to check whether the table with the name in the parameter <c>@TableName</c> exists.
+    /// </summary>
+    public const string CheckTableExists =
+        @"SELECT EXISTS (
+                SELECT 1
+                FROM   information_schema.tables
+                WHERE  table_schema = 'public'
+                AND    table_name = @TableName
             );";
 
     /// <summary>

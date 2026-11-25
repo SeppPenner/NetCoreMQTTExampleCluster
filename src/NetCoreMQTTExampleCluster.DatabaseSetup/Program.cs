@@ -15,6 +15,11 @@ namespace NetCoreMQTTExampleCluster.DatabaseSetup;
 public static class Program
 {
     /// <summary>
+    /// The command line argument that deletes an existing database before it is created again.
+    /// </summary>
+    private const string DropDatabaseArgument = "--drop-database";
+
+    /// <summary>
     /// The database version repository.
     /// </summary>
     [NotNull]
@@ -41,9 +46,11 @@ public static class Program
     /// <summary>
     /// The main method of the program.
     /// </summary>
+    /// <param name="args">The command line arguments. <c>--drop-database</c> deletes an existing database first.</param>
     /// <returns>A <see cref="Task" />.</returns>
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
+        var dropDatabase = args.Contains(DropDatabaseArgument, StringComparer.OrdinalIgnoreCase);
         var connectionSettings = await ReadSettingsFile();
 
         if (connectionSettings is null)
@@ -58,8 +65,15 @@ public static class Program
 
         Console.WriteLine("Setting up the database...");
 
-        Console.WriteLine("Deleting database...");
-        await databaseHelper.DeleteDatabase(connectionSettings.Database);
+        if (dropDatabase)
+        {
+            Console.WriteLine("Deleting database...");
+            await databaseHelper.DeleteDatabase(connectionSettings.Database);
+        }
+        else
+        {
+            Console.WriteLine($"Keeping an existing database, pass {DropDatabaseArgument} to delete it first...");
+        }
 
         Console.WriteLine("Creating database...");
         await databaseHelper.CreateDatabase(connectionSettings.Database);
@@ -71,7 +85,7 @@ public static class Program
         await databaseHelper.CreateOrleansTables();
 
         Console.WriteLine("Creating tables...");
-        await databaseHelper.CreateAllTables(true);
+        await databaseHelper.CreateAllTables(false);
 
         Console.WriteLine("Creating hyper tables...");
         await databaseHelper.CreateHyperTables();
@@ -112,8 +126,17 @@ public static class Program
     {
         await InsertDatabaseVersion();
         var (user1Id, user2Id) = await InsertUsers();
-        await AddWhiteAndBlackListsForFirstUser(user1Id);
-        await AddWhiteAndBlackListsForSecondUser(user2Id);
+
+        // The lists are only added together with a new user, an existing user keeps its lists.
+        if (user1Id is not null)
+        {
+            await AddWhiteAndBlackListsForFirstUser(user1Id.Value);
+        }
+
+        if (user2Id is not null)
+        {
+            await AddWhiteAndBlackListsForSecondUser(user2Id.Value);
+        }
     }
 
     /// <summary>
@@ -175,41 +198,53 @@ public static class Program
     }
 
     /// <summary>
-    /// Inserts the <see cref="MqttUser"/>s.
+    /// Inserts the <see cref="MqttUser"/>s that don't exist yet.
     /// </summary>
-    /// <returns>A <see cref="Task" /> representing any asynchronous operation.</returns>
-    private static async Task<(Guid, Guid)> InsertUsers()
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the identifiers of the inserted users, <c>null</c> for users that already existed.</returns>
+    private static async Task<(Guid?, Guid?)> InsertUsers()
     {
-        var passwordHasher = new PasswordHasher<MqttUser>();
-
         // Add test MQTT user
-        var userId = Guid.NewGuid();
-
-        var mqttUser = new MqttUser
-        {
-            Id = userId,
-            UserName = "Test",
-            ValidateClientId = false
-        };
-
-        mqttUser.PasswordHash = passwordHasher.HashPassword(mqttUser, "test");
-        await mqttUserRepository.InsertMqttUser(mqttUser);
+        var userId = await InsertUserIfMissing(
+            new MqttUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = "Test",
+                ValidateClientId = false
+            },
+            "test");
 
         // Add broker MQTT user
-        var user2Id = Guid.NewGuid();
+        var user2Id = await InsertUserIfMissing(
+            new MqttUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = "mqtt-broker-sync",
+                ClientIdPrefix = "mqtt-broker-sync",
+                ValidateClientId = true,
+                IsSyncUser = true
+            },
+            "Test");
 
-        var mqttUser2 = new MqttUser
-        {
-            Id = user2Id,
-            UserName = "mqtt-broker-sync",
-            ClientIdPrefix = "mqtt-broker-sync",
-            ValidateClientId = true,
-            IsSyncUser = true
-        };
-
-        mqttUser2.PasswordHash = passwordHasher.HashPassword(mqttUser2, "Test");
-        await mqttUserRepository.InsertMqttUser(mqttUser2);
         return (userId, user2Id);
+    }
+
+    /// <summary>
+    /// Inserts the <see cref="MqttUser"/> if no user with the same name exists.
+    /// </summary>
+    /// <param name="mqttUser">The MQTT user.</param>
+    /// <param name="password">The password of the MQTT user.</param>
+    /// <returns>A <see cref="Task" /> representing any asynchronous operation providing the identifier of the inserted user, <c>null</c> if the user already existed.</returns>
+    private static async Task<Guid?> InsertUserIfMissing(MqttUser mqttUser, string password)
+    {
+        if (await mqttUserRepository.MqttUserNameExists(mqttUser.UserName))
+        {
+            Console.WriteLine($"The MQTT user {mqttUser.UserName} already exists, keeping it...");
+            return null;
+        }
+
+        mqttUser.PasswordHash = new PasswordHasher<MqttUser>().HashPassword(mqttUser, password);
+        await mqttUserRepository.InsertMqttUser(mqttUser);
+        return mqttUser.Id;
     }
 
     /// <summary>
