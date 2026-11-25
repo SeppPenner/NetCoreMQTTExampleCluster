@@ -78,15 +78,19 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     {
         try
         {
-            this.mqttUser = await this.mqttUserRepository.GetMqttUserByName(context.UserName);
+            var connectingUser = await this.mqttUserRepository.GetMqttUserByName(context.UserName);
 
-            if (this.mqttUser is null)
+            // A refused connection must not replace the user of a connected client with the same client identifier.
+            if (connectingUser is null || !this.mqttValidator.ValidateConnection(context, connectingUser, PasswordHasher))
             {
                 return false;
             }
 
-            await this.RefreshCache(false);
-            return this.mqttValidator.ValidateConnection(context, this.mqttUser, PasswordHasher);
+            // Another user may connect with the same client identifier, then its lists replace the cached ones.
+            var userChanged = this.mqttUser?.Id != connectingUser.Id;
+            this.mqttUser = connectingUser;
+            await this.RefreshCache(userChanged);
+            return true;
         }
         catch (Exception ex)
         {
