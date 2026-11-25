@@ -137,7 +137,7 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
             var eventLog = new EventLog
             {
                 EventType = EventType.Connect,
-                EventDetails = $"New connection: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}," + $" Username = {context.UserName}, Password = {context.Password}," + $" CleanSession = {context.CleanSession}."
+                EventDetails = $"New connection: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, Username = {context.UserName}, CleanSession = {context.CleanSession}."
             };
 
             this.eventLogQueue.Enqueue(eventLog);
