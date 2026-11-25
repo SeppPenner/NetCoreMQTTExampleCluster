@@ -19,7 +19,7 @@ The user `mqtt-broker-sync` must be present and must not be used for anything el
 
 1. Create the database with the project `NetCoreMQTTExampleCluster.DatabaseSetup`, adapting the `appsettings.json` as required.
 2. Start the projects `NetCoreMQTTExampleCluster.SiloHost` and `NetCoreMQTTExampleCluster.Cluster` as `several start projects`.
-3. Connect with a MQTT client using `Test` as user, `test` as Password and any `clientId`. The user can only publish to the topics: `a/b` and `a/d` and subcribe to `d/e` and `e`.
+3. Connect with a MQTT client using `Test` as user, `test` as Password and any `clientId`. The user can only publish to the topics: `a/b` and `a/d` and subscribe to `d/e` and `d`.
 
 # Use
 

@@ -147,8 +147,8 @@ Do not silently "clean up" these, they are existing behaviour:
   needed. It ends with `Console.ReadKey()`, which throws with redirected input after the work is done.
 - **Seed users.** `Test` with password `test`, no client identifier check, may publish to `a/b` and
   `a/d` and subscribe to `d/e` and `d`. `mqtt-broker-sync` with password `Test`, `IsSyncUser`,
-  `ValidateClientId` with the prefix `mqtt-broker-sync`, may publish and subscribe to `#`. The readme
-  says `e` instead of `d` for the subscription, `DatabaseSetup/Program.cs` is authoritative.
+  `ValidateClientId` with the prefix `mqtt-broker-sync`, may publish and subscribe to `#`. The seed
+  data lives in `DatabaseSetup/Program.cs`, keep the readme in line with it.
 - **The sync user prevents loops.** A message published by a user with `IsSyncUser` is validated and
   stored, but not forwarded again. Every broker's `BrokerConnectionSettings` logs in as that user,
   and the user must not be used for anything else.
