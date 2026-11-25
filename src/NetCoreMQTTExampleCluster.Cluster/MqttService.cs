@@ -252,7 +252,7 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         }
 
         // Todo: Move to configuration.
-        var certificate = new X509Certificate2(
+        var certificate = X509CertificateLoader.LoadPkcs12FromFile(
             Path.Combine(currentLocation, "certificate.pfx"),
             "test",
             X509KeyStorageFlags.Exportable);

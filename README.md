@@ -47,7 +47,7 @@ The user `mqtt-broker-sync` must be present and must not be used for anything el
 
 # Requirements
 
-The project requires at least NetCore 3.1 and NetStandard 2.1.
+The project targets .NET 10 and .NET 11.
 
 # Settings
 

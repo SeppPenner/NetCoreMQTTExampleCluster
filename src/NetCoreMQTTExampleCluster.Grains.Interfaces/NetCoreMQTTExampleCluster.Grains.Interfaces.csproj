@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
@@ -23,7 +23,6 @@
         <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.7.1" />
         <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
         <PackageReference Include="MQTTnet.Server" Version="5.0.1.1416" />
-        <PackageReference Include="System.Text.Json" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>
