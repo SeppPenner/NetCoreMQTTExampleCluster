@@ -36,8 +36,8 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     private readonly MqttServerFactory mqttServerFactory = new();
 
     /// <summary>
-    /// The client identifiers of the connected synchronization users. The client identifier is used and not the user name,
-    /// because MQTTnet keeps the user name of the first connection when another user resumes a persistent session.
+    /// The client identifiers of the connections of synchronization users. Every accepted connect with the same client
+    /// identifier sets or removes the entry, a disconnect removes it.
     /// </summary>
     private readonly ConcurrentDictionary<string, bool> syncClientIds = new();
 

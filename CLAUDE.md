@@ -158,10 +158,10 @@ Do not silently "clean up" these, they are existing behaviour:
 - **Messages of the sync user are trusted.** A broker remembers the client identifiers of the
   connections whose user has `IsSyncUser` and delivers their messages without a grain call, without
   storing them and without forwarding them again, which prevents loops. The origin broker validated
-  and stored them already, so each message is stored once. The key is the client identifier and not
-  the user name, because MQTTnet keeps the user name of the first connection when another user
-  resumes a persistent session. Every broker's `BrokerConnectionSettings` logs in as that user, and
-  the user must not be used for anything else.
+  and stored them already, so each message is stored once. Every accepted connect sets or removes the
+  entry of its client identifier, so a normal user that takes over or resumes a session of the sync
+  user is validated again. Every broker's `BrokerConnectionSettings` logs in as that user, and the
+  user must not be used for anything else.
 - **The repository grain holds only the broker list.** Key 0, in memory only. Connect, subscribe,
   publish, unsubscribe and disconnect go from the broker to the client grain directly. The grain tells
   the other brokers through `IMqttBrokerObserver` when a broker connects or disconnects. The brokers
@@ -185,8 +185,8 @@ Do not silently "clean up" these, they are existing behaviour:
   its lists once per activation and again when another user connects with the same client
   identifier. A refused connect does not touch the cached user. Changes in the database take effect
   after the grain is deactivated (Orleans collects idle grains after 15 minutes by default) or the
-  silo restarts. After a deactivation the grain loads the user by the user name of the publish, which
-  MQTTnet takes from the first connection of a persistent session.
+  silo restarts. After a deactivation the grain loads the user by the user name of the next publish
+  or subscription, which MQTTnet takes from the current connection, also on a resumed session.
 - **The monthly byte limit lives in memory.** `ThrottleUser` plus `MonthlyByteLimit` count into a
   static `MemoryCache` per silo process that expires at the end of the month. A silo restart resets
   the count.

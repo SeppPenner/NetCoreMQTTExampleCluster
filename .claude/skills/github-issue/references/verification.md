@@ -23,6 +23,6 @@ The brokers validate every connection, subscription, and publish through the Orl
    - A rejected publish (`Test` on `x/y`) gets a PUBACK with `NotAuthorized` and arrives nowhere. A rejected subscription gets a SUBACK with `NotAuthorized`.
    - `Test` resuming or taking over a session of `mqtt-broker-sync` with the same client identifier can't publish to `x/y`.
    - After 20 seconds, `publishmessage` holds each message once, a binary payload as Base64 with `"IsBase64": true`.
-6. Optional failure cases: stop the silo and start it again, the brokers register again within `ServiceDelayInMilliseconds`. Kill one broker hard and start it again, the other broker replaces the old entry as soon as it registers.
+6. Optional failure cases: stop the silo and start it again, the brokers register again within `ServiceDelayInMilliseconds`, and `Test` on a resumed session of `mqtt-broker-sync` is still validated as `Test` by the new client grain. Kill one broker hard and start it again, the other broker replaces the old entry as soon as it registers.
 
 Set `ASPNETCORE_ENVIRONMENT` to a name other than `Development` and `LogFolderPath` to a temporary folder to get log files; `Development` logs to the console only. Stop the services with Ctrl+C so that the brokers disconnect from the repository grain. If a process ignores Ctrl+C, for example because it runs in its own process group, Ctrl+Break stops it the same way. Remove the test container afterwards.
