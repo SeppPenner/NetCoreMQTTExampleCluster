@@ -81,14 +81,17 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
             throw new ArgumentNullException(nameof(brokerId));
         }
 
-        // Save connect to the database
-        var eventLog = new EventLog
+        // The brokers register cyclically, so only new brokers are saved to the database.
+        if (!this.brokers.ContainsKey(brokerId))
         {
-            EventType = EventType.BrokerConnect,
-            EventDetails = $"New broker connected: BrokerId = {brokerId}."
-        };
+            var eventLog = new EventLog
+            {
+                EventType = EventType.BrokerConnect,
+                EventDetails = $"New broker connected: BrokerId = {brokerId}."
+            };
 
-        this.eventLogQueue.Enqueue(eventLog);
+            this.eventLogQueue.Enqueue(eventLog);
+        }
 
         // Add to dictionary
         this.brokers[brokerId] = brokerConnectionSettings;

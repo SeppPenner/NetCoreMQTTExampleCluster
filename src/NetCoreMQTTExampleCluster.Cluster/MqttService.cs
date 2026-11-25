@@ -68,6 +68,21 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         this.Logger.Information("Stopping MQTT service...");
+
+        // Stop the cyclic task first, so that it doesn't register the broker again after the disconnect.
+        this.CancellationTokenSource.Cancel();
+
+        if (this.ExecuteTask is not null)
+        {
+            try
+            {
+                await this.ExecuteTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+
         await this.mqttServer.StopAsync();
         var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
         await repositoryGrain.DisconnectBroker(this.brokerId);
@@ -87,6 +102,9 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         {
             // Runs the main task of the service.
             this.TryRunServiceTask();
+
+            // Registers the broker again, see the method for details.
+            await this.RegisterBroker();
 
             // Wait for the next run.
             await Task.Delay(this.ServiceConfiguration.ServiceDelayInMilliSeconds, linkedTokenSource.Token);
@@ -206,6 +224,24 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         catch (Exception ex)
         {
             this.logger.Error("An error occurred: {Exception}.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Registers the broker at the repository grain. The grain keeps the brokers in memory only and loses them if the silo
+    /// restarts or the grain is deactivated (e.g. after 15 minutes without calls), so the registration is repeated cyclically.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+    private async Task RegisterBroker()
+    {
+        try
+        {
+            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
+            await repositoryGrain.ConnectBroker(this.ServiceConfiguration.BrokerConnectionSettings!, this.brokerId);
+        }
+        catch (Exception ex)
+        {
+            this.logger.Warning("Registering the broker failed: {Message}", ex.Message);
         }
     }
 

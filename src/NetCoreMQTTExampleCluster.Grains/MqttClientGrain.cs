@@ -96,32 +96,40 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context)
+    public async Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context)
     {
         try
         {
-            var result = this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.mqttUser!, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
-            return Task.FromResult(result);
+            if (!await this.EnsureUserLoaded(context.UserName))
+            {
+                return false;
+            }
+
+            return this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.mqttUser!, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
         }
         catch (Exception ex)
         {
             this.logger.Error("An error occurred: {Exception}.", ex);
-            return Task.FromResult(false);
+            return false;
         }
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />
-    public Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs context)
+    public async Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs context)
     {
         try
         {
-            var result = this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.mqttUser!, this.userData.ClientIdPrefixes);
-            return Task.FromResult(result);
+            if (!await this.EnsureUserLoaded(context.UserName))
+            {
+                return false;
+            }
+
+            return this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.mqttUser!, this.userData.ClientIdPrefixes);
         }
         catch (Exception ex)
         {
             this.logger.Error("An error occurred: {Exception}.", ex);
-            return Task.FromResult(false);
+            return false;
         }
     }
 
@@ -153,5 +161,30 @@ public class MqttClientGrain : Grain, IMqttClientGrain
 
         this.userData = await this.mqttUserRepository.GetMqttUserData(this.mqttUser!.Id);
         this.cacheLoaded = true;
+    }
+
+    /// <summary>
+    /// Loads the MQTT user if the grain doesn't know it. This happens if the client connected before the grain was deactivated
+    /// (e.g. after 15 minutes without calls) or before the silo was restarted. The broker already validated the connection then.
+    /// </summary>
+    /// <param name="userName">The user name of the connection.</param>
+    /// <returns>A value indicating whether the user is loaded or not.</returns>
+    private async Task<bool> EnsureUserLoaded(string userName)
+    {
+        if (this.mqttUser is not null)
+        {
+            return true;
+        }
+
+        this.mqttUser = await this.mqttUserRepository.GetMqttUserByName(userName);
+
+        if (this.mqttUser is null)
+        {
+            this.logger.Warning("The MQTT user {UserName} of a connected client was not found.", userName);
+            return false;
+        }
+
+        await this.RefreshCache(false);
+        return true;
     }
 }
