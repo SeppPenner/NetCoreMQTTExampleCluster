@@ -33,6 +33,11 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     private readonly IMqttValidator mqttValidator;
 
     /// <summary>
+    /// The persistence queue.
+    /// </summary>
+    private readonly IMqttPersistenceQueue persistenceQueue;
+
+    /// <summary>
     /// The MQTT user.
     /// </summary>
     private MqttUser? mqttUser;
@@ -57,11 +62,17 @@ public class MqttClientGrain : Grain, IMqttClientGrain
     /// </summary>
     private ILogger logger;
 
-    /// <inheritdoc cref="IMqttClientGrain" />
-    public MqttClientGrain(IMqttUserRepository mqttUserRepository, IMqttValidator mqttValidator)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MqttClientGrain" /> class.
+    /// </summary>
+    /// <param name="mqttUserRepository">The MQTT user repository.</param>
+    /// <param name="mqttValidator">The MQTT validator.</param>
+    /// <param name="persistenceQueue">The persistence queue.</param>
+    public MqttClientGrain(IMqttUserRepository mqttUserRepository, IMqttValidator mqttValidator, IMqttPersistenceQueue persistenceQueue)
     {
         this.mqttUserRepository = mqttUserRepository;
         this.mqttValidator = mqttValidator;
+        this.persistenceQueue = persistenceQueue;
         this.logger = Log.ForContext("Grain", nameof(MqttClientGrain));
     }
 
@@ -90,6 +101,13 @@ public class MqttClientGrain : Grain, IMqttClientGrain
             var userChanged = this.mqttUser?.Id != connectingUser.Id;
             this.mqttUser = connectingUser;
             await this.RefreshCache(userChanged);
+
+            this.persistenceQueue.Enqueue(new EventLog
+            {
+                EventType = EventType.Connect,
+                EventDetails = $"New connection: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, Username = {context.UserName}, CleanSession = {context.CleanSession}."
+            });
+
             return true;
         }
         catch (Exception ex)
@@ -109,7 +127,21 @@ public class MqttClientGrain : Grain, IMqttClientGrain
                 return false;
             }
 
-            return this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.mqttUser!, DataLimitCacheMonth, this.userData.ClientIdPrefixes);
+            if (!this.mqttValidator.ValidatePublish(context, this.userData.PublishBlacklist, this.userData.PublishWhitelist, this.mqttUser!, DataLimitCacheMonth, this.userData.ClientIdPrefixes))
+            {
+                return false;
+            }
+
+            this.persistenceQueue.Enqueue(new PublishMessage
+            {
+                ClientId = context.ClientId,
+                Topic = context.ApplicationMessage.Topic,
+                Payload = new PublishedMessagePayload(Encoding.UTF8.GetString(context.ApplicationMessage.Payload)),
+                QoS = context.ApplicationMessage.QualityOfServiceLevel,
+                Retain = context.ApplicationMessage.Retain
+            });
+
+            return true;
         }
         catch (Exception ex)
         {
@@ -128,13 +160,67 @@ public class MqttClientGrain : Grain, IMqttClientGrain
                 return false;
             }
 
-            return this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.mqttUser!, this.userData.ClientIdPrefixes);
+            if (!this.mqttValidator.ValidateSubscription(context, this.userData.SubscriptionBlacklist, this.userData.SubscriptionWhitelist, this.mqttUser!, this.userData.ClientIdPrefixes))
+            {
+                return false;
+            }
+
+            this.persistenceQueue.Enqueue(new EventLog
+            {
+                EventType = EventType.Subscription,
+                EventDetails = $"New subscription: ClientId = {context.ClientId}, TopicFilter = {context.TopicFilter}."
+            });
+
+            return true;
         }
         catch (Exception ex)
         {
             this.logger.Error("An error occurred: {Exception}.", ex);
             return false;
         }
+    }
+
+    /// <inheritdoc cref="IMqttClientGrain" />
+    public Task ProceedUnsubscription(SimpleClientUnsubscribedTopicEventArgs eventArgs)
+    {
+        ArgumentNullException.ThrowIfNull(eventArgs);
+
+        if (string.IsNullOrWhiteSpace(eventArgs.ClientId))
+        {
+            throw new ArgumentNullException(nameof(eventArgs.ClientId));
+        }
+
+        if (string.IsNullOrWhiteSpace(eventArgs.TopicFilter))
+        {
+            throw new ArgumentNullException(nameof(eventArgs.TopicFilter));
+        }
+
+        this.persistenceQueue.Enqueue(new EventLog
+        {
+            EventType = EventType.Unsubscription,
+            EventDetails = $"Unsubscription: ClientId = {eventArgs.ClientId}, TopicFilter = {eventArgs.TopicFilter}."
+        });
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc cref="IMqttClientGrain" />
+    public Task ProceedDisconnect(SimpleClientDisconnectedEventArgs eventArgs)
+    {
+        ArgumentNullException.ThrowIfNull(eventArgs);
+
+        if (string.IsNullOrWhiteSpace(eventArgs.ClientId))
+        {
+            throw new ArgumentNullException(nameof(eventArgs.ClientId));
+        }
+
+        this.persistenceQueue.Enqueue(new EventLog
+        {
+            EventType = EventType.Disconnect,
+            EventDetails = $"Disconnected: ClientId = {eventArgs.ClientId}, DisconnectType = {eventArgs.DisconnectType}."
+        });
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc cref="IMqttClientGrain" />

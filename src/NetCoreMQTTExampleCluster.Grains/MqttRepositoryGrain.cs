@@ -10,93 +10,84 @@
 namespace NetCoreMQTTExampleCluster.Grains;
 
 /// <inheritdoc cref="IMqttRepositoryGrain" />
-[Reentrant]
 public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
 {
     /// <summary>
-    /// The event log repository.
+    /// The persistence queue.
     /// </summary>
-    private readonly IEventLogRepository eventLogRepository;
+    private readonly IMqttPersistenceQueue persistenceQueue;
 
     /// <summary>
-    /// The publish message repository.
+    /// The brokers by their broker identifier.
     /// </summary>
-    private readonly IPublishMessageRepository publishMessageRepository;
+    private readonly Dictionary<Guid, IBrokerConnectionSettings> brokers = [];
 
     /// <summary>
-    /// The brokers.
+    /// The observers of the brokers by their broker identifier.
     /// </summary>
-    private readonly IDictionary<Guid, IBrokerConnectionSettings> brokers = new ConcurrentDictionary<Guid, IBrokerConnectionSettings>();
-
-    /// <summary>
-    /// The event log queue.
-    /// </summary>
-    private readonly ConcurrentQueue<EventLog> eventLogQueue = new();
-
-    /// <summary>
-    /// The publish message queue.
-    /// </summary>
-    private readonly ConcurrentQueue<PublishMessage> publishMessageQueue = new();
+    private readonly Dictionary<Guid, IMqttBrokerObserver> observers = [];
 
     /// <summary>
     /// The logger.
     /// </summary>
-    private ILogger logger;
+    private readonly ILogger logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
 
-    /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public MqttRepositoryGrain(IEventLogRepository eventLogRepository, IPublishMessageRepository publishMessageRepository)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MqttRepositoryGrain" /> class.
+    /// </summary>
+    /// <param name="persistenceQueue">The persistence queue.</param>
+    public MqttRepositoryGrain(IMqttPersistenceQueue persistenceQueue)
     {
-        this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
-        this.eventLogRepository = eventLogRepository;
-        this.publishMessageRepository = publishMessageRepository;
-    }
-
-    /// <inheritdoc cref="Grain" />
-    public override Task OnActivateAsync(CancellationToken cancellationToken)
-    {
-        this.logger = Log.ForContext("Grain", nameof(MqttRepositoryGrain));
-        this.RegisterGrainTimer(
-            this.OnTimer,
-            new GrainTimerCreationOptions(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(20)) { Interleave = true });
-        return base.OnActivateAsync(cancellationToken);
-    }
-
-    /// <inheritdoc cref="Grain" />
-    public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
-    {
-        await this.OnTimer();
-        await base.OnDeactivateAsync(reason, cancellationToken);
+        this.persistenceQueue = persistenceQueue;
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public Task ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId)
+    public Task<Dictionary<Guid, IBrokerConnectionSettings>> ConnectBroker(IBrokerConnectionSettings brokerConnectionSettings, Guid brokerId, IMqttBrokerObserver observer)
     {
-        if (brokerConnectionSettings is null)
-        {
-            throw new ArgumentNullException(nameof(brokerConnectionSettings));
-        }
+        ArgumentNullException.ThrowIfNull(brokerConnectionSettings);
+        ArgumentNullException.ThrowIfNull(observer);
 
         if (brokerId == default)
         {
             throw new ArgumentNullException(nameof(brokerId));
         }
 
-        // The brokers register cyclically, so only new brokers are saved to the database.
-        if (!this.brokers.ContainsKey(brokerId))
+        // A broker that restarts after a crash gets a new identifier but keeps its endpoint. Its old entry is removed,
+        // otherwise the other brokers would keep a second connection to that endpoint and forward every message twice.
+        var replacedBrokerIds = this.brokers
+            .Where(b => b.Key != brokerId && IsSameEndpoint(b.Value, brokerConnectionSettings))
+            .Select(b => b.Key)
+            .ToList();
+
+        foreach (var replacedBrokerId in replacedBrokerIds)
         {
-            var eventLog = new EventLog
+            this.brokers.Remove(replacedBrokerId);
+            this.observers.Remove(replacedBrokerId);
+
+            this.persistenceQueue.Enqueue(new EventLog
+            {
+                EventType = EventType.BrokerDisconnect,
+                EventDetails = $"Broker replaced: BrokerId = {replacedBrokerId}, new BrokerId = {brokerId}."
+            });
+        }
+
+        var isNewBroker = !this.brokers.ContainsKey(brokerId);
+        this.brokers[brokerId] = brokerConnectionSettings;
+        this.observers[brokerId] = observer;
+
+        // The brokers register cyclically, so only new brokers are saved to the database and announced to the others.
+        if (isNewBroker)
+        {
+            this.persistenceQueue.Enqueue(new EventLog
             {
                 EventType = EventType.BrokerConnect,
                 EventDetails = $"New broker connected: BrokerId = {brokerId}."
-            };
+            });
 
-            this.eventLogQueue.Enqueue(eventLog);
+            this.NotifyOtherBrokers(brokerId);
         }
 
-        // Add to dictionary
-        this.brokers[brokerId] = brokerConnectionSettings;
-
-        return Task.CompletedTask;
+        return Task.FromResult(this.GetBrokers());
     }
 
     /// <inheritdoc cref="IMqttRepositoryGrain" />
@@ -107,296 +98,61 @@ public class MqttRepositoryGrain : Grain, IMqttRepositoryGrain
             throw new ArgumentNullException(nameof(brokerId));
         }
 
-        // Save disconnect to the database
-        var eventLog = new EventLog
+        this.persistenceQueue.Enqueue(new EventLog
         {
             EventType = EventType.BrokerDisconnect,
             EventDetails = $"Broker disconnected: BrokerId = {brokerId}."
-        };
+        });
 
-        this.eventLogQueue.Enqueue(eventLog);
+        this.observers.Remove(brokerId);
 
-        // Remove from broker list
-        this.brokers.Remove(brokerId);
-
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public async Task<bool> ProceedConnect(SimpleValidatingConnectionEventArgs context)
-    {
-        try
+        if (this.brokers.Remove(brokerId))
         {
-            // Handle connect in grain
-            var mqttClientGrain = this.GrainFactory.GetGrain<IMqttClientGrain>(context.ClientId);
-            var connectValid = await mqttClientGrain.ProceedConnect(context);
-
-            if (!connectValid)
-            {
-                return false;
-            }
-
-            // Save connect to the database
-            var eventLog = new EventLog
-            {
-                EventType = EventType.Connect,
-                EventDetails = $"New connection: ClientId = {context.ClientId}, Endpoint = {context.Endpoint}, Username = {context.UserName}, CleanSession = {context.CleanSession}."
-            };
-
-            this.eventLogQueue.Enqueue(eventLog);
-            return true;
+            this.NotifyOtherBrokers(brokerId);
         }
-        catch (Exception ex)
-        {
-            this.logger.Error("An error occurred: {Exception}.", ex);
-            return false;
-        }
-    }
-
-    /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public Task ProceedDisconnect(SimpleClientDisconnectedEventArgs eventArgs)
-    {
-        if (eventArgs is null)
-        {
-            throw new ArgumentNullException(nameof(eventArgs));
-        }
-
-        if (string.IsNullOrWhiteSpace(eventArgs.ClientId))
-        {
-            throw new ArgumentNullException(nameof(eventArgs.ClientId));
-        }
-
-        // Save disconnect to the database
-        var eventLog = new EventLog
-        {
-            EventType = EventType.Disconnect,
-            EventDetails = $"Disconnected: ClientId = {eventArgs.ClientId}, DisconnectType = {eventArgs.DisconnectType}."
-        };
-
-        this.eventLogQueue.Enqueue(eventLog);
-
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public async Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context, Guid brokerId)
-    {
-        try
-        {
-            // Handle published message in grains
-            var mqttClientGrain = this.GrainFactory.GetGrain<IMqttClientGrain>(context.ClientId);
-            var publishValid = await mqttClientGrain.ProceedPublish(context);
-
-            if (!publishValid)
-            {
-                return false;
-            }
-
-            // Save published message to the database
-            var payloadString = Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
-
-            var publishMessage = new PublishMessage
-            {
-                ClientId = context.ClientId,
-                Topic = context.ApplicationMessage.Topic,
-                Payload = new PublishedMessagePayload(payloadString),
-                QoS = context.ApplicationMessage?.QualityOfServiceLevel,
-                Retain = context.ApplicationMessage?.Retain
-            };
-
-            this.publishMessageQueue.Enqueue(publishMessage);
-
-            // Publish messages to the broker if the publishing user is not the synchronization user
-            var isUserBrokerUser = await mqttClientGrain.IsUserBrokerUser();
-
-            if (!isUserBrokerUser)
-            {
-                this.PublishMessageToBrokers(context, brokerId).Ignore();
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            this.logger.Error("An error occurred: {Exception}.", ex);
-            return false;
-        }
-    }
-
-    /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public async Task<bool> ProceedSubscription(SimpleInterceptingSubscriptionEventArgs context)
-    {
-        try
-        {
-            // Handle subscription in grain
-            var mqttClientGrain = this.GrainFactory.GetGrain<IMqttClientGrain>(context.ClientId);
-            var subscriptionValid = await mqttClientGrain.ProceedSubscription(context);
-
-            if (!subscriptionValid)
-            {
-                return false;
-            }
-
-            // Save subscription to the database
-            var eventLog = new EventLog
-            {
-                EventType = EventType.Subscription,
-                EventDetails = $"New subscription: ClientId = {context.ClientId}, TopicFilter = {context.TopicFilter}."
-            };
-
-            this.eventLogQueue.Enqueue(eventLog);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            this.logger.Error("An error occurred: {Exception}.", ex);
-            return false;
-        }
-    }
-
-    /// <inheritdoc cref="IMqttRepositoryGrain" />
-    public Task ProceedUnsubscription(SimpleClientUnsubscribedTopicEventArgs eventArgs)
-    {
-        if (eventArgs is null)
-        {
-            throw new ArgumentNullException(nameof(eventArgs));
-        }
-
-        if (string.IsNullOrWhiteSpace(eventArgs.ClientId))
-        {
-            throw new ArgumentNullException(nameof(eventArgs.ClientId));
-        }
-
-        if (string.IsNullOrWhiteSpace(eventArgs.TopicFilter))
-        {
-            throw new ArgumentNullException(nameof(eventArgs.TopicFilter));
-        }
-
-        // Save unsubscription to the database
-        var eventLog = new EventLog
-        {
-            EventType = EventType.Unsubscription,
-            EventDetails = $"Unsubscription: ClientId = {eventArgs.ClientId}, TopicFilter = {eventArgs.TopicFilter}."
-        };
-
-        this.eventLogQueue.Enqueue(eventLog);
 
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Publishes a message to a remote broker that hasn't initially sent the message to the cluster.
+    /// Checks whether two brokers have the same endpoint for the forwarding.
     /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="brokerConnectionSettings">The broker connection settings.</param>
-    /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-    private static async Task PublishMessageToBroker(SimpleInterceptingPublishEventArgs context, IBrokerConnectionSettings brokerConnectionSettings)
+    /// <param name="first">The settings of the first broker.</param>
+    /// <param name="second">The settings of the second broker.</param>
+    /// <returns>A value indicating whether the host name and the port are the same.</returns>
+    private static bool IsSameEndpoint(IBrokerConnectionSettings first, IBrokerConnectionSettings second)
     {
-        if (context.ApplicationMessage is null)
-        {
-            return;
-        }
+        return string.Equals(first.HostName, second.HostName, StringComparison.OrdinalIgnoreCase) && first.Port == second.Port;
+    }
 
-        // Create a new MQTT client
-        var factory = new MqttClientFactory();
-        var mqttClient = factory.CreateMqttClient();
-        var optionsBuilder = new MqttClientOptionsBuilder().WithClientId(brokerConnectionSettings.ClientId).WithTcpServer(brokerConnectionSettings.HostName, brokerConnectionSettings.Port)
-            .WithCredentials(brokerConnectionSettings.UserName, brokerConnectionSettings.Password).WithCleanSession(brokerConnectionSettings.UseCleanSession);
+    /// <summary>
+    /// Gets a copy of the broker list.
+    /// </summary>
+    /// <returns>All registered brokers by their broker identifier.</returns>
+    private Dictionary<Guid, IBrokerConnectionSettings> GetBrokers()
+    {
+        return new Dictionary<Guid, IBrokerConnectionSettings>(this.brokers);
+    }
 
-        if (brokerConnectionSettings.UseTls)
+    /// <summary>
+    /// Tells all brokers except the changed one that the broker list has changed.
+    /// A broker that misses the notification gets the list with its next cyclic registration.
+    /// </summary>
+    /// <param name="changedBrokerId">The identifier of the broker that connected or disconnected.</param>
+    private void NotifyOtherBrokers(Guid changedBrokerId)
+    {
+        var brokerList = this.GetBrokers();
+
+        foreach (var (brokerId, observer) in this.observers.Where(o => o.Key != changedBrokerId))
         {
-            optionsBuilder.WithTlsOptions(options =>
+            try
             {
-                options.UseTls();
-            });
+                observer.BrokersChanged(brokerList).Ignore();
+            }
+            catch (Exception ex)
+            {
+                this.logger.Warning("Notifying broker {BrokerId} about the broker list failed: {Message}", brokerId, ex.Message);
+            }
         }
-
-        var options = optionsBuilder.Build();
-
-        // Deserialize payload
-        var payloadString = Encoding.UTF8.GetString(context.ApplicationMessage.Payload);
-
-        // Connect the MQTT client
-        await mqttClient.ConnectAsync(options, CancellationToken.None);
-
-        // Send the message
-        var message = new MqttApplicationMessageBuilder()
-            .WithTopic(context.ApplicationMessage.Topic)
-            .WithPayload(payloadString)
-            .WithQualityOfServiceLevel(context.ApplicationMessage.QualityOfServiceLevel)
-            .WithRetainFlag(context.ApplicationMessage.Retain)
-            .Build();
-
-        await mqttClient.PublishAsync(message, CancellationToken.None);
-        await mqttClient.DisconnectAsync(null, CancellationToken.None);
-    }
-
-    /// <summary>
-    /// Publishes a message to all remote brokers that haven't initially sent the message to the cluster.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="brokerId">The broker identifier.</param>
-    /// <returns>A <see cref="Task" /> representing asynchronous operation.</returns>
-    private async Task PublishMessageToBrokers(SimpleInterceptingPublishEventArgs context, Guid brokerId)
-    {
-        var tasks = this.brokers
-            .Where(kvp => kvp.Key != brokerId)
-            .Select(b => PublishMessageToBroker(context, b.Value));
-
-        await Task.WhenAll(tasks);
-    }
-
-    /// <summary>
-    /// Runs the timer function and writes the data to the database.
-    /// </summary>
-    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    private async Task OnTimer()
-    {
-        try
-        {
-            this.logger.Information(
-                "Periodic persisting started, publish message queue size is {PublishMessageQueueCount}, event log queue size is {EventLogQueueCount}.",
-                this.publishMessageQueue.Count,
-                this.eventLogQueue.Count);
-            await this.StoreEventLogs();
-            await this.StorePublishMessages();
-            this.logger.Information("Periodic persisting finished.");
-        }
-        catch (Exception ex)
-        {
-            this.logger.Error("An error occurred: {Exception}.", ex);
-        }
-    }
-
-    /// <summary>
-    /// Stores the event logs from the queue to the database.
-    /// </summary>
-    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    private async Task StoreEventLogs()
-    {
-        var eventLogs = new List<EventLog>();
-
-        while (this.eventLogQueue.TryDequeue(out var eventLog))
-        {
-            eventLogs.Add(eventLog);
-        }
-
-        await this.eventLogRepository.InsertEventLogs(eventLogs);
-    }
-
-    /// <summary>
-    /// Stores the publish messages from the queue to the database.
-    /// </summary>
-    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
-    private async Task StorePublishMessages()
-    {
-        var publishMessages = new List<PublishMessage>();
-
-        while (this.publishMessageQueue.TryDequeue(out var publishMessage))
-        {
-            publishMessages.Add(publishMessage);
-        }
-
-        await this.publishMessageRepository.InsertPublishMessages(publishMessages);
     }
 }

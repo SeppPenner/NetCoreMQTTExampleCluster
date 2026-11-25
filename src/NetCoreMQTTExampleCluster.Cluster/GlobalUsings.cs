@@ -1,19 +1,25 @@
 #pragma warning disable IDE0065 // Die using-Anweisung wurde falsch platziert.
+global using System.Buffers;
+global using System.Collections.Concurrent;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Reflection;
 global using System.Security.Authentication;
 global using System.Security.Cryptography.X509Certificates;
+global using System.Threading.Channels;
 
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 
 global using MQTTnet;
+global using MQTTnet.Formatter;
+global using MQTTnet.Packets;
 global using MQTTnet.Protocol;
 global using MQTTnet.Server;
 
 global using NetCoreMQTTExampleCluster.Models.Configuration;
 global using NetCoreMQTTExampleCluster.Models.Constants;
+global using NetCoreMQTTExampleCluster.Models.Interfaces;
 global using NetCoreMQTTExampleCluster.Models.Service;
 global using NetCoreMQTTExampleCluster.Grains.Interfaces;
 

@@ -9,6 +9,7 @@ global using System.Threading.Tasks;
 
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.Extensions.Caching.Memory;
+global using Microsoft.Extensions.Hosting;
 
 global using MQTTnet;
 

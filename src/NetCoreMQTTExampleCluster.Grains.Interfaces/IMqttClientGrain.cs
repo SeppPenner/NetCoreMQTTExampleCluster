@@ -29,11 +29,25 @@ public interface IMqttClientGrain : IGrainWithStringKey
     Task<bool> ProceedPublish(SimpleInterceptingPublishEventArgs context);
 
     /// <summary>
+    /// Proceeds the unsubscription for one client identifier.
+    /// </summary>
+    /// <param name="eventArgs">The event args.</param>
+    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+    Task ProceedUnsubscription(SimpleClientUnsubscribedTopicEventArgs eventArgs);
+
+    /// <summary>
     /// Proceeds the connection for one client identifier.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>A value indicating whether the connection is accepted or not.</returns>
     Task<bool> ProceedConnect(SimpleValidatingConnectionEventArgs context);
+
+    /// <summary>
+    /// Proceeds the disconnection for one client identifier.
+    /// </summary>
+    /// <param name="eventArgs">The event args.</param>
+    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+    Task ProceedDisconnect(SimpleClientDisconnectedEventArgs eventArgs);
 
     /// <summary>
     /// Checks whether the user is a user used for synchronization.

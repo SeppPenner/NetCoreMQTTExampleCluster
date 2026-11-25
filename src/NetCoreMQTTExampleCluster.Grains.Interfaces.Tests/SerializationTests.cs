@@ -233,6 +233,40 @@ public class SerializationTests
     }
 
     /// <summary>
+    /// Tests the serialization of the broker list that the repository grain returns and sends to the broker observers.
+    /// </summary>
+    [TestMethod]
+    public void TestBrokerList()
+    {
+        var brokerId = Guid.NewGuid();
+        var value = new Dictionary<Guid, IBrokerConnectionSettings>
+        {
+            [brokerId] = new BrokerConnectionSettings
+            {
+                ClientId = "mqtt-broker-sync-2",
+                HostName = "localhost",
+                Port = 1884,
+                UserName = "mqtt-broker-sync",
+                Password = "Test"
+            }
+        };
+
+        foreach (var result in RoundTrip(value))
+        {
+            Assert.HasCount(1, result);
+            var settings = result[brokerId];
+            Assert.IsInstanceOfType<BrokerConnectionSettings>(settings);
+            Assert.AreEqual("mqtt-broker-sync-2", settings.ClientId);
+            Assert.AreEqual("localhost", settings.HostName);
+            Assert.AreEqual(1884, settings.Port);
+            Assert.AreEqual("mqtt-broker-sync", settings.UserName);
+            Assert.AreEqual("Test", settings.Password);
+            Assert.IsFalse(settings.UseTls);
+            Assert.IsFalse(settings.UseCleanSession);
+        }
+    }
+
+    /// <summary>
     /// Serializes and deserializes the value and creates a deep copy of it, the same way Orleans does for grain calls.
     /// </summary>
     /// <typeparam name="T">The type of the value.</typeparam>

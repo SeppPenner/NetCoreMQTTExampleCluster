@@ -36,9 +36,22 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     private readonly MqttServerFactory mqttServerFactory = new();
 
     /// <summary>
-    /// The client identifiers.
+    /// The client identifiers of the connected synchronization users. The client identifier is used and not the user name,
+    /// because MQTTnet keeps the user name of the first connection when another user resumes a persistent session.
     /// </summary>
-    private static readonly HashSet<string> clientIds = [];
+    private readonly ConcurrentDictionary<string, bool> syncClientIds = new();
+
+    /// <summary>
+    /// The synchronizer that forwards the messages to the other brokers.
+    /// </summary>
+    [NotNull]
+    private BrokerSynchronizer? brokerSynchronizer = null;
+
+    /// <summary>
+    /// The Orleans reference to the <see cref="brokerSynchronizer"/> as observer of the repository grain.
+    /// </summary>
+    [NotNull]
+    private IMqttBrokerObserver? brokerObserver = null;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MqttService" /> class.
@@ -58,6 +71,10 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
 
         // Connect Orleans.
         await this.ConnectOrleans(this.CreateOrleansClientHost, linkedTokenSource.Token);
+
+        // Create the synchronizer, the repository grain tells it about new and removed brokers.
+        this.brokerSynchronizer = new BrokerSynchronizer(this.brokerId, this.ServiceConfiguration.BrokerConnectionSettings!.ClientId);
+        this.brokerObserver = this.OrleansClient.CreateObjectReference<IMqttBrokerObserver>(this.brokerSynchronizer);
 
         // Startup the service.
         await this.StartupService();
@@ -86,6 +103,8 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         await this.mqttServer.StopAsync();
         var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
         await repositoryGrain.DisconnectBroker(this.brokerId);
+        await this.brokerSynchronizer.DisposeAsync();
+        this.OrleansClient.DeleteObjectReference<IMqttBrokerObserver>(this.brokerObserver);
         await this.StopService("MQTT service is stopped.", cancellationToken);
         await base.StopAsync(cancellationToken);
 #pragma warning disable CA1816 // Dispose-Methoden müssen SuppressFinalize aufrufen
@@ -120,8 +139,8 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     {
         try
         {
-            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            await repositoryGrain.ProceedUnsubscription(new SimpleClientUnsubscribedTopicEventArgs(args));
+            var clientGrain = this.OrleansClient.GetGrain<IMqttClientGrain>(args.ClientId);
+            await clientGrain.ProceedUnsubscription(new SimpleClientUnsubscribedTopicEventArgs(args));
         }
         catch (Exception ex)
         {
@@ -138,9 +157,26 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     {
         try
         {
-            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var connectionValid = await repositoryGrain.ProceedConnect(new SimpleValidatingConnectionEventArgs(args));
-            args.ReasonCode = connectionValid ? MqttConnectReasonCode.Success : MqttConnectReasonCode.BadUserNameOrPassword;
+            var clientGrain = this.OrleansClient.GetGrain<IMqttClientGrain>(args.ClientId);
+            var connectionValid = await clientGrain.ProceedConnect(new SimpleValidatingConnectionEventArgs(args));
+
+            if (!connectionValid)
+            {
+                args.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
+                return;
+            }
+
+            // Remember the connections of synchronization users, their messages come from another broker.
+            if (await clientGrain.IsUserBrokerUser())
+            {
+                this.syncClientIds[args.ClientId] = true;
+            }
+            else
+            {
+                this.syncClientIds.TryRemove(args.ClientId, out _);
+            }
+
+            args.ReasonCode = MqttConnectReasonCode.Success;
         }
         catch (Exception ex)
         {
@@ -159,8 +195,8 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     {
         try
         {
-            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var subscriptionValid = await repositoryGrain.ProceedSubscription(new SimpleInterceptingSubscriptionEventArgs(args));
+            var clientGrain = this.OrleansClient.GetGrain<IMqttClientGrain>(args.ClientId);
+            var subscriptionValid = await clientGrain.ProceedSubscription(new SimpleInterceptingSubscriptionEventArgs(args));
             args.ProcessSubscription = subscriptionValid;
 
             if (!subscriptionValid)
@@ -185,10 +221,17 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
     public async Task InterceptPublish(InterceptingPublishEventArgs args)
     {
+        // A message of a synchronization user was forwarded by another broker, which validated and stored it already.
+        // It is only delivered here and not forwarded again, which also prevents loops.
+        if (this.syncClientIds.ContainsKey(args.ClientId))
+        {
+            return;
+        }
+
         try
         {
-            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            var publishValid = await repositoryGrain.ProceedPublish(new SimpleInterceptingPublishEventArgs(args), this.brokerId);
+            var clientGrain = this.OrleansClient.GetGrain<IMqttClientGrain>(args.ClientId);
+            var publishValid = await clientGrain.ProceedPublish(new SimpleInterceptingPublishEventArgs(args));
             args.ProcessPublish = publishValid;
 
             if (!publishValid)
@@ -196,7 +239,10 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
                 // Without this, MQTT 5 clients get a PUBACK with success although the message was rejected.
                 // MQTT 3.1.1 has no reason code in the PUBACK, so these clients still get a positive acknowledgement.
                 args.Response.ReasonCode = MqttPubAckReasonCode.NotAuthorized;
+                return;
             }
+
+            this.brokerSynchronizer.Forward(args.ApplicationMessage);
         }
         catch (Exception ex)
         {
@@ -214,12 +260,16 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
     public async Task ClientDisconnected(ClientDisconnectedEventArgs args)
     {
+        // On a takeover, the new connection with the same client identifier was validated already and keeps its entry.
+        if (args.DisconnectType != MqttClientDisconnectType.Takeover)
+        {
+            this.syncClientIds.TryRemove(args.ClientId, out _);
+        }
+
         try
         {
-            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            await repositoryGrain.ProceedDisconnect(new SimpleClientDisconnectedEventArgs(args));
-            // Todo: Maybe move this to grain?
-            clientIds.Remove(args.ClientId);
+            var clientGrain = this.OrleansClient.GetGrain<IMqttClientGrain>(args.ClientId);
+            await clientGrain.ProceedDisconnect(new SimpleClientDisconnectedEventArgs(args));
         }
         catch (Exception ex)
         {
@@ -228,21 +278,32 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
     }
 
     /// <summary>
-    /// Registers the broker at the repository grain. The grain keeps the brokers in memory only and loses them if the silo
-    /// restarts or the grain is deactivated (e.g. after 15 minutes without calls), so the registration is repeated cyclically.
+    /// Registers the broker at the repository grain and updates the forwarding to the other brokers. The grain keeps the brokers
+    /// in memory only and loses them if the silo restarts or the grain is deactivated (e.g. after 15 minutes without calls), so
+    /// the registration is repeated cyclically.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
     private async Task RegisterBroker()
     {
         try
         {
-            var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-            await repositoryGrain.ConnectBroker(this.ServiceConfiguration.BrokerConnectionSettings!, this.brokerId);
+            await this.ConnectBroker();
         }
         catch (Exception ex)
         {
             this.logger.Warning("Registering the broker failed: {Message}", ex.Message);
         }
+    }
+
+    /// <summary>
+    /// Connects the broker to the repository grain and updates the forwarding with the broker list from the grain.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing any asynchronous operation.</returns>
+    private async Task ConnectBroker()
+    {
+        var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
+        var brokers = await repositoryGrain.ConnectBroker(this.ServiceConfiguration.BrokerConnectionSettings!, this.brokerId, this.brokerObserver);
+        this.brokerSynchronizer.UpdateBrokers(brokers);
     }
 
     /// <summary>
@@ -355,9 +416,7 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         this.mqttServer.ClientDisconnectedAsync += this.ClientDisconnected;
 
         await this.mqttServer.StartAsync();
-
-        var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
-        await repositoryGrain.ConnectBroker(this.ServiceConfiguration.BrokerConnectionSettings!, this.brokerId);
+        await this.ConnectBroker();
 
         this.logger.Information("Started MQTT service.");
     }

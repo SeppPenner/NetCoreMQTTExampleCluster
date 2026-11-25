@@ -90,6 +90,14 @@ public class Program
                     webBuilder.UseUrls($"http://*:{Configuration.OrleansConfiguration!.DashboardPort}");
                     webBuilder.UseStartup<Startup>();
                 })
+            .ConfigureServices(
+                services =>
+                {
+                    // Registered before the silo, so that it stops after the silo and writes the remaining queue entries.
+                    services.AddSingleton<MqttPersistenceQueue>();
+                    services.AddSingleton<IMqttPersistenceQueue>(p => p.GetRequiredService<MqttPersistenceQueue>());
+                    services.AddHostedService(p => p.GetRequiredService<MqttPersistenceQueue>());
+                })
             .UseOrleans(
                (_, builder) =>
                {
