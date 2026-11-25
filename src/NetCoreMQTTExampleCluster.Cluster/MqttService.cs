@@ -142,6 +142,12 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             var subscriptionValid = await repositoryGrain.ProceedSubscription(new SimpleInterceptingSubscriptionEventArgs(args));
             args.ProcessSubscription = subscriptionValid;
+
+            if (!subscriptionValid)
+            {
+                // Without this, the client gets a SUBACK with a granted QoS although the subscription was rejected.
+                args.Response.ReasonCode = MqttSubscribeReasonCode.NotAuthorized;
+            }
         }
         catch (Exception ex)
         {
