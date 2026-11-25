@@ -86,12 +86,14 @@ public class Program
     /// <returns>A new <see cref="IHostBuilder"/>.</returns>
     private static IHostBuilder CreateHostBuilder(string[] args, string currentLocation)
     {
-        return Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(
-            webBuilder =>
-            {
-                webBuilder.UseContentRoot(currentLocation);
-                webBuilder.UseStartup<Startup>();
-            })
+        return Host.CreateDefaultBuilder(args)
+            .UseContentRoot(currentLocation)
+            .ConfigureServices(
+                services =>
+                {
+                    services.AddSingleton(Configuration);
+                    services.AddHostedService<MqttService>();
+                })
             .UseSerilog()
             .UseWindowsService()
             .UseSystemd();

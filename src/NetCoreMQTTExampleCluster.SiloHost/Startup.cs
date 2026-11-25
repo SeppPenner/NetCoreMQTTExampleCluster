@@ -41,10 +41,8 @@ public class Startup
         // Add the logger.
         services.AddSingleton(Log.Logger);
 
-        // Add JSON converters.
-        services.AddMvc()
-            .AddRazorPagesOptions(options => options.RootDirectory = "/")
-            .AddDataAnnotationsLocalization();
+        // Add routing for the Orleans dashboard.
+        services.AddRouting();
 
         // Workaround to have a hosted background service available by DI.
         services.AddSingleton<SiloHostService>();
