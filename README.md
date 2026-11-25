@@ -469,11 +469,11 @@ Therefore, the parameter `ThrottleUser` in the `User` table must be set to `true
 
 ## Create an openssl certificate
 ```bash
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+openssl req -x509 -newkey rsa:4096 -sha256 -keyout key.pem -out cert.pem -days 3650 -subj "/C=DE/ST=BY/L=Test/O=Test/OU=Test/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1" -addext "extendedKeyUsage=serverAuth"
 openssl pkcs12 -export -out certificate.pfx -inkey key.pem -in cert.pem
 ```
 
-An example certificate is in the folder. Password for all is `test`.
+An example certificate for `localhost` (self-signed, valid until 2036-11-25) is in the folder. Password for all is `test`.
 
 Change history
 --------------
