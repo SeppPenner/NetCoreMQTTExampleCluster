@@ -126,7 +126,9 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         }
         catch (Exception ex)
         {
+            // Without the silo, the connection can't be validated, so it is refused.
             this.logger.Error("An error occurred: {Exception}.", ex);
+            args.ReasonCode = MqttConnectReasonCode.ServerUnavailable;
         }
     }
 
@@ -151,7 +153,10 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         }
         catch (Exception ex)
         {
+            // Without the silo, the subscription can't be validated, so it is rejected.
             this.logger.Error("An error occurred: {Exception}.", ex);
+            args.ProcessSubscription = false;
+            args.Response.ReasonCode = MqttSubscribeReasonCode.UnspecifiedError;
         }
     }
 
@@ -177,7 +182,10 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
         }
         catch (Exception ex)
         {
+            // Without the silo, the message can't be validated, so it is rejected.
             this.logger.Error("An error occurred: {Exception}.", ex);
+            args.ProcessPublish = false;
+            args.Response.ReasonCode = MqttPubAckReasonCode.UnspecifiedError;
         }
     }
 
