@@ -167,6 +167,13 @@ public class MqttService : BackgroundServiceBase<ClusterConfiguration>
             var repositoryGrain = this.OrleansClient.GetGrain<IMqttRepositoryGrain>(GlobalConstants.RepositoryGrainId);
             var publishValid = await repositoryGrain.ProceedPublish(new SimpleInterceptingPublishEventArgs(args), this.brokerId);
             args.ProcessPublish = publishValid;
+
+            if (!publishValid)
+            {
+                // Without this, MQTT 5 clients get a PUBACK with success although the message was rejected.
+                // MQTT 3.1.1 has no reason code in the PUBACK, so these clients still get a positive acknowledgement.
+                args.Response.ReasonCode = MqttPubAckReasonCode.NotAuthorized;
+            }
         }
         catch (Exception ex)
         {
